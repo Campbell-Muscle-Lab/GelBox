@@ -1,0 +1,11 @@
+function gui = update_display(gui)
+
+gel_data = guidata(gui.Window);
+
+% Display image data 
+set(gui.image_data_box_text, ...
+    'String',printstruct(gel_data.imfinfo), ...
+    'HorizontalAlignment','left')
+
+
+
