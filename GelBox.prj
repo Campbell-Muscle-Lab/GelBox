@@ -1,0 +1,61 @@
+<deployment-project plugin="plugin.apptool" plugin-version="1.0">
+  <configuration build-checksum="1742252929" file="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox\GelBox.prj" location="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox" name="GelBox" target="target.mlapps" target-name="Package App">
+    <param.appname>GelBox</param.appname>
+    <param.authnamewatermark>Kenneth Campbell</param.authnamewatermark>
+    <param.email>k.s.campbell@uky.edu</param.email>
+    <param.company />
+    <param.icon />
+    <param.icons />
+    <param.summary />
+    <param.description>A simple tool for analyzing gels and immunoblots</param.description>
+    <param.screenshot />
+    <param.version>2.0</param.version>
+    <param.products.name />
+    <param.products.id />
+    <param.products.version />
+    <param.platforms />
+    <param.output>${PROJECT_ROOT}</param.output>
+    <param.guid>35f0eff5-b07e-47ce-a116-a5b262c5d61d</param.guid>
+    <unset>
+      <param.company />
+      <param.icon />
+      <param.icons />
+      <param.summary />
+      <param.screenshot />
+      <param.products.name />
+      <param.products.id />
+      <param.products.version />
+      <param.platforms />
+      <param.output />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\gel_box.m</file>
+    </fileset.main>
+    <fileset.depfun />
+    <fileset.resources />
+    <fileset.package />
+    <build-deliverables>
+      <file location="C:\ken\GitHub\CampbellMuscleLab\analysis_tools" name="GelBox" optional="false">C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2020b</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
