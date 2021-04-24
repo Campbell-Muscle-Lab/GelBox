@@ -1,13 +1,13 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="3821972350" file="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox\GelBox.prj" location="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox" name="GelBox" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="1657459346" file="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox\GelBox.prj" location="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox" name="GelBox" target="target.mlapps" target-name="Package App">
     <param.appname>GelBox</param.appname>
     <param.authnamewatermark>Kenneth Campbell</param.authnamewatermark>
     <param.email>k.s.campbell@uky.edu</param.email>
     <param.company />
     <param.icon />
     <param.icons />
-    <param.summary />
-    <param.description>A simple tool for analyzing gels and immunoblots</param.description>
+    <param.summary>Simlpe tool for analyzing gels and immunoblots</param.summary>
+    <param.description />
     <param.screenshot />
     <param.version>2.0</param.version>
     <param.products.name />
@@ -15,12 +15,12 @@
     <param.products.version />
     <param.platforms />
     <param.output>${PROJECT_ROOT}</param.output>
-    <param.guid>35f0eff5-b07e-47ce-a116-a5b262c5d61d</param.guid>
+    <param.guid>32655463-ad6b-4bdc-aaef-422304d385c6</param.guid>
     <unset>
       <param.company />
       <param.icon />
       <param.icons />
-      <param.summary />
+      <param.description />
       <param.screenshot />
       <param.products.name />
       <param.products.id />
@@ -31,8 +31,35 @@
     <fileset.main>
       <file>${PROJECT_ROOT}\gel_box.m</file>
     </fileset.main>
-    <fileset.depfun />
-    <fileset.resources />
+    <fileset.depfun>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\center_image_with_preserved_aspect_ratio.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\+mixin\Container.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\+mixin\Panel.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\Box.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\calcPixelSizes.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\ChildEvent.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\ChildObserver.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\Container.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\FigureData.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\FigureObserver.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\HBox.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\Node.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\Panel.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\SelectionData.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\setPosition.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\tracking.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\GUI_layout\layout\+uix\VBox.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\parse_pv_pairs.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\printstruct.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\uigetfile2.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\uiputfile2.m</file>
+      <file>C:\ken\GitHub\CampbellMuscleLab\MATLAB\MATLAB_Utilities\write_structure_to_excel.m</file>
+    </fileset.depfun>
+    <fileset.resources>
+      <file>${PROJECT_ROOT}\box</file>
+      <file>${PROJECT_ROOT}\interface</file>
+      <file>${PROJECT_ROOT}\update</file>
+    </fileset.resources>
     <fileset.package />
     <build-deliverables>
       <file location="C:\ken\GitHub\CampbellMuscleLab\analysis_tools" name="GelBox" optional="false">C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox</file>

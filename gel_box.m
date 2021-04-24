@@ -1,6 +1,6 @@
 function gelbox
 
-version_string = 'GelBox Version 1.3';
+version_string = 'GelBox Version 2.0';
 
 addpath('box','interface','update');
 
