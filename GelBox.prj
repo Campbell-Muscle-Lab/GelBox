@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="1742252929" file="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox\GelBox.prj" location="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox" name="GelBox" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="3821972350" file="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox\GelBox.prj" location="C:\ken\GitHub\CampbellMuscleLab\analysis_tools\GelBox" name="GelBox" target="target.mlapps" target-name="Package App">
     <param.appname>GelBox</param.appname>
     <param.authnamewatermark>Kenneth Campbell</param.authnamewatermark>
     <param.email>k.s.campbell@uky.edu</param.email>
