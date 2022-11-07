@@ -7,6 +7,8 @@ set(gui.image_data_box_text, ...
     'String',printstruct(gel_data.imfinfo), ...
     'HorizontalAlignment','left');
 
+
+
 % Display selection
 if (isfield(gel_data,'box_handle'))
     n = numel(gel_data.box_handle);
@@ -37,6 +39,7 @@ if (isfield(gel_data,'box_handle'))
     % Store data for display
     d=[];
     for i=1:n
+        d.box(i).fitting_mode = gel_data.fitting_mode ;
         % Extract position
         d.box(i).position = getPosition(gel_data.box_handle(i));
        
@@ -53,13 +56,23 @@ if (isfield(gel_data,'box_handle'))
         
         x = flipud(mean(m,2));
         y = 1:size(m,1);
+
         x_back = linspace(x(1),x(end),numel(y));
+
+        if (strcmp(gel_data.fitting_mode,'Double'))
+
+            [x1,x2,x_fit] = double_gauss(y,x,x_back);
+       
+        else
         
+
         d.box(i).total_area = sum(x);
         d.box(i).background_area = sum(x_back);
         d.box(i).band_area = d.box(i).total_area - ...
                                 d.box(i).background_area;
-                            
+        
+
+        end
         % Store data for later
         gel_data.box_data(i) = d.box(i);
 
@@ -73,6 +86,13 @@ if (isfield(gel_data,'box_handle'))
             plot(gui.zoom_profile_axes,x,y,'b-');
             hold(gui.zoom_profile_axes,'on');
             plot(gui.zoom_profile_axes,x_back,y,'r-');
+            
+            if (strcmp(gel_data.fitting_mode,'Double'))
+            fill(gui.zoom_profile_axes,x1+x_back,y,'g','FaceAlpha',0.25);
+            fill(gui.zoom_profile_axes,x2+x_back,y,'m','FaceAlpha',0.25);
+            plot(gui.zoom_profile_axes,x_fit+x_back,y,'k-');
+            end
+
             xlim(gui.zoom_profile_axes,[0 max(x)]);
             xlabel(gui.zoom_profile_axes,'Intensity');
             ylabel(gui.zoom_profile_axes,'Pixels');

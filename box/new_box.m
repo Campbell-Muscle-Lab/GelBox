@@ -2,6 +2,9 @@ function gui = new_box(gui);
 
 gel_data = guidata(gui.Window)
 
+temp_strings = get(gui.fitting_mode,'String');
+gel_data.fitting_mode = temp_strings{get(gui.fitting_mode,'Value')};
+
 if (~isfield(gel_data,'box_handle'))
     n=1;
     gel_data.box_handle(n) = imrect(gui.gel_axes);
@@ -42,7 +45,7 @@ guidata(gui.Window,gel_data)
 
 update_display(gui,n);
 
-    % Nested function
+% Nested function
     function new_box_position(pos);
         gel_data = guidata(gui.Window);
         if (isfield(gel_data,'box_position'))
@@ -55,10 +58,10 @@ update_display(gui,n);
             update_display(gui,n);
         end
     end
-        
+
 end
-        
 
 
-    
+
+
 

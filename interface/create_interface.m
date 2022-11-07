@@ -27,7 +27,9 @@ gui.zoom_panel = uix.Panel( ...
     'Parent',gui.main_layout);
 gui.data_panel = uix.Panel( ...
     'Parent',gui.main_layout);
-set(gui.main_layout,'Widths',[-3 -1 -2]);
+gui.fitting_panel = uix.Panel( ...
+    'Parent',gui.main_layout);
+set(gui.main_layout,'Widths',[-3 -1 -2 -1]);
 
 % Add in gel axes
 gui.gel_box = uix.HBox( ...
@@ -86,6 +88,18 @@ gui.selection_data_box_text = uicontrol( ...
     'min',0, ...
     'max',2);
 
+% Add in fitting panel
+
+gui.fitting_mode_box = uix.HBox( ...
+    'Parent',gui.fitting_panel);
+gui.fitting_mode_text = uicontrol( ...
+    'parent',gui.fitting_mode_box, ...
+    'style','text', ...
+    'string','Gaussian Fit Selection');
+gui.fitting_mode=uicontrol('Parent',gui.fitting_mode_box, ...
+    'Style','popupmenu', ...
+        'String',{'Single','Double'});
+%         'Callback',{@change_fitting_mode,gui});
 
 % Add in menus
 gui.file_menu = uimenu(gui.Window,'Label','File');
@@ -270,6 +284,9 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
                 end
             end
     end
+    function change_fitting_mode(gui)
+        update_display(gui)
+    end
 
     function gui = call_output_results(~,~,gui)
         
@@ -288,6 +305,7 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
             d.band_top(i) = gel_data.box_data(i).position(2);
             d.band_width(i) = gel_data.box_data(i).position(3);
             d.band_height(i) = gel_data.box_data(i).position(4);
+            d.fitting_mode{i} = gel_data.box_data(i).fitting_mode;
         end
         
        [file_string,path_string] = uiputfile2( ...
