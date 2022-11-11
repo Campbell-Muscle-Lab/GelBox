@@ -17,7 +17,7 @@ target = target - y_back;
 
 par = zeros(no_of_bands,3);
 
-half_distance=(0.05*length(x));
+half_distance=(0.1*length(x));
 alfa_estimate = -log(0.5)/(half_distance^2);
 skew = 1;
 
