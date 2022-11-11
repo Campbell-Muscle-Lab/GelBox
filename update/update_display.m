@@ -59,6 +59,9 @@ if (isfield(gel_data,'box_handle'))
 
         x_back = linspace(x(1),x(end),numel(y));
 
+        num_of_bands = gel_data.fitting_mode;
+        [x_bands,x_fit] = fit_gaussian(y,x,x_back,num_of_bands);
+
         if (strcmp(gel_data.fitting_mode,'Double'))
 
             [x1,x2,x_fit] = double_gauss(y,x,x_back);

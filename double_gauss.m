@@ -53,24 +53,24 @@ par = [peaks.max_indices(1),peaks.max_indices(2),A1_guess,A2_guess,alfa_guess,sk
             e(j) = e(j) + (y_fit(i) - target(i))^2;
         end
 
-        figure(3)
-        clf
-
-        subplot(2,1,1)
-        plot(log10(e),'-r','MarkerFaceColor','r')
-        xlabel('Iteration')
-        ylabel('Log Error')
+%         figure(3)
+%         clf
+% 
+%         subplot(2,1,1)
+%         plot(log10(e),'-r','MarkerFaceColor','r')
+%         xlabel('Iteration')
+%         ylabel('Log Error')
 
         trial_e = e(end);
 
         j = j + 1;
 
-        subplot(2,1,2)
-        plot(y_fit,'LineWidth',2)
-        hold on
-        plot(target,'LineWidth',2,'LineStyle','-.','Color','k')
-        plot(y1)
-        plot(y2)
+%         subplot(2,1,2)
+%         plot(y_fit,'LineWidth',2)
+%         hold on
+%         plot(target,'LineWidth',2,'LineStyle','-.','Color','k')
+%         plot(y1)
+%         plot(y2)
     end
 
     function [y1,y2,y_fit] = calculate_profile(x,par)
