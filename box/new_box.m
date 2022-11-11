@@ -2,9 +2,6 @@ function gui = new_box(gui);
 
 gel_data = guidata(gui.Window)
 
-temp_strings = get(gui.fitting_mode_bg.SelectedObject,'String');
-gel_data.fitting_mode = str2double(temp_strings);
-
 if (~isfield(gel_data,'box_handle'))
     n=1;
     gel_data.box_handle(n) = imrect(gui.gel_axes);

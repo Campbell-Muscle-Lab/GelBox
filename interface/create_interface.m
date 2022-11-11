@@ -95,25 +95,11 @@ gui.fitting_mode_box = uix.HBox( ...
 gui.fitting_mode_text = uicontrol( ...
     'parent',gui.fitting_mode_box, ...
     'style','text', ...
-    'string','Number of Bands');
-
-gui.fitting_mode_bg = uibuttongroup(gui.fitting_mode_box,'Visible','off');
-r1 = uicontrol(gui.fitting_mode_bg,'Style',...
-                  'radiobutton',...
-                  'String','1',...
-                  'HandleVisibility','off',...
-                  'Position',[10 835 100 30]);
-r2 = uicontrol(gui.fitting_mode_bg,'Style',...
-                  'radiobutton',...
-                  'String','2',...
-                  'HandleVisibility','off',...
-                  'Position',[10 810 100 30]);
-r3 = uicontrol(gui.fitting_mode_bg,'Style',...
-                  'radiobutton',...
-                  'String','3',...
-                  'HandleVisibility','off',...
-                  'Position',[10 785 100 30]);
-gui.fitting_mode_bg.Visible = 'on';
+    'string','Number of bands');
+gui.fitting_mode=uicontrol('Parent',gui.fitting_mode_box, ...
+    'Style','popupmenu', ...
+    'String',{'1','2','3'},...
+    'Callback',{@change_fitting_mode});
 
 % Add in menus
 gui.file_menu = uimenu(gui.Window,'Label','File');
@@ -150,17 +136,17 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
 
 % Nested functions
     function gui = call_load_image(~,~,gui)
-        
+
         [file_string,path_string]=uigetfile2( ...
             {'*.png','PNG';'*.tif','TIF'}, ...
             'Select image file');
-        
+
         if (path_string~=0)
-            
+
             gel_data = [];
-            
+
             gel_data.invert_status = 0;
-            
+
             gel_data.image_file_string = fullfile(path_string,file_string);
             gel_data.im_data = imread(gel_data.image_file_string);
             if (ndims(gel_data.im_data)==3)
@@ -170,11 +156,11 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
             center_image_with_preserved_aspect_ratio( ...
                 gel_data.im_data, ...
                 gui.gel_axes);
-            
+
             gel_data.imfinfo = imfinfo(gel_data.image_file_string);
-            
+
             guidata(gui.gel_axes,gel_data);
-            
+
             update_display(gui)
         end
     end
@@ -187,26 +173,26 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
         gel_data = guidata(gui.Window);
         gel_data.im_data = imcomplement(gel_data.im_data);
         center_image_with_preserved_aspect_ratio( ...
-                gel_data.im_data, ...
-                gui.gel_axes);
+            gel_data.im_data, ...
+            gui.gel_axes);
         gel_data.invert_status = 1;
         guidata(gui.Window,gel_data);
     end
-        
+
     function gui = call_save_analysis(~,~,gui)
         gel_data = guidata(gui.Window);
-        
+
         save_data.image_file_string = gel_data.image_file_string;
-        save_data.box_position = gel_data.box_position;     
+        save_data.box_position = gel_data.box_position;
         save_data.im_data = gel_data.im_data;
         save_data.imfinfo = gel_data.imfinfo;
-        
+
         [file_string,path_string] = uiputfile2( ...
             {'*.gdf','Gel data file'},'Select file to save analysis');
 
         if (path_string~=0)
             save(fullfile(path_string,file_string),'save_data');
-           
+
             msgbox(sprintf('Current analysis saved to %s',file_string), ...
                 'Analysis saved');
         end
@@ -216,7 +202,7 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
     function gui = call_load_analysis(~,~,gui)
 
         gel_data = guidata(gui.Window);
-        
+
         % Delete any old boxes
         if (isfield(gel_data,'box_handle'))
             n = numel(gel_data.box_handle);
@@ -224,10 +210,10 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
                 delete(gel_data.box_handle(i));
             end
         end
-        
+
         [file_string,path_string] = uigetfile2( ...
             {'*.gdf','Gel data file'},'Select file to load prior analysis');
-        
+
         if (path_string~=0)
 
 
@@ -283,29 +269,29 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
 
         guidata(gui.gel_axes,gel_data);
         update_display(gui)
-        
-            % Nested function
-            function new_box_position2(pos);
-                gel_data = guidata(gui.Window);
-                if (isfield(gel_data,'box_position'))
-                    box_position = gel_data.box_position;
-                    [r,c]=size(box_position);
-                    if (r>=n)&(~isequal(box_position(n,:),pos))
-                        update_display(gui,n);
-                    end
-                else
+
+        % Nested function
+        function new_box_position2(pos);
+            gel_data = guidata(gui.Window);
+            if (isfield(gel_data,'box_position'))
+                box_position = gel_data.box_position;
+                [r,c]=size(box_position);
+                if (r>=n)&(~isequal(box_position(n,:),pos))
                     update_display(gui,n);
                 end
+            else
+                update_display(gui,n);
             end
+        end
     end
-    function change_fitting_mode(gui)
+    function change_fitting_mode(~,~)
         update_display(gui)
     end
 
     function gui = call_output_results(~,~,gui)
-        
+
         gel_data = guidata(gui.Window)
-        
+
         % Save data as structure for output
         d = [];
         d.image_file{1} = gel_data.image_file_string;
@@ -314,28 +300,40 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
             d.band(i) = i;
             d.total_area(i) = gel_data.box_data(i).total_area;
             d.background_area(i) = gel_data.box_data(i).background_area;
-            d.band_area(i) = gel_data.box_data(i).band_area;
+            band_orientation = numel(gel_data.box_data.band_area);
+            switch band_orientation
+                case 1
+                    d.band_area(i) = gel_data.box_data(i).band_area;
+                case 2
+                    d.band_area_bottom(i) = gel_data.box_data(i).band_area(1);
+                    d.band_area_top(i) = gel_data.box_data(i).band_area(2);
+                case 3
+                    d.band_area_bottom(i) = gel_data.box_data(i).band_area(1);
+                    d.band_area_mid(i) = gel_data.box_data(i).band_area(2);
+                    d.band_area_top(i) = gel_data.box_data(i).band_area(3);
+            end
+
             d.band_left(i) = gel_data.box_data(i).position(1);
             d.band_top(i) = gel_data.box_data(i).position(2);
             d.band_width(i) = gel_data.box_data(i).position(3);
             d.band_height(i) = gel_data.box_data(i).position(4);
             d.fitting_mode{i} = gel_data.box_data(i).fitting_mode;
         end
-        
-       [file_string,path_string] = uiputfile2( ...
+
+        [file_string,path_string] = uiputfile2( ...
             {'*.xlsx','Excel file'},'Select file for results');
-        
+
         if (path_string~=0)
             write_structure_to_excel( ...
                 'filename',fullfile(path_string,file_string), ...
                 'structure',d);
-            
+
             msgbox(sprintf('Data written to %s',file_string), ...
                 'Data saved');
         end
     end
 end
-        
+
 
 
 

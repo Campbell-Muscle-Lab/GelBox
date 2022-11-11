@@ -2,6 +2,9 @@ function gui = update_display(gui,active_box)
 
 gel_data = guidata(gui.Window);
 
+temp_strings = get(gui.fitting_mode,'String');
+gel_data.fitting_mode = temp_strings{get(gui.fitting_mode,'Value')};
+
 % Display image data
 set(gui.image_data_box_text, ...
     'String',printstruct(gel_data.imfinfo), ...
@@ -59,23 +62,20 @@ if (isfield(gel_data,'box_handle'))
 
         x_back = linspace(x(1),x(end),numel(y));
 
-        num_of_bands = gel_data.fitting_mode;
+        num_of_bands = str2double(gel_data.fitting_mode);
         [x_bands,x_fit] = fit_gaussian(y,x,x_back,num_of_bands);
-
-        if (strcmp(gel_data.fitting_mode,'Double'))
-
-            [x1,x2,x_fit] = double_gauss(y,x,x_back);
-       
-        else
         
-
         d.box(i).total_area = sum(x);
         d.box(i).background_area = sum(x_back);
-        d.box(i).band_area = d.box(i).total_area - ...
-                                d.box(i).background_area;
-        
-
+        % Check if band number is changed
+        if size(x_bands,1) ~= num_of_bands
+            num_of_bands = size(x_bands,1);
         end
+        
+        for j = 1 : num_of_bands
+            d.box(i).band_area(j) = trapz(y,x_bands(j,:));
+        end
+
         % Store data for later
         gel_data.box_data(i) = d.box(i);
 
@@ -88,15 +88,17 @@ if (isfield(gel_data,'box_handle'))
             cla(gui.zoom_profile_axes);
             plot(gui.zoom_profile_axes,x,y,'b-');
             hold(gui.zoom_profile_axes,'on');
-            plot(gui.zoom_profile_axes,x_back,y,'r-');
-            
-            if (strcmp(gel_data.fitting_mode,'Double'))
-            fill(gui.zoom_profile_axes,x1+x_back,y,'g','FaceAlpha',0.25);
-            fill(gui.zoom_profile_axes,x2+x_back,y,'m','FaceAlpha',0.25);
             plot(gui.zoom_profile_axes,x_fit+x_back,y,'k-');
-            end
+            color = lines(num_of_bands);
 
-            xlim(gui.zoom_profile_axes,[0 max(x)]);
+            for j = 1 : num_of_bands
+
+                fill(gui.zoom_profile_axes,x_back+x_bands(j,:),y,color(j,:),'FaceAlpha',0.25)
+            
+            end
+            plot(gui.zoom_profile_axes,x_back,y,'r-');
+            x_limit = max(max(x),max(x_fit));
+            xlim(gui.zoom_profile_axes,[0 x_limit+10]);
             xlabel(gui.zoom_profile_axes,'Intensity');
             ylabel(gui.zoom_profile_axes,'Pixels');
         end
