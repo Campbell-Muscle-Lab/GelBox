@@ -6,8 +6,8 @@ peaks=find_peaks('x',x, ...
     'min_x_index_spacing',2);
 
 if numel(peaks.max_indices) ~= no_of_bands
-    warn_text = sprintf('The number of peaks is not equaled to number of bands.\nThe number of bands is adjusted to the number of peaks');
-    warndlg(warn_text)
+%     warn_text = sprintf('The number of peaks is not equaled to number of bands.\nThe number of bands is adjusted to the number of peaks');
+%     fprintf(warn_text)
     no_of_bands = numel(peaks.max_indices);
 end
 target = y';

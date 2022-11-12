@@ -89,11 +89,11 @@ if (isfield(gel_data,'box_handle'))
             plot(gui.zoom_profile_axes,x,y,'b-');
             hold(gui.zoom_profile_axes,'on');
             plot(gui.zoom_profile_axes,x_fit+x_back,y,'k-');
-            color = lines(num_of_bands);
+            color = {'r','g','b'};
 
             for j = 1 : num_of_bands
 
-                fill(gui.zoom_profile_axes,x_back+x_bands(j,:),y,color(j,:),'FaceAlpha',0.25)
+                fill(gui.zoom_profile_axes,x_back+x_bands(j,:),y,color{j},'FaceAlpha',0.25)
             
             end
             plot(gui.zoom_profile_axes,x_back,y,'r-');

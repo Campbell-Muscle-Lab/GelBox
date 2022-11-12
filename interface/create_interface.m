@@ -300,13 +300,16 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
             d.band(i) = i;
             d.total_area(i) = gel_data.box_data(i).total_area;
             d.background_area(i) = gel_data.box_data(i).background_area;
-            band_orientation = numel(gel_data.box_data.band_area);
+            band_orientation = numel(gel_data.box_data(i).band_area);
             switch band_orientation
                 case 1
-                    d.band_area(i) = gel_data.box_data(i).band_area;
+                    d.band_area_bottom(i) = gel_data.box_data(i).band_area;
+                    d.band_area_mid(i) = [0];
+                    d.band_area_top(i) = [0];
                 case 2
                     d.band_area_bottom(i) = gel_data.box_data(i).band_area(1);
-                    d.band_area_top(i) = gel_data.box_data(i).band_area(2);
+                    d.band_area_mid(i) = gel_data.box_data(i).band_area(2);
+                    d.band_area_top(i) = [0];
                 case 3
                     d.band_area_bottom(i) = gel_data.box_data(i).band_area(1);
                     d.band_area_mid(i) = gel_data.box_data(i).band_area(2);
@@ -318,6 +321,7 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
             d.band_width(i) = gel_data.box_data(i).position(3);
             d.band_height(i) = gel_data.box_data(i).position(4);
             d.fitting_mode{i} = gel_data.box_data(i).fitting_mode;
+            d.num_of_bands(i) = band_orientation;
         end
 
         [file_string,path_string] = uiputfile2( ...
