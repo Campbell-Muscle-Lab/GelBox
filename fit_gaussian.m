@@ -35,6 +35,14 @@ e = [];
 
 [p_result,fval,exitflag,output] = fminsearch(@profile_error, par, []);
 
+%Band Span Restriction
+for u = 1 : size(y_bands,1)
+
+    if sum(y_bands(u,:) - 0 > 10 ^-6) > 0.7 * length(x)
+       y_bands(u,:) = zeros(1,length(x));
+    end
+end
+
     function trial_e = profile_error(par)
 
         [y_bands,y_fit] = calculate_profile(x,par);
