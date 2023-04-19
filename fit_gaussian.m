@@ -39,7 +39,7 @@ e = [];
 if size(y_bands,1) > 1
 for u = 1 : size(y_bands,1)
 
-    if sum(y_bands(u,:) - 0 > 10 ^-6) > 0.9 * length(x)
+    if sum(y_bands(u,:) - 0 > 10 ^-6) > 0.7 * length(x)
        y_bands(u,:) = zeros(1,length(x));
     end
 end
