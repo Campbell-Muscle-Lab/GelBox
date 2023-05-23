@@ -65,6 +65,7 @@ if (isfield(gel_data,'box_handle'))
         num_of_bands = str2double(gel_data.fitting_mode);
         [x_bands,x_fit] = fit_gaussian(y,x,x_back,num_of_bands);
         
+
         d.box(i).total_area = sum(x);
         d.box(i).background_area = sum(x_back);
         % Check if band number is changed
@@ -77,7 +78,18 @@ if (isfield(gel_data,'box_handle'))
         end
 
         % Store data for later
+
         gel_data.box_data(i) = d.box(i);
+        gel_data.summary(i).x = x;
+        gel_data.summary(i).y = y;
+        gel_data.summary(i).x_fit = x_fit;
+        gel_data.summary(i).x_back = x_back;
+
+        gel_data.summary(i).band_1 = x_bands(1,:);
+        gel_data.summary(i).band_2 = x_bands(2,:);
+        gel_data.summary(i).inset = d.box(i).inset;
+        gel_box_summary(gel_data.summary)
+
 
         % Display
         if (i==selected_box)
