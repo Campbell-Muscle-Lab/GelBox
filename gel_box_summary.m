@@ -40,7 +40,7 @@ numel(sp)
 for i = 1 : length(im_handles)
     h = subplot(sp(im_handles(i)));
     colormap(h,"gray")
-    t = sprintf('Box %i',i);
+    t = sprintf('Gel 4 Box %i',i);
     title(t)
     center_image_with_preserved_aspect_ratio( ...
         summary(i).inset,sp(im_handles(i)));
@@ -76,7 +76,7 @@ end
 figure_export('output_file_string', output_file_string_b,'output_type', 'png');
 
 figure(20)
-
+cla
 for i = 1 : length(im_handles)
     plot(i, summary(i).r_squared,'bo')
     hold on
