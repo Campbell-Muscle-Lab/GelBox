@@ -1,37 +1,39 @@
-function [y_bands, y_fit]= fit_gaussian(x,y,y_back,no_of_bands)
+function [y_bands, y_fit,r_squared]= fit_gaussian(x,y,y_back,no_of_bands)
 
 peaks=find_peaks('x',x, ...
     'y',y, ...
-    'min_rel_delta_y',0.025, ...
-    'min_x_index_spacing',5);
+    'min_rel_delta_y',0.05, ...
+    'min_x_index_spacing',2);
 
-figure(9)
+figure(2)
 cla
 plot(y,x)
 hold on
 plot(y(peaks.max_indices),peaks.max_indices,'o')
-% findpeaks(y)
-% plot(peaks)
+
 if numel(peaks.max_indices) ~= no_of_bands
-%     warn_text = sprintf('The number of peaks is not equaled to number of bands.\nThe number of bands is adjusted to the number of peaks');
-%     fprintf(warn_text)
-    no_of_bands = 2;
+    if no_of_bands == 2
+        peaks.max_indices = [];
+        peaks.max_indices(1) = round(0.5*length(x));
+        peaks.max_indices(2) = round(0.6*length(x));
+
+    end   
 end
 target = y';
 
 target = target - y_back;
-[max_value,max_index]=max(target);
+[max_value,~]=max(target);
+
+
 
 par = zeros(no_of_bands,3);
 
 half_distance=(0.1*length(x));
 alfa_estimate = -log(0.5)/(half_distance^2);
-skew = 1;
-peaks.max_indices = []
-peaks.max_indices(1) = round(0.5*length(x))
-peaks.max_indices(2) = round(0.6*length(x))
+skew = [1];
+
 for m = 1:no_of_bands
-par(m,1) = target(peaks.max_indices(m));
+par(m,1) = max_value;
 par(m,2) = alfa_estimate;
 par(m,3) = peaks.max_indices(m);
 par(m,4) = skew;
@@ -43,6 +45,21 @@ j = 1;
 e = [];
 
 [p_result,fval,exitflag,output] = fminsearch(@profile_error, par, []);
+
+r_squared = calculate_r_squared(y,y_fit+y_back);
+if ~isempty(y_fit)
+    figure(2)
+    cla
+    plot(y,x,'k','LineWidth',1.5)
+    hold on
+    plot(y(peaks.max_indices),peaks.max_indices,'bo')
+    plot(y_fit+y_back,x,'rd')
+    plot(y_back,x,'md')
+    t = sprintf('r^2 = %.3f',r_squared);
+    title(t)
+end
+
+
 
     function trial_e = profile_error(par)
 

@@ -10,8 +10,6 @@ set(gui.image_data_box_text, ...
     'String',printstruct(gel_data.imfinfo), ...
     'HorizontalAlignment','left');
 
-
-
 % Display selection
 if (isfield(gel_data,'box_handle'))
     n = numel(gel_data.box_handle);
@@ -63,7 +61,7 @@ if (isfield(gel_data,'box_handle'))
         x_back = linspace(x(1),x(end),numel(y));
 
         num_of_bands = str2double(gel_data.fitting_mode);
-        [x_bands,x_fit] = fit_gaussian(y,x,x_back,num_of_bands);
+        [x_bands,x_fit,r_squared] = fit_gaussian(y,x,x_back,num_of_bands);
         
 
         d.box(i).total_area = sum(x);
@@ -84,11 +82,19 @@ if (isfield(gel_data,'box_handle'))
         gel_data.summary(i).y = y;
         gel_data.summary(i).x_fit = x_fit;
         gel_data.summary(i).x_back = x_back;
+        
+        if num_of_bands == 2
+            gel_data.summary(i).band_1 = x_bands(1,:);
+            gel_data.summary(i).band_2 = x_bands(2,:);
+            gel_data.summary(i).bottom = d.box(i).band_area(1);
+            gel_data.summary(i).top = d.box(i).band_area(2);
+        else
+            gel_data.summary(i).band_1 = x_bands(1,:);
+        end
 
-        gel_data.summary(i).band_1 = x_bands(1,:);
-        gel_data.summary(i).band_2 = x_bands(2,:);
+
         gel_data.summary(i).inset = d.box(i).inset;
-        gel_box_summary(gel_data.summary)
+        gel_data.summary(i).r_squared = r_squared;
 
 
         % Display

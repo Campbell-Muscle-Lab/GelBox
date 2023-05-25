@@ -291,7 +291,6 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
     function gui = call_output_results(~,~,gui)
 
         gel_data = guidata(gui.Window)
-
         % Save data as structure for output
         d = [];
         d.image_file{1} = gel_data.image_file_string;
@@ -304,16 +303,14 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
             switch band_orientation
                 case 1
                     d.band_area_bottom(i) = gel_data.box_data(i).band_area;
-                    d.band_area_mid(i) = [0];
                     d.band_area_top(i) = [0];
                 case 2
                     d.band_area_bottom(i) = gel_data.box_data(i).band_area(1);
-                    d.band_area_mid(i) = gel_data.box_data(i).band_area(2);
-                    d.band_area_top(i) = [0];
-                case 3
-                    d.band_area_bottom(i) = gel_data.box_data(i).band_area(1);
-                    d.band_area_mid(i) = gel_data.box_data(i).band_area(2);
-                    d.band_area_top(i) = gel_data.box_data(i).band_area(3);
+                    d.band_area_top(i) = gel_data.box_data(i).band_area(2);
+%                 case 3
+%                     d.band_area_bottom(i) = gel_data.box_data(i).band_area(1);
+%                     d.band_area_mid(i) = gel_data.box_data(i).band_area(2);
+%                     d.band_area_top(i) = gel_data.box_data(i).band_area(3);
             end
 
             d.band_left(i) = gel_data.box_data(i).position(1);
@@ -326,6 +323,9 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
 
         [file_string,path_string] = uiputfile2( ...
             {'*.xlsx','Excel file'},'Select file for results');
+        
+        
+        
 
         if (path_string~=0)
             if ispc
@@ -335,6 +335,7 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
 
                 msgbox(sprintf('Data written to %s',file_string), ...
                     'Data saved');
+                gel_box_summary(gel_data.summary,path_string,file_string)
             elseif ismac
                 write_structure_to_excel_mac( ...
                     'filename',fullfile(path_string,file_string), ...
@@ -342,6 +343,7 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
 
                 msgbox(sprintf('Data written to %s',file_string), ...
                     'Data saved');
+                gel_box_summary(gel_data.summary,path_string,file_string)
             end
         end
     end

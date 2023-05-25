@@ -1,18 +1,22 @@
-function gel_box_summary(summary)
+function gel_box_summary(summary,path_string,file_string)
 
 [m,n] = size(summary);
 
+output_file_string = fullfile(path_string,file_string);
+output_file_string = erase(output_file_string,'.xlsx');
+output_file_string_b = sprintf('%s_boxes',output_file_string);
+output_file_string_r = sprintf('%s_r_squared',output_file_string);
 total_figures = n*2;
 
 im_handles = 1:2:total_figures;
 fit_handles = 2:2:total_figures;
 
 if mod(total_figures,6) == 0
-    no_of_panels_wide = 6;
+    no_of_panels_wide = 4;
     no_of_panels_high = total_figures/no_of_panels_wide;
 else
-    no_of_panels_wide = 6;
-    no_of_panels_high = 5;
+    no_of_panels_wide = 4;
+    no_of_panels_high = 7;
 end
 
 left_pads = 0.35 * ones(1,no_of_panels_wide);
@@ -32,28 +36,59 @@ sp = initialise_publication_quality_figure( ...
     'panel_label_font_size', 0, ...
     'figure_handle',19);
 
-
+numel(sp)
 for i = 1 : length(im_handles)
-    subplot(sp(im_handles(i)))
+    h = subplot(sp(im_handles(i)));
+    colormap(h,"gray")
+    t = sprintf('Box %i',i);
+    title(t)
     center_image_with_preserved_aspect_ratio( ...
         summary(i).inset,sp(im_handles(i)));
 
+   
     subplot(sp(fit_handles(i)))
-    plot(summary.x,summary.y,'b-');
+    plot(summary(i).x,summary(i).y,'k-');
     hold on
-    plot(summary.x_fit,summary.y,'ro');
+    fill(sp(fit_handles(i)),summary(i).x_back+summary(i).band_1, ...
+        summary(i).y,'b','FaceAlpha',0.1)
+    fill(sp(fit_handles(i)),summary(i).x_back+summary(i).band_2, ...
+        summary(i).y,'y','FaceAlpha',0.1)
+    plot(summary(i).x_back,summary(i).y, ...
+        'mo','MarkerSize',1);
+    plot(summary(i).x_fit+summary(i).x_back,summary(i).y, ...
+        'ro','MarkerSize',1);
+     xlabel(sp(fit_handles(i)),'Intensity');
+     ylabel(sp(fit_handles(i)),'Pixels');
+    t = sprintf('r^2 = %.3f',summary(i).r_squared);
+    title(t)
+    str1 = sprintf('Top: %.3f\n Bottom: %.3f', summary(i).top, summary(i).bottom);
+
+    xL=xlim;
+    yL=ylim;
+    text(0.99*xL(2),0.99*yL(2),str1,'HorizontalAlignment','right','VerticalAlignment','top')
+
 
 end
 
 
 
 
+figure_export('output_file_string', output_file_string_b,'output_type', 'png');
 
+figure(20)
 
+for i = 1 : length(im_handles)
+    plot(i, summary(i).r_squared,'bo')
+    hold on
+    xlabel('Box No')
+    ylabel('r squared')
 
+end
 
-
-
+xlim([0.9 n*1.1])
+xticks([1:n])
+ylim([0 1.05])
+figure_export('output_file_string', output_file_string_r,'output_type', 'png');
 
 
 
