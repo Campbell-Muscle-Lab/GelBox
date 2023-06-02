@@ -38,7 +38,7 @@ par=[upper_band_x_estimate ...
 
 j = 1;
 e = [];
-fig_disp = [];
+fig_disp = [1];
 
 opts=optimset('fminsearch');
 opts.Display='off';
@@ -47,7 +47,7 @@ opts.MaxFunEvals=10000;
 
 [p_result,fval,exitflag,output] = fminsearch(@profile_error, par, opts);
 p_result
-r_squared = calculate_r_squared(y,y_fit+y_back);
+r_squared = calculate_r_squared(y',y_fit+y_back);
 if ~isempty(y_fit) && ~isempty(fig_disp) 
     figure(25)
     cla
@@ -96,9 +96,9 @@ end
             plot(target,x,'LineWidth',2,'LineStyle','-.','Color','k')
             area_1 = trapz(x,y_bands(1,:));
             area_2 = trapz(x,y_bands(2,:));
-            plot(y_bands(1,:),x,'bo');
-            plot(y_bands(2,:),x,'ro');
-            str1 = sprintf('Blue: %.3f\n Red: %.3f', area_1, area_2);
+            plot(y_bands(1,:),x,'ro');
+            plot(y_bands(2,:),x,'bo');
+            str1 = sprintf('Red: %.3f\n Blue: %.3f', area_1, area_2);
 
             xL=xlim;
             yL=ylim;
@@ -114,12 +114,12 @@ end
         skew1=par(6);
 %         relative_shape=par(7);
 
-        yblue=skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
-        yred=skewed_Gaussian(x,x2,curve_shape1,amp2,skew1);
+        yred=skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
+        yblue=skewed_Gaussian(x,x2,curve_shape1,amp2,skew1);
 
         y_fit=yblue+yred;
-        y_bands(1,:) = yblue;
-        y_bands(2,:) = yred;
+        y_bands(1,:) = yred;
+        y_bands(2,:) = yblue;
 
     end
     function y=skewed_Gaussian(x,x0,gamma,A,skew1)

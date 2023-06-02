@@ -40,7 +40,7 @@ numel(sp)
 for i = 1 : length(im_handles)
     h = subplot(sp(im_handles(i)));
     colormap(h,"gray")
-    t = sprintf('Gel 4 Box %i',i);
+    t = sprintf('Gel 3 Box %i',i);
     title(t)
     center_image_with_preserved_aspect_ratio( ...
         summary(i).inset,sp(im_handles(i)));
