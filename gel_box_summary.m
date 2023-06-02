@@ -2,22 +2,22 @@ function gel_box_summary(summary,path_string,file_string)
 
 [m,n] = size(summary);
 
+path_string = regexprep(path_string,'excel_files','output_figures')
 output_file_string = fullfile(path_string,file_string);
 output_file_string = erase(output_file_string,'.xlsx');
+fig_title = erase(file_string,'.xlsx');
+fig_title = regexprep(fig_title,'_',' ');
 output_file_string_b = sprintf('%s_boxes',output_file_string);
 output_file_string_r = sprintf('%s_r_squared',output_file_string);
+
 total_figures = n*2;
 
 im_handles = 1:2:total_figures;
 fit_handles = 2:2:total_figures;
+no_of_panels_wide = 4;
+no_of_panels_high = (total_figures + ...
+    mod(total_figures,no_of_panels_wide))/no_of_panels_wide;
 
-if mod(total_figures,6) == 0
-    no_of_panels_wide = 4;
-    no_of_panels_high = total_figures/no_of_panels_wide;
-else
-    no_of_panels_wide = 4;
-    no_of_panels_high = 7;
-end
 
 left_pads = 0.35 * ones(1,no_of_panels_wide);
 right_pads = 0.15 * ones(1,no_of_panels_wide);
@@ -40,7 +40,7 @@ numel(sp)
 for i = 1 : length(im_handles)
     h = subplot(sp(im_handles(i)));
     colormap(h,"gray")
-    t = sprintf('Gel 3 Box %i',i);
+    t = sprintf('%s Box %i',fig_title,i);
     title(t)
     center_image_with_preserved_aspect_ratio( ...
         summary(i).inset,sp(im_handles(i)));
@@ -71,7 +71,7 @@ for i = 1 : length(im_handles)
 end
 
 
-
+% improve_axes
 
 figure_export('output_file_string', output_file_string_b,'output_type', 'png');
 

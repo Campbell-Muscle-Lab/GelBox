@@ -38,7 +38,7 @@ par=[upper_band_x_estimate ...
 
 j = 1;
 e = [];
-fig_disp = [1];
+fig_disp = [];
 
 opts=optimset('fminsearch');
 opts.Display='off';
