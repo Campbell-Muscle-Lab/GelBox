@@ -305,8 +305,8 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
                     d.band_area_bottom(i) = gel_data.box_data(i).band_area;
                     d.band_area_top(i) = [0];
                 case 2
-                    d.band_area_bottom(i) = gel_data.box_data(i).band_area(1);
-                    d.band_area_top(i) = gel_data.box_data(i).band_area(2);
+                    d.band_area_bottom(i) = gel_data.summary(i).bottom;
+                    d.band_area_top(i) = gel_data.summary(i).top;
 %                 case 3
 %                     d.band_area_bottom(i) = gel_data.box_data(i).band_area(1);
 %                     d.band_area_mid(i) = gel_data.box_data(i).band_area(2);

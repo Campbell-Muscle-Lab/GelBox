@@ -7,11 +7,11 @@ peaks=find_peaks('x',x, ...
 
 if numel(peaks.max_indices) == no_of_bands
 
-    upper_band_x_estimate=peaks.max_indices(1);
-    lower_band_x_estimate=peaks.max_indices(2);
+    lower_band_x_estimate=peaks.max_indices(1);
+    upper_band_x_estimate=peaks.max_indices(2);
 else
-    upper_band_x_estimate = 0.5*length(x);
-    lower_band_x_estimate = 0.6*length(x);
+    lower_band_x_estimate = 0.3*length(x);
+    upper_band_x_estimate = 0.6*length(x);
 end
 target = y';
 
@@ -27,13 +27,15 @@ upper_amp_estimate=max_value;
 lower_amp_estimate=upper_amp_estimate;
 upper_skew_estimate=1;
 
+lower_curve_shape_estimate = alfa_estimate;
 
-par=[upper_band_x_estimate ...
-    lower_band_x_estimate ...
+par=[lower_band_x_estimate ...
+    upper_band_x_estimate ...
     upper_curve_shape_estimate ...
     upper_amp_estimate  ...
     lower_amp_estimate ...
     upper_skew_estimate ...
+    lower_curve_shape_estimate ...
     ];
 
 j = 1;
@@ -61,7 +63,7 @@ if ~isempty(y_fit) && ~isempty(fig_disp)
     area_1 = trapz(x,y_bands(1,:));
     area_2 = trapz(x,y_bands(2,:));
     plot(y_bands(1,:)+y_back,x,'ro');
-    plot(y_bands(2,:)+y_back,x,'bo');
+%     plot(y_bands(2,:)+y_back,x,'bo');
     str1 = sprintf('Red: %.3f\n Blue: %.3f', area_1, area_2);
 
     xL=xlim;
@@ -97,7 +99,7 @@ end
             area_1 = trapz(x,y_bands(1,:));
             area_2 = trapz(x,y_bands(2,:));
             plot(y_bands(1,:),x,'ro');
-            plot(y_bands(2,:),x,'bo');
+%             plot(y_bands(2,:),x,'bo');
             str1 = sprintf('Red: %.3f\n Blue: %.3f', area_1, area_2);
 
             xL=xlim;
@@ -112,10 +114,11 @@ end
         amp1=par(4);
         amp2=par(5);
         skew1=par(6);
-%         relative_shape=par(7);
-
+        curve_shape2=par(7);
+        
+%         x1
         yred=skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
-        yblue=skewed_Gaussian(x,x2,curve_shape1,amp2,skew1);
+        yblue=skewed_Gaussian(x,x2,curve_shape2,amp2,skew1);
 
         y_fit=yblue+yred;
         y_bands(1,:) = yred;

@@ -84,10 +84,23 @@ if (isfield(gel_data,'box_handle'))
         gel_data.summary(i).x_back = x_back;
 
         if num_of_bands == 2
-            gel_data.summary(i).band_1 = x_bands(1,:);
-            gel_data.summary(i).band_2 = x_bands(2,:);
-            gel_data.summary(i).bottom = d.box(i).band_area(1);
-            gel_data.summary(i).top = d.box(i).band_area(2);
+
+            
+            [~,peak_band_1] = max(x_bands(1,:));    
+            [~,peak_band_2] = max(x_bands(2,:));
+
+            if peak_band_2 > peak_band_1
+
+                gel_data.summary(i).bottom = d.box(i).band_area(1);
+                gel_data.summary(i).top = d.box(i).band_area(2);
+                gel_data.summary(i).band_1 = x_bands(1,:);
+                gel_data.summary(i).band_2 = x_bands(2,:);
+            else
+                gel_data.summary(i).bottom = d.box(i).band_area(2);
+                gel_data.summary(i).top = d.box(i).band_area(1);
+                gel_data.summary(i).band_1 = x_bands(2,:);
+                gel_data.summary(i).band_2 = x_bands(1,:);
+            end
         else
             gel_data.summary(i).band_1 = x_bands(1,:);
         end
@@ -122,16 +135,16 @@ if (isfield(gel_data,'box_handle'))
 
             figure(25)
             cla
-            plot(x,y,'k','LineWidth',1.5)
+            plot(x-x_back',y,'k','LineWidth',1.5)
             hold on
-            plot(x_fit+x_back,y,'gd')
-            plot(x_back,y,'md')
+            plot(x_fit,y,'gd')
+%             plot(x_back,y,'md')
             t = sprintf('Box %i r^2 = %.3f',i,r_squared);
             title(t)
             area_1 = trapz(y,x_bands(1,:));
             area_2 = trapz(y,x_bands(2,:));
-            plot(x_bands(1,:)+x_back,y,'ro');
-            plot(x_bands(2,:)+x_back,y,'bo');
+            plot(x_bands(1,:),y,'ro');
+            plot(x_bands(2,:),y,'bo');
             str1 = sprintf('Red: %.3f\n Blue: %.3f', area_1, area_2);
 
             xL=xlim;
