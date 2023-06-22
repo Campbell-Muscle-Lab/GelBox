@@ -145,7 +145,8 @@ if (isfield(gel_data,'box_handle'))
             area_2 = trapz(y,x_bands(2,:));
             plot(x_bands(1,:),y,'ro');
             plot(x_bands(2,:),y,'bo');
-            str1 = sprintf('Red: %.3f\n Blue: %.3f', area_1, area_2);
+            str1 = sprintf('Red: %.2f\n Blue: %.2f', ...
+                area_1/(area_1+area_2), area_2/(area_1+area_2));
 
             xL=xlim;
             yL=ylim;
