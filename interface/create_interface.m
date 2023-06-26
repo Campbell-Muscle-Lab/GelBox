@@ -241,26 +241,30 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
             n=size(save_data.box_position,1);
             control_strings = [];
             for i=1:n
-                gel_data.box_handle(i) = ...
-                    imrect(gui.gel_axes,save_data.box_position(i,:));
+                gel_data.box_handle(i) = images.roi.Rectangle(gui.gel_axes, ...
+                    'Position',save_data.box_position(i,:));
                 control_strings{i} = sprintf('%.0f',i);
             end
             set(gui.zoom_control,'String',control_strings);
             set(gui.zoom_control,'Value',1);
 
             gel_data.box_label=[];
+            
+            
 
             for i=1:n
+                gel_data.box_handle(i).FaceAlpha = 0;
                 if (i~=1)
-                    setColor(gel_data.box_handle(i),[1 0 0]);
-                    setResizable(gel_data.box_handle(i),false);
+                    gel_data.box_handle(i).Color = [1 0 0];
+                    gel_data.box_handle(i).InteractionsAllowed = 'none';
                 else
-                    setColor(gel_data.box_handle(i),[0 1 0]);
-                    setResizable(gel_data.box_handle(i),true);
+                    gel_data.box_handle(i).Color = [0 1 0];
+                    gel_data.box_handle(i).InteractionsAllowed = 'all';
+
                 end
 
-                p = getPosition(gel_data.box_handle(i))
-                gel_data.box_label(i) = text(p(1),p(2),sprintf('%.0f',i), ...
+                p = gel_data.box_handle(i).Position
+                gel_data.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
                     'Parent',gui.gel_axes);
 
                 gel_data.old_width = p(3);
@@ -268,7 +272,7 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
 
 
                 i=i
-                addNewPositionCallback(gel_data.box_handle(i),@new_box_position2);
+                addlistener(gel_data.box_handle(i),"ROIMoved",@(src,evt) new_box_position2(evt));
             end
 
             % Need this to make labels
@@ -279,12 +283,12 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
         update_display(gui)
 
         % Nested function
-        function new_box_position2(pos);
+        function new_box_position2(evt);
             gel_data = guidata(gui.Window);
             if (isfield(gel_data,'box_position'))
                 box_position = gel_data.box_position;
                 [r,c]=size(box_position);
-                if (r>=n)&(~isequal(box_position(n,:),pos))
+                if (r>=n)&(~isequal(box_position(n,:),evt.CurrentPosition))
                     update_display(gui,n);
                 end
             else

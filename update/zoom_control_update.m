@@ -10,11 +10,11 @@ n = numel(control_strings);
 
 for i=1:n
     if (i~=selected_box)
-        setColor(gel_data.box_handle(i),[1 0 0]);
-        setResizable(gel_data.box_handle(i),false);
+        gel_data.box_handle(i).Color = [1 0 0];
+        gel_data.box_handle(i).InteractionsAllowed = 'none';
     else
-        setColor(gel_data.box_handle(i),[0 1 0]);
-        setResizable(gel_data.box_handle(i),true);
+        gel_data.box_handle(i).Color = [0 1 0];
+        gel_data.box_handle(i).InteractionsAllowed = 'all';
     end
 end
 

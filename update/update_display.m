@@ -20,7 +20,7 @@ if (isfield(gel_data,'box_handle'))
         get(gui.zoom_control,'Value')});
 
     for i=1:n
-        p(i,1:4) = getPosition(gel_data.box_handle(i));
+        p(i,1:4) = gel_data.box_handle(i).Position;
     end
     w = p(selected_box,3);
     h = p(selected_box,4);
@@ -28,13 +28,13 @@ if (isfield(gel_data,'box_handle'))
         for i=1:n
             p(i,3) = w;
             p(i,4) = h;
-            setPosition(gel_data.box_handle(i),p(i,:));
+            gel_data.box_handle(i).Position = p(i,:);
         end
     end
 
     % Store data in case we need to save it
     for i=1:n
-        gel_data.box_position(i,:) = getPosition(gel_data.box_handle(i));
+        gel_data.box_position(i,:) = gel_data.box_handle(i).Position;
     end
 
     % Store data for display
@@ -42,12 +42,13 @@ if (isfield(gel_data,'box_handle'))
     for i=1:n
         d.box(i).fitting_mode = gel_data.fitting_mode ;
         % Extract position
-        d.box(i).position = getPosition(gel_data.box_handle(i));
+        d.box(i).position = gel_data.box_handle(i).Position;
 
         % Label it
         set(gel_data.box_label(i),'String',sprintf('%.0f',i));
         set(gel_data.box_label(i), ...
-            'Position',[d.box(i).position(1) d.box(i).position(2)]);
+            'Position',[d.box(i).position(1)+d.box(i).position(3) ...
+            d.box(i).position(2)-50]);
 
         % Calculate profile
         d.box(i).inset = imcrop(gel_data.im_data, ...

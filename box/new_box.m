@@ -4,32 +4,33 @@ gel_data = guidata(gui.Window)
 
 if (~isfield(gel_data,'box_handle'))
     n=1;
-    gel_data.box_handle(n) = imrect(gui.gel_axes);
-    p = getPosition(gel_data.box_handle(n));
+    gel_data.box_handle(n) = drawrectangle(gui.gel_axes);
+    p = gel_data.box_handle(n).Position;
     gel_data.old_width = p(3);
     gel_data.old_height = p(4);
 else
     n = 1 + numel(gel_data.box_handle);
-    p = getPosition(gel_data.box_handle(n-1));
-    gel_data.box_handle(n) = imrect(gui.gel_axes,p);
-    setPosition(gel_data.box_handle(n),p+[20 0 0 0]);
+    p = gel_data.box_handle(n-1).Position;
+    
+    gel_data.box_handle(n) = images.roi.Rectangle(gui.gel_axes,'Position',p + [20,0,0,0]);
     for i=1:(n-1)
-        setResizable(gel_data.box_handle(i),false);
+        gel_data.box_handle(i).InteractionsAllowed = 'none';
     end
 end
 
 guidata(gui.Window,gel_data)
-addNewPositionCallback(gel_data.box_handle(n),@new_box_position);
+addlistener(gel_data.box_handle(n),"ROIMoved",@(src,evt) new_box_position(evt));
 
 % Set color to last box
-setColor(gel_data.box_handle(n),[0 1 0]);
+gel_data.box_handle(n).Color = [0 1 0];
+gel_data.box_handle(n).FaceAlpha = 0;
 for i=1:(n-1)
-    setColor(gel_data.box_handle(i),[1 0 0]);
+    gel_data.box_handle(i).Color = [1 0 0];
 end
 
 % Add in a label
-p = getPosition(gel_data.box_handle(n));
-gel_data.box_label(n) = text(p(1),p(2),sprintf('%.0f',n));
+p = gel_data.box_handle(n).Position;
+gel_data.box_label(n) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',n));
 
 % Update zoom control
 for i=1:n
@@ -43,12 +44,12 @@ guidata(gui.Window,gel_data)
 update_display(gui,n);
 
 % Nested function
-    function new_box_position(pos);
+    function new_box_position(evt);
         gel_data = guidata(gui.Window);
         if (isfield(gel_data,'box_position'))
             box_position = gel_data.box_position;
             [r,c]=size(box_position);
-            if (r>=n)&(~isequal(box_position(n,:),pos))
+            if (r>=n)&(~isequal(box_position(n,:),evt.CurrentPosition))
                 update_display(gui,n);
             end
         else
