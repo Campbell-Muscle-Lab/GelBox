@@ -117,9 +117,10 @@ if (isfield(gel_data,'box_handle'))
                 gui.zoom_inset_axes);
 
             cla(gui.zoom_profile_axes);
-            plot(gui.zoom_profile_axes,x,y,'b-');
+            cla(gui.zoom_profile_axes_corrected);
+            plot(gui.zoom_profile_axes,x,y,'k-');
             hold(gui.zoom_profile_axes,'on');
-            plot(gui.zoom_profile_axes,x_fit+x_back,y,'k-');
+            plot(gui.zoom_profile_axes,x_fit+x_back,y,':r','LineWidth',2);
             color = {'r','b'};
 
             for j = 1 : num_of_bands
@@ -127,32 +128,41 @@ if (isfield(gel_data,'box_handle'))
                 fill(gui.zoom_profile_axes,x_back+x_bands(j,:),y,color{j},'FaceAlpha',0.25)
 
             end
-            plot(gui.zoom_profile_axes,x_back,y,'r-');
-            x_limit = max(max(x),max(x_fit));
-            xlim(gui.zoom_profile_axes,[0 x_limit+10]);
-            xlabel(gui.zoom_profile_axes,'Intensity');
+            plot(gui.zoom_profile_axes,x_back,y,'m-');
+            x_limit = max(max(x),max(x_fit+x_back));
+            xlabel(gui.zoom_profile_axes,'Optical Density');
             ylabel(gui.zoom_profile_axes,'Pixels');
-
-            figure(25)
-            cla
-            plot(x-x_back',y,'k','LineWidth',1.5)
-            hold on
-            plot(x_fit,y,'gd')
+            x_t_end = ceil(max(x) /500)*500;
+            x_t_mid = round(x_t_end/2);
+            try
+                x_ticks = [0 x_t_mid x_t_end];
+                xticks(gui.zoom_profile_axes,x_ticks)
+                xlim(gui.zoom_profile_axes,[0 x_t_end])
+            end
+            ylim(gui.zoom_profile_axes,[1 y(end)])
+%             legend(gui.zoom_profile_axes,'datos','ajuste','datos','ajuste','datos',"location","best")
+            plot(gui.zoom_profile_axes_corrected,x-x_back',y,'k','LineWidth',1.5)
+            hold(gui.zoom_profile_axes_corrected,'on')
+            plot(gui.zoom_profile_axes_corrected,x_fit,y,'gd')
 %             plot(x_back,y,'md')
             t = sprintf('Box %i r^2 = %.3f',i,r_squared);
-            title(t)
+            title(gui.zoom_profile_axes_corrected,t)
             area_1 = trapz(y,x_bands(1,:));
             area_2 = trapz(y,x_bands(2,:));
-            plot(x_bands(1,:),y,'ro');
-            plot(x_bands(2,:),y,'bo');
+            plot(gui.zoom_profile_axes_corrected,x_bands(1,:),y,'ro');
+            plot(gui.zoom_profile_axes_corrected,x_bands(2,:),y,'bo');
             str1 = sprintf('Red: %.2f\n Blue: %.2f', ...
                 area_1/(area_1+area_2), area_2/(area_1+area_2));
 
-            xL=xlim;
-            yL=ylim;
-            text(0.99*xL(2),0.99*yL(2),str1,'HorizontalAlignment','right','VerticalAlignment','top')
-            xlabel('Intensity')
-            ylabel('Pixels')
+
+            xlabel(gui.zoom_profile_axes_corrected,'Back. Corr. Density')
+            ylabel(gui.zoom_profile_axes_corrected,'Pixels')
+            ylim(gui.zoom_profile_axes_corrected,[1 y(end)])
+            xL=xlim(gui.zoom_profile_axes_corrected);
+            yL=ylim(gui.zoom_profile_axes_corrected);
+            text(gui.zoom_profile_axes_corrected,0.99*xL(2),0.99*yL(2),str1, ...
+                'HorizontalAlignment','right','VerticalAlignment','top')
+
         end
     end
 

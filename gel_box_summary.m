@@ -9,6 +9,8 @@ fig_title = erase(file_string,'.xlsx');
 fig_title = regexprep(fig_title,'_',' ');
 output_file_string_b = sprintf('%s_boxes',output_file_string);
 output_file_string_r = sprintf('%s_r_squared',output_file_string);
+output_file_string_f = sprintf('%s_fits.xlsx',output_file_string);
+output_file_string_i = sprintf('%s_insets.xlsx',output_file_string);
 
 total_figures = n*3;
 fig_handles = 1:total_figures;
@@ -140,6 +142,8 @@ p = initialise_publication_quality_figure( ...
 figure(20)
 cla
 for i = 1 : length(im_handles)
+    i_name = sprintf('box_%i',i);
+    insets.(i_name) = summary(i).inset;
     plot(i, summary(i).r_squared,'bo')
     hold on
     xlabel('Box No')
@@ -163,6 +167,28 @@ improve_axes('axis_handle',p,'x_axis_label', 'Box No',...
     'y_label_offset',-0.05)
 
 figure_export('output_file_string', output_file_string_r,'output_type', 'png');
+
+
+
+summary = rmfield(summary,'top');
+summary = rmfield(summary,'bottom');
+summary = rmfield(summary,'r_squared');
+summary = rmfield(summary,'inset');
+
+names = fieldnames(summary);
+for j = 1 : length(summary)
+    for i = 1 : numel(names)
+
+        [row,col] = size(summary(j).(names{i}));
+
+        if row == 1 && col ~= 1
+            summary(j).(names{i}) = (summary(j).(names{i}))';
+        end
+    end
+    sheet = sprintf('box_%i',j);
+    writetable(struct2table(summary(j)),output_file_string_f,'Sheet',sheet)
+    writematrix(insets.(sheet),output_file_string_i,'Sheet',sheet)
+end
 
 
 

@@ -48,7 +48,8 @@ opts.MaxIter=1000;
 opts.MaxFunEvals=10000;
 
 [p_result,fval,exitflag,output] = fminsearch(@profile_error, par, opts);
-p_result
+p_result(3)
+p_result(7)
 r_squared = calculate_r_squared(y',y_fit+y_back);
 if ~isempty(y_fit) && ~isempty(fig_disp) 
     figure(25)
