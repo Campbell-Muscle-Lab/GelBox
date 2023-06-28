@@ -1,0 +1,22 @@
+remote_theme: pmarsceill/just-the-docs
+
+# Auxiliary links for the upper right navigation.
+aux_links:
+  "Campbell Muscle Lab":
+  - "http://www.campbellmusclelab.org"
+  "Lab GitHub":
+  - "http://campbell-muscle-lab.github.io"
+  "GelBox Repo":
+  - "http://github.com/Campbell-Muscle-Lab/GelBox"
+
+# Not a big fan of dark mode. I think the light looks better.
+# color_scheme: "dark"
+
+# You can display an image instead of the site's title like this.
+# logo: "/assets/images/example-image.png"
+
+# Footer
+footer_content: ""
+
+# This is the title of the website
+title: "GelBox"

@@ -1,0 +1,79 @@
+{"0": {
+    "doc": "Help",
+    "title": "Help",
+    "content": "If you encounter problems, we recommend the following strategies: . | Take a step back, and make sure to thoroughly go over the tutorial . | If that doesn’t work, submit an issue . | If you don’t hear back in 3 days, email Ken Campbell, PhD . | . ",
+    "url": "/pages/help/help.html",
+    
+    "relUrl": "/pages/help/help.html"
+  },"1": {
+    "doc": "GelBox",
+    "title": "GelBox",
+    "content": "A simple GUI written in MATLAB to help analyze gels and immunoblots. It uses a workflow that is similar to GelBandFitter. ",
+    "url": "/",
+    
+    "relUrl": "/"
+  },"2": {
+    "doc": "Installation",
+    "title": "Installation",
+    "content": " ",
+    "url": "/pages/installation/installation.html",
+    
+    "relUrl": "/pages/installation/installation.html"
+  },"3": {
+    "doc": "Installation",
+    "title": "Cloning GelBox",
+    "content": "This page instructs you on how to clone the GelBox repository. For cloning the GelBox repository, we recommend using the GitHub Desktop client. Clicking on any of the images on this page will open a larger version in a new browswer window. Open GitHub Desktop and click the dropdown menu for repositories (shown in red rectangle in below image). Click the “Add” dropdown menu (shown in red rectangle in below image). Click the “Clone repository…” button (shown in red rectangle in below image). Type “GelBox” into the repository search bar (shown in red rectangle in below image). Click the Campbell-Muscle-Lab/GelBox repository, describe where you would like the repository to be located on your local machine (both shown in red rectangles in below image). ",
+    "url": "/pages/installation/installation.html#cloning-gelbox",
+    
+    "relUrl": "/pages/installation/installation.html#cloning-gelbox"
+  },"4": {
+    "doc": "Load analysis",
+    "title": "Load analysis",
+    "content": "This page provides simple instructions on how to load an existing analysis to GelBox. ",
+    "url": "/pages/tutorial/load_analysis/load_analysis.html",
+    
+    "relUrl": "/pages/tutorial/load_analysis/load_analysis.html"
+  },"5": {
+    "doc": "Load analysis",
+    "title": "Instructions",
+    "content": " ",
+    "url": "/pages/tutorial/load_analysis/load_analysis.html#instructions",
+    
+    "relUrl": "/pages/tutorial/load_analysis/load_analysis.html#instructions"
+  },"6": {
+    "doc": "Load analysis",
+    "title": "Instructions",
+    "content": ". | Launch MATLAB and open GelBox.m | Press F5 to run the file. | . After a few seconds, you should see a program window. This is the main GelBox program. (Clicking on any of the images on this page will open a larger version in a new browswer window.) . First select the number of bands used in the GelBox analysis using the number of bands dropdown menu (red rectangle). Click the ‘File’ button. File button opens a dropdown menu, which is highlighted in red rectangle in the image below. click the ‘Load Analysis’ button in the dropdown menu. This button brings up a normal Windows File Open Dialog. Use this to load the GelBox analysis file. To how to save a GelBox analysis please follow the start new analysis tutorial . After few seconds, the analysis is loaded to GelBox. All the operations described in start new analysis tutorial are available upon loading. ",
+    "url": "/pages/tutorial/load_analysis/load_analysis.html#instructions-1",
+    
+    "relUrl": "/pages/tutorial/load_analysis/load_analysis.html#instructions-1"
+  },"7": {
+    "doc": "Start new analysis",
+    "title": "Start new analysis",
+    "content": "This page provides simple instructions on how to perform a new analysis with GelBox. ",
+    "url": "/pages/tutorial/start_new_analysis/start_new_analysis.html",
+    
+    "relUrl": "/pages/tutorial/start_new_analysis/start_new_analysis.html"
+  },"8": {
+    "doc": "Start new analysis",
+    "title": "Instructions",
+    "content": ". | Launch MATLAB and open GelBox.m | Press F5 to run the file. | . After a few seconds, you should see a program window. This is the main GelBox program. (Clicking on any of the images on this page will open a larger version in a new browswer window.) . The first step in new analysis is to load an image file. You do this by clicking the ‘File’ button. File button opens a dropdown menu, which is highlighted in red rectangle in the image below. click the ‘Load Image’ button in the dropdown menu. This button brings up a normal Windows File Open Dialog. Use this to load an image file. GelBox can open a TIF and PNG files. Please note that the file format is selected as TIF in the red rectangle. This can be switched to PNG using the file extension dropdown. Press open to load the image. An image of your gel should now be displayed in the left panel (red rectangle). The top right panel consists the variety of information on the image file (blue rectangle). GelBox can work with both flourescent and non-flourescent images. In the case of a flourescent image, click the ‘Tools’ button in the toolbar to reveal the ‘Invert Image’ button (red rectangle). Clicking ‘Invert Image’ button transforms bright pixels to dark pixels and vice versa. The inverted image appears in the left panel. In this tutorial, we are interested in analyzing the top two bands. First, change the number of bands to 2 (red rectangle). GelBox can analyze relative quantities of 1, 2, or 3 bands using a summation of 1, 2, or 3 Gaussian functions, respectively. You can now zoom into the the lane of interest by using scroll wheel of the mouse or changing the mouse cursor mode to MATLAB’s zoom in feature. This feature appears on the top right corner of the image axes. It is hidden, but as you hover over the image it appears. The next step is to draw a box for analysis. Click the ‘Edit’ button in the toolbar, it opens the ‘New Box’ button (red rectangle). This operation can be also performed using the Ctrl+N shortcut. The newly generated box appears as light green. The GelBox automatically calculates the fit using the provided information by the user. The middle panel displays different portions of the analysis: . | An inset figure is diplayed in the middle panel (red rectangle). Please note that the inset image can be seem to be darker than the original. It is because of the “scaled image display” option by MATLAB, in which the pixel intensities are scaled with respect to maximum available pixel intensity. This is used for display purposes, it doesn’t impact the calculation. | In purple rectangle, the raw optical density (black line) is plotted. The fitted function, which is the summation of two Gaussian functions in this case, is shown in red dashed line. The Gaussian functions are highlighted in blue and red shaded areas. Magenta dashed line is the baseline. | The background corrected density (raw optical density - baseline) and fitted function traces are shown in solid black and dashed red lines, respectively. The blue and red circles show the individual Gaussian functions. The relative area under the Gaussian functions are given in the top right corner. The r2 value for each box is employed as a goodness of fit measure and shown at the title. | . The box can be resized and dragged along the image. The fitting process automatically follows the position of the box. You can explore a better fit by replacing or resizing the box. Usually, there are more than one lanes of interest in gels. Once you are completed with the current box, generate your next box as mentioned above. GelBox will automatically place a new box in the vicinity of the old box. All the boxes have the same dimensions. The new box becomes the selected box (light green) and the old box is shown in red. Drag the new box to desired position. Please note that the inset and density figures are updated as the box moves. You can change the selected box using the ‘Adjustable box’ dropdown menu. The second box can be also dragged around the image. However, when the selected box is resizing, all the existing boxes change their size as well. Please note that the fits may change as a result of resizing. Make sure to check all the existing boxes to verify fits. Once you are done with your analysis, click the ‘File’ button to save your analysis and export figures and summary excel files. ‘Save analysis’ button opens the following file dialog box, which allows you to save GelBox analysis files in a special .gdf format. This file format can be loaded to GelBox to revisit analysis. ‘Output results to Excel’ button opens a file dialog box for the summary excel file. Here is a snapshot of the excel file: . | image_file: file path of the image | band: the box number | total_area: area under the raw density trace | background_area: area under the baseline | band_area_bottom: area under the Gaussian function representing bottom band | band_area_top: area under the Gaussian function representing top band | band_left: position of the upper left corner on the x axis | band_top: position of the upper left corner on the y axis | band_width: width of the box | band_height: height of the box | fitting_mode: number of Gaussian functions | num_of_bands: number of bands | r_squared: r2 value of the fit | . Following the excel file export, an input dialog box appears to define the band labels for the output figures. | Box layout plot . | r2 - box plot: red dashed line indicates the r2 value of 0.9 . | . In addition to output figures two more excel files, one with the density trace and band fits for each box and one with the inset figures. Inset images are saved as an array, therefore reading this file as an image is essential for post processing. | gel_box_tutorial_fits . | x: raw density value | y: pixel index along height of the box | x_fit: fitted function value | x_back: background density value | band_1: 1st Gaussian function value | band_2: 2nd Gaussian function value | . | . | gel_box_tutorial_insets . | excel rows show the pixel index along height of the box | excel columns show the pixel index along width of the box | . | . ",
+    "url": "/pages/tutorial/start_new_analysis/start_new_analysis.html#instructions",
+    
+    "relUrl": "/pages/tutorial/start_new_analysis/start_new_analysis.html#instructions"
+  },"9": {
+    "doc": "Tutorial",
+    "title": "Tutorial",
+    "content": " ",
+    "url": "/pages/tutorial/tutorial.html#tutorial",
+    
+    "relUrl": "/pages/tutorial/tutorial.html#tutorial"
+  },"10": {
+    "doc": "Tutorial",
+    "title": "Tutorial",
+    "content": "Users can start a new analysis and also revisit their old analyses by loading it. ",
+    "url": "/pages/tutorial/tutorial.html",
+    
+    "relUrl": "/pages/tutorial/tutorial.html"
+  }
+}
