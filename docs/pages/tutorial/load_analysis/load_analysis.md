@@ -13,7 +13,7 @@ This page provides simple instructions on how to load an existing analysis to Ge
 
 ## Instructions
 
-+ Launch MATLAB and open `GelBox.m`. It is located under `code` folder.
++ Launch MATLAB and open `GelBox.m`. It is located under `<repo>code` folder.
 + Press <kbd>F5</kbd> to run the file.
 
 After a few seconds, you should see a program window. This is the main GelBox program. (Clicking on any of the images on this page will open a larger version in a new browswer window.)
@@ -28,11 +28,11 @@ Click the 'File' button. File button opens a dropdown menu, which is highlighted
 
 <a href="media/load_file_button.png" target="_blank">![Load file button](media/load_file_button.png)</a>
 
-This button brings up a normal Windows File Open Dialog. Use this to load the GelBox analysis file. To how to save a GelBox analysis please follow the [start new analysis tutorial]('../start_new_analysis/start_new_analysis.html')
+This button brings up a normal Windows File Open Dialog. Use this to load the GelBox analysis file. To how to save a GelBox analysis please follow the [start new analysis tutorial](../start_new_analysis/start_new_analysis.html).
 
 <a href="media/load_analysis.png" target="_blank">![Load analysis](media/load_analysis.png)</a>
 
-After few seconds, the analysis is loaded to GelBox. All the operations described in [start new analysis tutorial]('../start_new_analysis/start_new_analysis.html') are available upon loading.
+After few seconds, the analysis is loaded to GelBox. All the operations described in [start new analysis tutorial](../start_new_analysis/start_new_analysis.html) are available upon loading.
 
 <a href="media/loaded_analysis.png" target="_blank">![Loaded analysis](media/loaded_analysis.png)</a>
 

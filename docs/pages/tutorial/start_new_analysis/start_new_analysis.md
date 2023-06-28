@@ -11,7 +11,7 @@ This page provides simple instructions on how to perform a new analysis with Gel
 
 ## Instructions
 
-+ Launch MATLAB and open `GelBox.m`
++ Launch MATLAB and open `GelBox.m`. It is located under `<repo>code` folder.
 + Press <kbd>F5</kbd> to run the file.
 
 After a few seconds, you should see a program window. This is the main GelBox program. (Clicking on any of the images on this page will open a larger version in a new browswer window.)
