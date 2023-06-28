@@ -120,7 +120,7 @@ Following the excel file export, an input dialog box appears to define the band 
 
 In addition to output figures two more excel files, one with the density trace and band fits for each box and one with the inset figures. Inset images are saved as an array, therefore reading this file as an image is essential for post processing.
 
-<a href="media/extra_excel.png" target="_blank">![extra excel](media/extra_excel.png)</a>
+<a href="media/extra_excel.PNG" target="_blank">![extra excel](media/extra_excel.PNG)</a>
 
 + gel_box_tutorial_fits
     - x: raw density value
@@ -130,10 +130,10 @@ In addition to output figures two more excel files, one with the density trace a
     - band_1: 1<sup>st</sup> Gaussian function value
     - band_2: 2<sup>nd</sup> Gaussian function value
 
-<a href="media/excel_fits.png" target="_blank">![excel fits](media/excel_fits.png)</a>
+<a href="media/excel_fits.PNG" target="_blank">![excel fits](media/excel_fits.PNG)</a>
 
 + gel_box_tutorial_insets
     - excel rows show the pixel index along height of the box
     - excel columns show the pixel index along width of the box
 
-<a href="media/excel_inset.png" target="_blank">![excel inset](media/excel_inset.png)</a>
+<a href="media/excel_inset.PNG" target="_blank">![excel inset](media/excel_inset.PNG)</a>
