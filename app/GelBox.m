@@ -3,62 +3,72 @@ classdef GelBox < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        GelBoxUIFigure                matlab.ui.Figure
-        SelectedBoxFittingPanel       matlab.ui.container.Panel
-        BandRelativeArea_3            matlab.ui.control.NumericEditField
-        BandRelativeAreaLabel_3       matlab.ui.control.Label
-        BandArea_3                    matlab.ui.control.NumericEditField
-        BandAreaLabel_3               matlab.ui.control.Label
-        BandRelativeArea_2            matlab.ui.control.NumericEditField
-        BandRelativeAreaLabel_2       matlab.ui.control.Label
-        BandArea_2                    matlab.ui.control.NumericEditField
-        BandAreaLabel_2               matlab.ui.control.Label
-        BandRelativeArea_1            matlab.ui.control.NumericEditField
-        BandRelativeAreaLabel_1       matlab.ui.control.Label
-        BandArea_1                    matlab.ui.control.NumericEditField
-        BandAreaLabel_1               matlab.ui.control.Label
-        rsquaredField                 matlab.ui.control.NumericEditField
-        RsquaredLabel                 matlab.ui.control.Label
-        DrawFittingCheckBox           matlab.ui.control.CheckBox
+        GelBoxUIFigure               matlab.ui.Figure
+        FileMenu                     matlab.ui.container.Menu
+        LoadImageMenu                matlab.ui.container.Menu
+        InvertImageMenu              matlab.ui.container.Menu
+        LoadAnalysisMenu             matlab.ui.container.Menu
+        SaveAnalysisMenu             matlab.ui.container.Menu
+        OutputMenu                   matlab.ui.container.Menu
+        GelImageFileInformationMenu  matlab.ui.container.Menu
+        SelectedBoxInformationMenu   matlab.ui.container.Menu
+        SelectedBoxFittingPanel      matlab.ui.container.Panel
+        BandRelativeArea_3           matlab.ui.control.NumericEditField
+        BandRelativeAreaLabel_3      matlab.ui.control.Label
+        BandArea_3                   matlab.ui.control.NumericEditField
+        BandAreaLabel_3              matlab.ui.control.Label
+        BandRelativeArea_2           matlab.ui.control.NumericEditField
+        BandRelativeAreaLabel_2      matlab.ui.control.Label
+        BandArea_2                   matlab.ui.control.NumericEditField
+        BandAreaLabel_2              matlab.ui.control.Label
+        BandRelativeArea_1           matlab.ui.control.NumericEditField
+        BandRelativeAreaLabel_1      matlab.ui.control.Label
+        BandArea_1                   matlab.ui.control.NumericEditField
+        BandAreaLabel_1              matlab.ui.control.Label
+        rsquaredField                matlab.ui.control.NumericEditField
+        RsquaredLabel                matlab.ui.control.Label
+        DrawFittingCheckBox          matlab.ui.control.CheckBox
         BackgroundCorrectedOpticalDensityLabel  matlab.ui.control.Label
-        RawOpticalDensityLabel        matlab.ui.control.Label
-        raw_density_fit               matlab.ui.control.UIAxes
+        RawOpticalDensityLabel       matlab.ui.control.Label
+        raw_density_fit              matlab.ui.control.UIAxes
         background_corrected_raw_density_fit  matlab.ui.control.UIAxes
-        GelImagePanel                 matlab.ui.container.Panel
-        gel_image_axes                matlab.ui.control.UIAxes
-        GelImageFileInformationPanel  matlab.ui.container.Panel
-        ImFInfoArea                   matlab.ui.control.TextArea
+        GelImagePanel                matlab.ui.container.Panel
+        gel_image_axes               matlab.ui.control.UIAxes
         SelectedBoxOpticalDensitiesPanel  matlab.ui.container.Panel
-        BackgroundAreaField           matlab.ui.control.NumericEditField
-        BackgroundAreaLabel           matlab.ui.control.Label
-        TotalAreaField                matlab.ui.control.NumericEditField
-        TotalAreaEditFieldLabel       matlab.ui.control.Label
+        BackgroundAreaField          matlab.ui.control.NumericEditField
+        BackgroundAreaLabel          matlab.ui.control.Label
+        TotalAreaField               matlab.ui.control.NumericEditField
+        TotalAreaEditFieldLabel      matlab.ui.control.Label
         BackgroundCorrectedOpticalDensityLabel_2  matlab.ui.control.Label
-        RawOpticalDensityLabel_2      matlab.ui.control.Label
-        BoxZoomLabel                  matlab.ui.control.Label
-        box_inset                     matlab.ui.control.UIAxes
+        RawOpticalDensityLabel_2     matlab.ui.control.Label
+        BoxZoomLabel                 matlab.ui.control.Label
+        box_inset                    matlab.ui.control.UIAxes
         background_corrected_raw_density  matlab.ui.control.UIAxes
-        raw_density                   matlab.ui.control.UIAxes
-        SelectedBoxInformationPanel   matlab.ui.container.Panel
-        SelectedBoxInformationArea    matlab.ui.control.TextArea
-        AnalysisControlsPanel         matlab.ui.container.Panel
-        BoxSelectionDropDown          matlab.ui.control.DropDown
-        BoxSelectionDropDownLabel     matlab.ui.control.Label
-        DeleteBoxButton               matlab.ui.control.Button
-        NewBoxButton                  matlab.ui.control.Button
-        NumberofBandsDropDown         matlab.ui.control.DropDown
-        NumberofBandsDropDownLabel    matlab.ui.control.Label
-        FileControlsPanel             matlab.ui.container.Panel
-        OutputButton                  matlab.ui.control.Button
-        SaveAnalysisButton            matlab.ui.control.Button
-        LoadAnalysisButton            matlab.ui.control.Button
-        InvertImageButton             matlab.ui.control.Button
-        LoadImageButton               matlab.ui.control.Button
+        raw_density                  matlab.ui.control.UIAxes
+        AnalysisControlsPanel        matlab.ui.container.Panel
+        BoxSelectionDropDown         matlab.ui.control.DropDown
+        BoxSelectionDropDownLabel    matlab.ui.control.Label
+        DeleteBoxButton              matlab.ui.control.Button
+        NewBoxButton                 matlab.ui.control.Button
+        NumberofBandsDropDown        matlab.ui.control.DropDown
+        NumberofBandsDropDownLabel   matlab.ui.control.Label
+        FileControlsPanel            matlab.ui.container.Panel
+        OutputButton                 matlab.ui.control.Button
+        SaveAnalysisButton           matlab.ui.control.Button
+        LoadAnalysisButton           matlab.ui.control.Button
+        InvertImageButton            matlab.ui.control.Button
+        LoadImageButton              matlab.ui.control.Button
     end
 
     
     properties (Access = public)
         gel_data % Description
+    end
+    
+    properties (Access = private)
+        ImageFileTextDialog % Description
+
+        SelectedBoxTextDialog % Description
     end
     
     methods (Access = public)
@@ -218,8 +228,8 @@ classdef GelBox < matlab.apps.AppBase
                        app.raw_density.XAxis.Exponent = 0;
                        xlim(app.raw_density,[0 x_t_end]);
                        ylim(app.raw_density,[1 max(y)]);
-                       legend(app.raw_density,'',{'Baseline'}, ...
-                           'Location','northwest')
+                       legend(app.raw_density,'','Baseline', ...
+                           'Location','best')
 
 
                        xticks(app.raw_density_fit,x_ticks);
@@ -329,11 +339,13 @@ classdef GelBox < matlab.apps.AppBase
                            [1 max(y)]);
                        ylim(app.background_corrected_raw_density_fit, ...
                            [1 max(y)]);
-                            
+                       
+                       
                        app.SelectedBoxInformationArea.Value = printstruct(d.box(i));
 
                     end
                 end
+                app.gel_data.d_box = d;
             end
         end
         
@@ -705,7 +717,7 @@ classdef GelBox < matlab.apps.AppBase
 
         end
 
-        % Button pushed function: LoadImageButton
+        % Callback function: LoadImageButton, LoadImageMenu
         function LoadImageButtonPushed(app, event)
             [file_string,path_string]=uigetfile2( ...
                 {'*.png','PNG';'*.tif','TIF'}, ...
@@ -713,7 +725,8 @@ classdef GelBox < matlab.apps.AppBase
             if (path_string~=0)
                 
                 ResetDisplay(app)
-
+                app.GelImageFileInformationMenu.Enable = 1;
+                app.SelectedBoxInformationMenu.Enable = 1;
                 app.gel_data = [];
 
                 app.gel_data.invert_status = 0;
@@ -734,7 +747,7 @@ classdef GelBox < matlab.apps.AppBase
 
         end
 
-        % Button pushed function: InvertImageButton
+        % Callback function: InvertImageButton, InvertImageMenu
         function InvertImageButtonPushed(app, event)
             app.gel_data.im_data = imcomplement(app.gel_data.im_data);
             center_image_with_preserved_aspect_ratio( ...
@@ -743,7 +756,7 @@ classdef GelBox < matlab.apps.AppBase
             app.gel_data.invert_status = 1;
         end
 
-        % Button pushed function: LoadAnalysisButton
+        % Callback function: LoadAnalysisButton, LoadAnalysisMenu
         function LoadAnalysisButtonPushed(app, event)
             % Delete any old boxes
             if (isfield(app.gel_data,'box_handle'))
@@ -760,6 +773,8 @@ classdef GelBox < matlab.apps.AppBase
                 app.DeleteBoxButton.Enable = 1;
                 app.SaveAnalysisButton.Enable = 1;
                 app.OutputButton.Enable = 1;
+                app.GelImageFileInformationMenu.Enable = 1;
+                app.SelectedBoxInformationMenu.Enable = 1;
 
                 temp = load(fullfile(path_string,file_string),'-mat','save_data');
                 save_data = temp.save_data;
@@ -812,7 +827,7 @@ classdef GelBox < matlab.apps.AppBase
                 % Need this to make labels
                 drawnow;
             end
-
+            
             UpdateDisplay(app)
 
             % Nested function
@@ -876,6 +891,7 @@ classdef GelBox < matlab.apps.AppBase
             app.BoxSelectionDropDown.Value = control_strings{n};
             
             app.DeleteBoxButton.Enable = 1;
+            app.SelectedBoxInformationMenu.Enable = 1;
             UpdateDisplay(app);
 
             function new_box_position(evt);
@@ -940,7 +956,7 @@ classdef GelBox < matlab.apps.AppBase
 
         end
 
-        % Button pushed function: SaveAnalysisButton
+        % Callback function: SaveAnalysisButton, SaveAnalysisMenu
         function SaveAnalysisButtonPushed(app, event)
             save_data.image_file_string = app.gel_data.image_file_string;
             try
@@ -1030,6 +1046,60 @@ classdef GelBox < matlab.apps.AppBase
                 app.gel_data.old_height = p(4);
             end
         end
+
+        % Button pushed function: OutputButton
+        function OutputButtonPushed(app, event)
+            d = [];
+            d.image_file{1} = app.gel_data.image_file_string;
+            n = numel(app.gel_data.box_handle);
+
+            for i=1:n
+                d.band(i) = i;
+                d.total_area(i) = app.gel_data.box_data(i).total_area;
+                d.background_area(i) = app.gel_data.box_data(i).background_area;
+                num_of_bands = numel(app.gel_data.box_data(i).band_area);
+                switch num_of_bands
+                    case 1
+                        d.band_area_bottom(i) = app.gel_data.summary(i).bottom;
+                    case 2
+                        d.band_area_bottom(i) = app.gel_data.summary(i).bottom;
+                        d.band_area_top(i) = app.gel_data.summary(i).top;
+                    case 3
+                        d.band_area_bottom(i) = app.gel_data.summary(i).bottom;
+                        d.band_area_middle(i) = app.gel_data.summary(i).middle;
+                        d.band_area_top(i) = app.gel_data.summary(i).top;
+                end
+
+                d.band_left(i) = app.gel_data.box_data(i).position(1);
+                d.band_top(i) = app.gel_data.box_data(i).position(2);
+                d.band_width(i) = app.gel_data.box_data(i).position(3);
+                d.band_height(i) = app.gel_data.box_data(i).position(4);
+                d.fitting_mode{i} = app.gel_data.box_data(i).fitting_mode;
+                d.num_of_bands(i) = band_orientation;
+                d.r_squared(i) = app.gel_data.summary(i).r_squared;
+            end
+
+            [file_string,path_string] = uiputfile2( ...
+                {'*.xlsx','Excel file'},'Select file for results');
+        end
+
+        % Menu selected function: GelImageFileInformationMenu
+        function GelImageFileInformationMenuSelected(app, event)
+            app.ImageFileTextDialog = ImFInfoDialog(app);
+        end
+
+        % Close request function: GelBoxUIFigure
+        function GelBoxUIFigureCloseRequest(app, event)
+            delete(app.ImageFileTextDialog)
+            delete(app.SelectedBoxTextDialog)
+            delete(app)
+            
+        end
+
+        % Menu selected function: SelectedBoxInformationMenu
+        function SelectedBoxInformationMenuSelected(app, event)
+            app.SelectedBoxTextDialog = SelectedBoxDialog(app);
+        end
     end
 
     % Component initialization
@@ -1043,11 +1113,52 @@ classdef GelBox < matlab.apps.AppBase
             colormap(app.GelBoxUIFigure, 'parula');
             app.GelBoxUIFigure.Position = [100 100 1530 585];
             app.GelBoxUIFigure.Name = 'GelBox';
+            app.GelBoxUIFigure.CloseRequestFcn = createCallbackFcn(app, @GelBoxUIFigureCloseRequest, true);
+
+            % Create FileMenu
+            app.FileMenu = uimenu(app.GelBoxUIFigure);
+            app.FileMenu.Text = 'File';
+
+            % Create LoadImageMenu
+            app.LoadImageMenu = uimenu(app.FileMenu);
+            app.LoadImageMenu.MenuSelectedFcn = createCallbackFcn(app, @LoadImageButtonPushed, true);
+            app.LoadImageMenu.Text = 'Load Image';
+
+            % Create InvertImageMenu
+            app.InvertImageMenu = uimenu(app.FileMenu);
+            app.InvertImageMenu.MenuSelectedFcn = createCallbackFcn(app, @InvertImageButtonPushed, true);
+            app.InvertImageMenu.Text = 'Invert Image';
+
+            % Create LoadAnalysisMenu
+            app.LoadAnalysisMenu = uimenu(app.FileMenu);
+            app.LoadAnalysisMenu.MenuSelectedFcn = createCallbackFcn(app, @LoadAnalysisButtonPushed, true);
+            app.LoadAnalysisMenu.Text = 'Load Analysis';
+
+            % Create SaveAnalysisMenu
+            app.SaveAnalysisMenu = uimenu(app.FileMenu);
+            app.SaveAnalysisMenu.MenuSelectedFcn = createCallbackFcn(app, @SaveAnalysisButtonPushed, true);
+            app.SaveAnalysisMenu.Text = 'Save Analysis';
+
+            % Create OutputMenu
+            app.OutputMenu = uimenu(app.FileMenu);
+            app.OutputMenu.Text = 'Output';
+
+            % Create GelImageFileInformationMenu
+            app.GelImageFileInformationMenu = uimenu(app.GelBoxUIFigure);
+            app.GelImageFileInformationMenu.MenuSelectedFcn = createCallbackFcn(app, @GelImageFileInformationMenuSelected, true);
+            app.GelImageFileInformationMenu.Enable = 'off';
+            app.GelImageFileInformationMenu.Text = 'Gel Image File Information';
+
+            % Create SelectedBoxInformationMenu
+            app.SelectedBoxInformationMenu = uimenu(app.GelBoxUIFigure);
+            app.SelectedBoxInformationMenu.MenuSelectedFcn = createCallbackFcn(app, @SelectedBoxInformationMenuSelected, true);
+            app.SelectedBoxInformationMenu.Enable = 'off';
+            app.SelectedBoxInformationMenu.Text = 'Selected Box Information';
 
             % Create FileControlsPanel
             app.FileControlsPanel = uipanel(app.GelBoxUIFigure);
             app.FileControlsPanel.Title = 'File Controls';
-            app.FileControlsPanel.Position = [8 390 143 181];
+            app.FileControlsPanel.Position = [85 677 143 181];
 
             % Create LoadImageButton
             app.LoadImageButton = uibutton(app.FileControlsPanel, 'push');
@@ -1076,6 +1187,7 @@ classdef GelBox < matlab.apps.AppBase
 
             % Create OutputButton
             app.OutputButton = uibutton(app.FileControlsPanel, 'push');
+            app.OutputButton.ButtonPushedFcn = createCallbackFcn(app, @OutputButtonPushed, true);
             app.OutputButton.Enable = 'off';
             app.OutputButton.Position = [27 8 90 22];
             app.OutputButton.Text = 'Output';
@@ -1123,21 +1235,10 @@ classdef GelBox < matlab.apps.AppBase
             app.BoxSelectionDropDown.Position = [124 33 100 22];
             app.BoxSelectionDropDown.Value = {};
 
-            % Create SelectedBoxInformationPanel
-            app.SelectedBoxInformationPanel = uipanel(app.GelBoxUIFigure);
-            app.SelectedBoxInformationPanel.Title = 'Selected Box Information';
-            app.SelectedBoxInformationPanel.Position = [403 390 283 182];
-
-            % Create SelectedBoxInformationArea
-            app.SelectedBoxInformationArea = uitextarea(app.SelectedBoxInformationPanel);
-            app.SelectedBoxInformationArea.Editable = 'off';
-            app.SelectedBoxInformationArea.FontSize = 11;
-            app.SelectedBoxInformationArea.Position = [12 11 260 143];
-
             % Create SelectedBoxOpticalDensitiesPanel
             app.SelectedBoxOpticalDensitiesPanel = uipanel(app.GelBoxUIFigure);
             app.SelectedBoxOpticalDensitiesPanel.Title = 'Selected Box Optical Densities';
-            app.SelectedBoxOpticalDensitiesPanel.Position = [698 294 826 278];
+            app.SelectedBoxOpticalDensitiesPanel.Position = [722 832 826 278];
 
             % Create raw_density
             app.raw_density = uiaxes(app.SelectedBoxOpticalDensitiesPanel);
@@ -1206,33 +1307,23 @@ classdef GelBox < matlab.apps.AppBase
             app.BackgroundAreaField.HorizontalAlignment = 'center';
             app.BackgroundAreaField.Position = [732 110 85 22];
 
-            % Create GelImageFileInformationPanel
-            app.GelImageFileInformationPanel = uipanel(app.GelBoxUIFigure);
-            app.GelImageFileInformationPanel.Title = 'Gel Image File Information';
-            app.GelImageFileInformationPanel.Position = [8 8 211 370];
-
-            % Create ImFInfoArea
-            app.ImFInfoArea = uitextarea(app.GelImageFileInformationPanel);
-            app.ImFInfoArea.Editable = 'off';
-            app.ImFInfoArea.FontSize = 9;
-            app.ImFInfoArea.Position = [8 9 193 334];
-
             % Create GelImagePanel
             app.GelImagePanel = uipanel(app.GelBoxUIFigure);
             app.GelImagePanel.Title = 'Gel Image';
-            app.GelImagePanel.Position = [227 8 459 370];
+            app.GelImagePanel.Position = [1059 207 459 370];
 
             % Create gel_image_axes
             app.gel_image_axes = uiaxes(app.GelImagePanel);
             app.gel_image_axes.XTick = [];
             app.gel_image_axes.YTick = [];
             app.gel_image_axes.Box = 'on';
-            app.gel_image_axes.Position = [11 14 437 329];
+            app.gel_image_axes.Visible = 'off';
+            app.gel_image_axes.Position = [11 14 437 310];
 
             % Create SelectedBoxFittingPanel
             app.SelectedBoxFittingPanel = uipanel(app.GelBoxUIFigure);
             app.SelectedBoxFittingPanel.Title = 'Selected Box Fitting';
-            app.SelectedBoxFittingPanel.Position = [698 8 827 277];
+            app.SelectedBoxFittingPanel.Position = [1547 493 827 277];
 
             % Create background_corrected_raw_density_fit
             app.background_corrected_raw_density_fit = uiaxes(app.SelectedBoxFittingPanel);
@@ -1296,6 +1387,7 @@ classdef GelBox < matlab.apps.AppBase
             % Create BandRelativeAreaLabel_1
             app.BandRelativeAreaLabel_1 = uilabel(app.SelectedBoxFittingPanel);
             app.BandRelativeAreaLabel_1.WordWrap = 'on';
+            app.BandRelativeAreaLabel_1.Enable = 'off';
             app.BandRelativeAreaLabel_1.Position = [663 117 81 42];
             app.BandRelativeAreaLabel_1.Text = 'Band Relative Area 1 (Red)';
 
@@ -1304,6 +1396,7 @@ classdef GelBox < matlab.apps.AppBase
             app.BandRelativeArea_1.ValueDisplayFormat = '%.2f';
             app.BandRelativeArea_1.Editable = 'off';
             app.BandRelativeArea_1.HorizontalAlignment = 'center';
+            app.BandRelativeArea_1.Enable = 'off';
             app.BandRelativeArea_1.Position = [749 127 70 22];
 
             % Create BandAreaLabel_2
