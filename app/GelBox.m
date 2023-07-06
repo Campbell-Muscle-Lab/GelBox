@@ -12,7 +12,10 @@ classdef GelBox < matlab.apps.AppBase
         OutputMenu                   matlab.ui.container.Menu
         GelImageFileInformationMenu  matlab.ui.container.Menu
         SelectedBoxInformationMenu   matlab.ui.container.Menu
-        SelectedBoxFittingPanel      matlab.ui.container.Panel
+        FittingPanel                 matlab.ui.container.Panel
+        FittingOptionsButton         matlab.ui.control.Button
+        NumberofBandsDropDown        matlab.ui.control.DropDown
+        NumberofBandsDropDownLabel   matlab.ui.control.Label
         BandRelativeArea_3           matlab.ui.control.NumericEditField
         BandRelativeAreaLabel_3      matlab.ui.control.Label
         BandArea_3                   matlab.ui.control.NumericEditField
@@ -33,8 +36,12 @@ classdef GelBox < matlab.apps.AppBase
         raw_density_fit              matlab.ui.control.UIAxes
         background_corrected_raw_density_fit  matlab.ui.control.UIAxes
         GelImagePanel                matlab.ui.container.Panel
+        BoxSelectionDropDown         matlab.ui.control.DropDown
+        BoxSelectionDropDownLabel    matlab.ui.control.Label
+        NewBoxButton                 matlab.ui.control.Button
+        DeleteBoxButton              matlab.ui.control.Button
         gel_image_axes               matlab.ui.control.UIAxes
-        SelectedBoxOpticalDensitiesPanel  matlab.ui.container.Panel
+        OpticalDensitiesPanel        matlab.ui.container.Panel
         BackgroundAreaField          matlab.ui.control.NumericEditField
         BackgroundAreaLabel          matlab.ui.control.Label
         TotalAreaField               matlab.ui.control.NumericEditField
@@ -45,30 +52,18 @@ classdef GelBox < matlab.apps.AppBase
         box_inset                    matlab.ui.control.UIAxes
         background_corrected_raw_density  matlab.ui.control.UIAxes
         raw_density                  matlab.ui.control.UIAxes
-        AnalysisControlsPanel        matlab.ui.container.Panel
-        BoxSelectionDropDown         matlab.ui.control.DropDown
-        BoxSelectionDropDownLabel    matlab.ui.control.Label
-        DeleteBoxButton              matlab.ui.control.Button
-        NewBoxButton                 matlab.ui.control.Button
-        NumberofBandsDropDown        matlab.ui.control.DropDown
-        NumberofBandsDropDownLabel   matlab.ui.control.Label
-        FileControlsPanel            matlab.ui.container.Panel
-        OutputButton                 matlab.ui.control.Button
-        SaveAnalysisButton           matlab.ui.control.Button
-        LoadAnalysisButton           matlab.ui.control.Button
-        InvertImageButton            matlab.ui.control.Button
-        LoadImageButton              matlab.ui.control.Button
     end
 
     
     properties (Access = public)
         gel_data % Description
+        fitting_options
     end
     
     properties (Access = private)
         ImageFileTextDialog % Description
-
         SelectedBoxTextDialog % Description
+        FittingOptions % Description
     end
     
     methods (Access = public)
@@ -243,6 +238,9 @@ classdef GelBox < matlab.apps.AppBase
 
                        plot(app.background_corrected_raw_density, ...
                            x-x_back',y,'-.k',"LineWidth",2)
+                       hold(app.background_corrected_raw_density,"on")
+                       plot(app.background_corrected_raw_density, ...
+                           1:numel(y),zeros(1,numel(y)),'-.m',"LineWidth",2)
                        ylim(app.background_corrected_raw_density, ...
                            [1 max(y)]);
                        
@@ -339,10 +337,6 @@ classdef GelBox < matlab.apps.AppBase
                            [1 max(y)]);
                        ylim(app.background_corrected_raw_density_fit, ...
                            [1 max(y)]);
-                       
-                       
-                       app.SelectedBoxInformationArea.Value = printstruct(d.box(i));
-
                     end
                 end
                 app.gel_data.d_box = d;
@@ -470,15 +464,26 @@ classdef GelBox < matlab.apps.AppBase
     
             second_curve_amp_estimate = first_curve_amp_estimate;
             second_curve_shape_estimate = alfa_estimate;
+            second_curve_skew_estimate = 1;
 
+            
             par = [first_curve_x_estimate ...
                    first_curve_shape_estimate ...
                    first_curve_amp_estimate ...
                    first_curve_skew_estimate ...
                    second_curve_x_estimate ...
                    second_curve_amp_estimate ...
-                   second_curve_shape_estimate ...
                    ];
+
+            if ~app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
+                par(7) = second_curve_shape_estimate;
+                par(8) = second_curve_skew_estimate;
+            elseif ~app.fitting_options.shared_shape && app.fitting_options.shared_skewness
+                par(7) = second_curve_shape_estimate;
+            elseif app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
+                par(7) = second_curve_skew_estimate;
+            end
+
 
             j = 1;
             e = [];
@@ -489,7 +494,8 @@ classdef GelBox < matlab.apps.AppBase
             opts.MaxFunEvals=10000;
 
             [p_result,fval,exitflag,output] = fminsearch(@profile_error_2gaussian, par, opts);
-
+            
+            p_result;
             r_squared = calculate_r_squared(y',y_fit+y_back);
 
             function trial_e = profile_error_2gaussian(par)
@@ -504,33 +510,65 @@ classdef GelBox < matlab.apps.AppBase
 
                 trial_e = e(end);
 
-                if any(par<0)
-                    trial_e = 10^6;
+                for i = 1:2
+                    if any(y_bands(i,:)<0)
+                        trial_e = 10^12;
+                    end
                 end
+
+                if any(par<0)
+                    trial_e = 10^12;
+                end
+                
+                for i = 1:2
+                    areas(i) = trapz(x,y_bands(i,:));
+                end
+
+                if any(areas<0)
+                    trial_e = 10^12;
+                end
+
                 r_squared_iter = calculate_r_squared(target,y_fit);
                 j = j + 1;
                 if app.DrawFittingCheckBox.Value
                     cla(app.background_corrected_raw_density_fit)
-                    plot(app.background_corrected_raw_density_fit,y_fit,x,'LineWidth',2)
+                    plot(app.background_corrected_raw_density_fit, ...
+                        y_fit,x,'LineWidth',2)
                     hold(app.background_corrected_raw_density_fit, 'on')
-                    plot(app.background_corrected_raw_density_fit,target,x,'LineWidth',2,'LineStyle','-.','Color','k')
+                    plot(app.background_corrected_raw_density_fit, ...
+                        target,x,'LineWidth',2,'LineStyle','-.','Color','k')
                     app.rsquaredField.Value = r_squared_iter;
                     drawnow
                 end
             end
             function [y_bands,y_fit] = calculate_2profile(x,par)
-                
+
                 x1 = par(1);
                 curve_shape1 = par(2);
                 amp1 = par(3);
                 skew1 = par(4);
                 x2 = par(5);
                 amp2 = par(6);
-                curve_shape2 = par(7);
-                
-                %         x1
+                                
+                if ~app.fitting_options.shared_shape && ...
+                    ~app.fitting_options.shared_skewness
+                    curve_shape2 = par(7);
+                    skew2 = par(8);
+                elseif ~app.fitting_options.shared_shape && ...
+                    app.fitting_options.shared_skewness
+                    curve_shape2 = par(7);
+                    skew2 = skew1;
+                elseif app.fitting_options.shared_shape && ...
+                    ~app.fitting_options.shared_skewness
+                    curve_shape2 = curve_shape1;
+                    skew2 = par(7);
+                else
+                    curve_shape2 = curve_shape1;
+                    skew2 = skew1;
+                end
+
                 y_first = skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
-                y_second = skewed_Gaussian(x,x2,curve_shape2,amp2,skew1);
+                y_second = skewed_Gaussian(x,x2,curve_shape2,amp2,skew2);
 
                 y_fit = y_first + y_second;
                 y_bands(1,:) = y_first;
@@ -575,9 +613,11 @@ classdef GelBox < matlab.apps.AppBase
     
             second_curve_amp_estimate = first_curve_amp_estimate;
             second_curve_shape_estimate = alfa_estimate;
+            second_curve_skew_estimate = 1;
 
             third_curve_amp_estimate = first_curve_amp_estimate;
             third_curve_shape_estimate = alfa_estimate;
+            third_curve_skew_estimate = 1;
 
             par = [first_curve_x_estimate ...
                    first_curve_shape_estimate ...
@@ -588,6 +628,21 @@ classdef GelBox < matlab.apps.AppBase
                    third_curve_x_estimate ...
                    third_curve_amp_estimate ...
                    ];
+
+            if ~app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
+                par(9) = second_curve_shape_estimate;
+                par(10) = second_curve_skew_estimate;
+                par(11) = third_curve_shape_estimate;
+                par(12) = third_curve_skew_estimate;
+            elseif ~app.fitting_options.shared_shape && app.fitting_options.shared_skewness
+                par(9) = second_curve_shape_estimate;
+                par(10) = third_curve_shape_estimate;
+            elseif app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
+                par(9) = second_curve_skew_estimate;
+                par(10) = third_curve_skew_estimate;
+
+            end
+
 
             j = 1;
             e = [];
@@ -613,9 +668,24 @@ classdef GelBox < matlab.apps.AppBase
 
                 trial_e = e(end);
 
-                if any(par<0)
-                    trial_e = 10^6;
+                for i = 1:3
+                    if any(y_bands(i,:)<0)
+                        trial_e = 10^12;
+                    end
                 end
+
+                if any(par<0)
+                    trial_e = 10^12;
+                end
+                
+                for i = 1:3
+                    areas(i) = trapz(x,y_bands(i,:));
+                end
+
+                if any(areas<0)
+                    trial_e = 10^12;
+                end
+
                 r_squared_iter = calculate_r_squared(target,y_fit);
                 j = j + 1;
                 if app.DrawFittingCheckBox.Value
@@ -638,10 +708,34 @@ classdef GelBox < matlab.apps.AppBase
                 x3 = par(7);
                 amp3 = par(8);
                 
-                %         x1
+                if ~app.fitting_options.shared_shape && ...
+                    ~app.fitting_options.shared_skewness
+                    curve_shape2 = par(9);
+                    skew2 = par(10);
+                    curve_shape3 = par(11);
+                    skew3 = par(12);
+                elseif ~app.fitting_options.shared_shape && ...
+                    app.fitting_options.shared_skewness
+                    curve_shape2 = par(9);
+                    skew2 = skew1;
+                    curve_shape3 = par(10);
+                    skew3 = skew1;
+                elseif app.fitting_options.shared_shape && ...
+                    ~app.fitting_options.shared_skewness
+                    curve_shape2 = curve_shape1;
+                    skew2 = par(9);
+                    curve_shape3 = curve_shape1;
+                    skew3 = par(10);
+                else
+                    curve_shape2 = curve_shape1;
+                    skew2 = skew1;
+                    curve_shape3 = curve_shape1;
+                    skew3 = skew1;
+                end
+              
                 y_first = skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
-                y_second = skewed_Gaussian(x,x2,curve_shape1,amp2,skew1);
-                y_third = skewed_Gaussian(x,x3,curve_shape1,amp3,skew1);
+                y_second = skewed_Gaussian(x,x2,curve_shape2,amp2,skew2);
+                y_third = skewed_Gaussian(x,x3,curve_shape3,amp3,skew3);
 
 
                 y_fit = y_first + y_second + y_third;
@@ -655,16 +749,18 @@ classdef GelBox < matlab.apps.AppBase
                 offset((x-x0)>0) = skew1*(x((x-x0)>0)-x0);
                 y=  A*exp(-gamma*(((x-x0)+offset).^2));
             end
-            
+        end
+        
+        function UpdateFittingOptions(app,shape,skewness)
+            app.fitting_options.shared_shape = shape;
+            app.fitting_options.shared_skewness = skewness;
+            UpdateDisplay(app)
         end
     end
     
     methods (Access = private)
         
         function ResetDisplay(app)
-            % Reset the file controls
-            app.SaveAnalysisButton.Enable = 0;
-            app.OutputButton.Enable = 0;
 
             % Clear the figure displays
             cla(app.box_inset)
@@ -672,10 +768,6 @@ classdef GelBox < matlab.apps.AppBase
             cla(app.background_corrected_raw_density)
             cla(app.raw_density_fit)
             cla(app.background_corrected_raw_density_fit)
-
-            % Clear the text displays
-            app.SelectedBoxInformationArea.Value = '';
-            app.ImFInfoArea.Value = '';
 
             % Reset optical density fields
             app.TotalAreaField.Value = 0;
@@ -714,10 +806,13 @@ classdef GelBox < matlab.apps.AppBase
             addpath(genpath('../code/utilities'));
             writelines(evalc('type(mfilename(''fullpath'')+".mlapp")'),mfilename('fullpath')+".m");
             colormap(app.GelBoxUIFigure, 'gray');
+            app.fitting_options.shared_shape = true(1,1);
+            app.fitting_options.shared_skewness = true(1,1);
+
 
         end
 
-        % Callback function: LoadImageButton, LoadImageMenu
+        % Menu selected function: LoadImageMenu
         function LoadImageButtonPushed(app, event)
             [file_string,path_string]=uigetfile2( ...
                 {'*.png','PNG';'*.tif','TIF'}, ...
@@ -741,13 +836,12 @@ classdef GelBox < matlab.apps.AppBase
                 app.gel_image_axes);
 
                 app.gel_data.imfinfo = imfinfo(app.gel_data.image_file_string);
-                app.ImFInfoArea.Value = printstruct(app.gel_data.imfinfo);
 
             end
 
         end
 
-        % Callback function: InvertImageButton, InvertImageMenu
+        % Menu selected function: InvertImageMenu
         function InvertImageButtonPushed(app, event)
             app.gel_data.im_data = imcomplement(app.gel_data.im_data);
             center_image_with_preserved_aspect_ratio( ...
@@ -756,7 +850,7 @@ classdef GelBox < matlab.apps.AppBase
             app.gel_data.invert_status = 1;
         end
 
-        % Callback function: LoadAnalysisButton, LoadAnalysisMenu
+        % Menu selected function: LoadAnalysisMenu
         function LoadAnalysisButtonPushed(app, event)
             % Delete any old boxes
             if (isfield(app.gel_data,'box_handle'))
@@ -771,7 +865,6 @@ classdef GelBox < matlab.apps.AppBase
             if (path_string~=0)
                 
                 app.DeleteBoxButton.Enable = 1;
-                app.SaveAnalysisButton.Enable = 1;
                 app.OutputButton.Enable = 1;
                 app.GelImageFileInformationMenu.Enable = 1;
                 app.SelectedBoxInformationMenu.Enable = 1;
@@ -784,7 +877,6 @@ classdef GelBox < matlab.apps.AppBase
                 app.gel_data.image_file_string = save_data.image_file_string;
                 app.gel_data.im_data = save_data.im_data;
                 app.gel_data.imfinfo = save_data.imfinfo;
-                app.ImFInfoArea.Value = printstruct(app.gel_data.imfinfo);
 
                 center_image_with_preserved_aspect_ratio( ...
                     app.gel_data.im_data, ...
@@ -847,8 +939,6 @@ classdef GelBox < matlab.apps.AppBase
 
         % Button pushed function: NewBoxButton
         function NewBoxButtonPushed(app, event)
-            app.SaveAnalysisButton.Enable = 1;
-            app.OutputButton.Enable = 1;
             if (~isfield(app.gel_data,'box_handle'))
                 app.DeleteBoxButton.Enable = 1;
                 n=1;
@@ -956,7 +1046,7 @@ classdef GelBox < matlab.apps.AppBase
 
         end
 
-        % Callback function: SaveAnalysisButton, SaveAnalysisMenu
+        % Menu selected function: SaveAnalysisMenu
         function SaveAnalysisButtonPushed(app, event)
             save_data.image_file_string = app.gel_data.image_file_string;
             try
@@ -1047,7 +1137,7 @@ classdef GelBox < matlab.apps.AppBase
             end
         end
 
-        % Button pushed function: OutputButton
+        % Menu selected function: OutputMenu
         function OutputButtonPushed(app, event)
             d = [];
             d.image_file{1} = app.gel_data.image_file_string;
@@ -1092,6 +1182,7 @@ classdef GelBox < matlab.apps.AppBase
         function GelBoxUIFigureCloseRequest(app, event)
             delete(app.ImageFileTextDialog)
             delete(app.SelectedBoxTextDialog)
+            delete(app.FittingOptions)
             delete(app)
             
         end
@@ -1099,6 +1190,12 @@ classdef GelBox < matlab.apps.AppBase
         % Menu selected function: SelectedBoxInformationMenu
         function SelectedBoxInformationMenuSelected(app, event)
             app.SelectedBoxTextDialog = SelectedBoxDialog(app);
+        end
+
+        % Button pushed function: FittingOptionsButton
+        function FittingOptionsButtonPushed(app, event)
+            app.FittingOptions = FittingOptionsDialog(app);
+
         end
     end
 
@@ -1111,7 +1208,7 @@ classdef GelBox < matlab.apps.AppBase
             % Create GelBoxUIFigure and hide until all components are created
             app.GelBoxUIFigure = uifigure('Visible', 'off');
             colormap(app.GelBoxUIFigure, 'parula');
-            app.GelBoxUIFigure.Position = [100 100 1530 585];
+            app.GelBoxUIFigure.Position = [100 100 1722 585];
             app.GelBoxUIFigure.Name = 'GelBox';
             app.GelBoxUIFigure.CloseRequestFcn = createCallbackFcn(app, @GelBoxUIFigureCloseRequest, true);
 
@@ -1141,6 +1238,7 @@ classdef GelBox < matlab.apps.AppBase
 
             % Create OutputMenu
             app.OutputMenu = uimenu(app.FileMenu);
+            app.OutputMenu.MenuSelectedFcn = createCallbackFcn(app, @OutputButtonPushed, true);
             app.OutputMenu.Text = 'Output';
 
             % Create GelImageFileInformationMenu
@@ -1155,106 +1253,26 @@ classdef GelBox < matlab.apps.AppBase
             app.SelectedBoxInformationMenu.Enable = 'off';
             app.SelectedBoxInformationMenu.Text = 'Selected Box Information';
 
-            % Create FileControlsPanel
-            app.FileControlsPanel = uipanel(app.GelBoxUIFigure);
-            app.FileControlsPanel.Title = 'File Controls';
-            app.FileControlsPanel.Position = [85 677 143 181];
-
-            % Create LoadImageButton
-            app.LoadImageButton = uibutton(app.FileControlsPanel, 'push');
-            app.LoadImageButton.ButtonPushedFcn = createCallbackFcn(app, @LoadImageButtonPushed, true);
-            app.LoadImageButton.Position = [27 134 90 22];
-            app.LoadImageButton.Text = 'Load Image';
-
-            % Create InvertImageButton
-            app.InvertImageButton = uibutton(app.FileControlsPanel, 'push');
-            app.InvertImageButton.ButtonPushedFcn = createCallbackFcn(app, @InvertImageButtonPushed, true);
-            app.InvertImageButton.Position = [27 102 90 22];
-            app.InvertImageButton.Text = 'Invert Image';
-
-            % Create LoadAnalysisButton
-            app.LoadAnalysisButton = uibutton(app.FileControlsPanel, 'push');
-            app.LoadAnalysisButton.ButtonPushedFcn = createCallbackFcn(app, @LoadAnalysisButtonPushed, true);
-            app.LoadAnalysisButton.Position = [27 71 90 22];
-            app.LoadAnalysisButton.Text = 'Load Analysis';
-
-            % Create SaveAnalysisButton
-            app.SaveAnalysisButton = uibutton(app.FileControlsPanel, 'push');
-            app.SaveAnalysisButton.ButtonPushedFcn = createCallbackFcn(app, @SaveAnalysisButtonPushed, true);
-            app.SaveAnalysisButton.Enable = 'off';
-            app.SaveAnalysisButton.Position = [27 39 90 23];
-            app.SaveAnalysisButton.Text = 'Save Analysis';
-
-            % Create OutputButton
-            app.OutputButton = uibutton(app.FileControlsPanel, 'push');
-            app.OutputButton.ButtonPushedFcn = createCallbackFcn(app, @OutputButtonPushed, true);
-            app.OutputButton.Enable = 'off';
-            app.OutputButton.Position = [27 8 90 22];
-            app.OutputButton.Text = 'Output';
-
-            % Create AnalysisControlsPanel
-            app.AnalysisControlsPanel = uipanel(app.GelBoxUIFigure);
-            app.AnalysisControlsPanel.Title = 'Analysis Controls';
-            app.AnalysisControlsPanel.Position = [157 391 239 181];
-
-            % Create NumberofBandsDropDownLabel
-            app.NumberofBandsDropDownLabel = uilabel(app.AnalysisControlsPanel);
-            app.NumberofBandsDropDownLabel.Position = [9 111 99 22];
-            app.NumberofBandsDropDownLabel.Text = 'Number of Bands';
-
-            % Create NumberofBandsDropDown
-            app.NumberofBandsDropDown = uidropdown(app.AnalysisControlsPanel);
-            app.NumberofBandsDropDown.Items = {'1', '2', '3'};
-            app.NumberofBandsDropDown.ValueChangedFcn = createCallbackFcn(app, @NumberofBandsDropDownValueChanged, true);
-            app.NumberofBandsDropDown.Position = [123 111 101 22];
-            app.NumberofBandsDropDown.Value = '1';
-
-            % Create NewBoxButton
-            app.NewBoxButton = uibutton(app.AnalysisControlsPanel, 'push');
-            app.NewBoxButton.ButtonPushedFcn = createCallbackFcn(app, @NewBoxButtonPushed, true);
-            app.NewBoxButton.Position = [9 73 100 22];
-            app.NewBoxButton.Text = 'New Box';
-
-            % Create DeleteBoxButton
-            app.DeleteBoxButton = uibutton(app.AnalysisControlsPanel, 'push');
-            app.DeleteBoxButton.ButtonPushedFcn = createCallbackFcn(app, @DeleteBoxButtonPushed, true);
-            app.DeleteBoxButton.Enable = 'off';
-            app.DeleteBoxButton.Position = [123 73 101 22];
-            app.DeleteBoxButton.Text = 'Delete Box';
-
-            % Create BoxSelectionDropDownLabel
-            app.BoxSelectionDropDownLabel = uilabel(app.AnalysisControlsPanel);
-            app.BoxSelectionDropDownLabel.Position = [10 33 98 22];
-            app.BoxSelectionDropDownLabel.Text = 'Box Selection';
-
-            % Create BoxSelectionDropDown
-            app.BoxSelectionDropDown = uidropdown(app.AnalysisControlsPanel);
-            app.BoxSelectionDropDown.Items = {};
-            app.BoxSelectionDropDown.ValueChangedFcn = createCallbackFcn(app, @BoxSelectionDropDownValueChanged, true);
-            app.BoxSelectionDropDown.Placeholder = 'No data';
-            app.BoxSelectionDropDown.Position = [124 33 100 22];
-            app.BoxSelectionDropDown.Value = {};
-
-            % Create SelectedBoxOpticalDensitiesPanel
-            app.SelectedBoxOpticalDensitiesPanel = uipanel(app.GelBoxUIFigure);
-            app.SelectedBoxOpticalDensitiesPanel.Title = 'Selected Box Optical Densities';
-            app.SelectedBoxOpticalDensitiesPanel.Position = [722 832 826 278];
+            % Create OpticalDensitiesPanel
+            app.OpticalDensitiesPanel = uipanel(app.GelBoxUIFigure);
+            app.OpticalDensitiesPanel.Title = 'Optical Densities';
+            app.OpticalDensitiesPanel.Position = [7 299 836 278];
 
             % Create raw_density
-            app.raw_density = uiaxes(app.SelectedBoxOpticalDensitiesPanel);
+            app.raw_density = uiaxes(app.OpticalDensitiesPanel);
             xlabel(app.raw_density, 'Optical Density')
             ylabel(app.raw_density, 'Pixel')
             app.raw_density.Position = [163 11 254 209];
 
             % Create background_corrected_raw_density
-            app.background_corrected_raw_density = uiaxes(app.SelectedBoxOpticalDensitiesPanel);
+            app.background_corrected_raw_density = uiaxes(app.OpticalDensitiesPanel);
             xlabel(app.background_corrected_raw_density, 'Optical Density')
             ylabel(app.background_corrected_raw_density, 'Pixel')
             app.background_corrected_raw_density.YColor = [0.9412 0.9412 0.9412];
             app.background_corrected_raw_density.Position = [401 11 254 209];
 
             % Create box_inset
-            app.box_inset = uiaxes(app.SelectedBoxOpticalDensitiesPanel);
+            app.box_inset = uiaxes(app.OpticalDensitiesPanel);
             xlabel(app.box_inset, 'Optical Density')
             ylabel(app.box_inset, 'Pixel')
             app.box_inset.XColor = [0.9412 0.9412 0.9412];
@@ -1262,46 +1280,46 @@ classdef GelBox < matlab.apps.AppBase
             app.box_inset.Position = [4 11 150 209];
 
             % Create BoxZoomLabel
-            app.BoxZoomLabel = uilabel(app.SelectedBoxOpticalDensitiesPanel);
+            app.BoxZoomLabel = uilabel(app.OpticalDensitiesPanel);
             app.BoxZoomLabel.HorizontalAlignment = 'center';
             app.BoxZoomLabel.WordWrap = 'on';
             app.BoxZoomLabel.Position = [34 224 126 22];
             app.BoxZoomLabel.Text = 'Box Zoom';
 
             % Create RawOpticalDensityLabel_2
-            app.RawOpticalDensityLabel_2 = uilabel(app.SelectedBoxOpticalDensitiesPanel);
+            app.RawOpticalDensityLabel_2 = uilabel(app.OpticalDensitiesPanel);
             app.RawOpticalDensityLabel_2.HorizontalAlignment = 'center';
             app.RawOpticalDensityLabel_2.WordWrap = 'on';
             app.RawOpticalDensityLabel_2.Position = [238 224 126 22];
             app.RawOpticalDensityLabel_2.Text = 'Raw Optical Density';
 
             % Create BackgroundCorrectedOpticalDensityLabel_2
-            app.BackgroundCorrectedOpticalDensityLabel_2 = uilabel(app.SelectedBoxOpticalDensitiesPanel);
+            app.BackgroundCorrectedOpticalDensityLabel_2 = uilabel(app.OpticalDensitiesPanel);
             app.BackgroundCorrectedOpticalDensityLabel_2.HorizontalAlignment = 'center';
             app.BackgroundCorrectedOpticalDensityLabel_2.WordWrap = 'on';
             app.BackgroundCorrectedOpticalDensityLabel_2.Position = [477 221 126 28];
             app.BackgroundCorrectedOpticalDensityLabel_2.Text = 'Background Corrected Optical Density';
 
             % Create TotalAreaEditFieldLabel
-            app.TotalAreaEditFieldLabel = uilabel(app.SelectedBoxOpticalDensitiesPanel);
+            app.TotalAreaEditFieldLabel = uilabel(app.OpticalDensitiesPanel);
             app.TotalAreaEditFieldLabel.Position = [661 146 59 22];
             app.TotalAreaEditFieldLabel.Text = 'Total Area';
 
             % Create TotalAreaField
-            app.TotalAreaField = uieditfield(app.SelectedBoxOpticalDensitiesPanel, 'numeric');
+            app.TotalAreaField = uieditfield(app.OpticalDensitiesPanel, 'numeric');
             app.TotalAreaField.ValueDisplayFormat = '%.2f';
             app.TotalAreaField.Editable = 'off';
             app.TotalAreaField.HorizontalAlignment = 'center';
             app.TotalAreaField.Position = [732 146 85 22];
 
             % Create BackgroundAreaLabel
-            app.BackgroundAreaLabel = uilabel(app.SelectedBoxOpticalDensitiesPanel);
+            app.BackgroundAreaLabel = uilabel(app.OpticalDensitiesPanel);
             app.BackgroundAreaLabel.WordWrap = 'on';
             app.BackgroundAreaLabel.Position = [661 106 81 30];
             app.BackgroundAreaLabel.Text = 'Background Area';
 
             % Create BackgroundAreaField
-            app.BackgroundAreaField = uieditfield(app.SelectedBoxOpticalDensitiesPanel, 'numeric');
+            app.BackgroundAreaField = uieditfield(app.OpticalDensitiesPanel, 'numeric');
             app.BackgroundAreaField.ValueDisplayFormat = '%.2f';
             app.BackgroundAreaField.Editable = 'off';
             app.BackgroundAreaField.HorizontalAlignment = 'center';
@@ -1310,7 +1328,7 @@ classdef GelBox < matlab.apps.AppBase
             % Create GelImagePanel
             app.GelImagePanel = uipanel(app.GelBoxUIFigure);
             app.GelImagePanel.Title = 'Gel Image';
-            app.GelImagePanel.Position = [1059 207 459 370];
+            app.GelImagePanel.Position = [854 12 859 565];
 
             % Create gel_image_axes
             app.gel_image_axes = uiaxes(app.GelImagePanel);
@@ -1318,148 +1336,193 @@ classdef GelBox < matlab.apps.AppBase
             app.gel_image_axes.YTick = [];
             app.gel_image_axes.Box = 'on';
             app.gel_image_axes.Visible = 'off';
-            app.gel_image_axes.Position = [11 14 437 310];
+            app.gel_image_axes.Position = [12 11 837 487];
 
-            % Create SelectedBoxFittingPanel
-            app.SelectedBoxFittingPanel = uipanel(app.GelBoxUIFigure);
-            app.SelectedBoxFittingPanel.Title = 'Selected Box Fitting';
-            app.SelectedBoxFittingPanel.Position = [1547 493 827 277];
+            % Create DeleteBoxButton
+            app.DeleteBoxButton = uibutton(app.GelImagePanel, 'push');
+            app.DeleteBoxButton.ButtonPushedFcn = createCallbackFcn(app, @DeleteBoxButtonPushed, true);
+            app.DeleteBoxButton.Enable = 'off';
+            app.DeleteBoxButton.Position = [127 512 101 22];
+            app.DeleteBoxButton.Text = 'Delete Box';
+
+            % Create NewBoxButton
+            app.NewBoxButton = uibutton(app.GelImagePanel, 'push');
+            app.NewBoxButton.ButtonPushedFcn = createCallbackFcn(app, @NewBoxButtonPushed, true);
+            app.NewBoxButton.Position = [13 512 100 22];
+            app.NewBoxButton.Text = 'New Box';
+
+            % Create BoxSelectionDropDownLabel
+            app.BoxSelectionDropDownLabel = uilabel(app.GelImagePanel);
+            app.BoxSelectionDropDownLabel.HorizontalAlignment = 'center';
+            app.BoxSelectionDropDownLabel.Position = [231 513 98 22];
+            app.BoxSelectionDropDownLabel.Text = 'Box Selection';
+
+            % Create BoxSelectionDropDown
+            app.BoxSelectionDropDown = uidropdown(app.GelImagePanel);
+            app.BoxSelectionDropDown.Items = {};
+            app.BoxSelectionDropDown.ValueChangedFcn = createCallbackFcn(app, @BoxSelectionDropDownValueChanged, true);
+            app.BoxSelectionDropDown.Placeholder = 'No data';
+            app.BoxSelectionDropDown.Position = [329 513 100 22];
+            app.BoxSelectionDropDown.Value = {};
+
+            % Create FittingPanel
+            app.FittingPanel = uipanel(app.GelBoxUIFigure);
+            app.FittingPanel.Title = 'Fitting';
+            app.FittingPanel.Position = [7 10 836 277];
 
             % Create background_corrected_raw_density_fit
-            app.background_corrected_raw_density_fit = uiaxes(app.SelectedBoxFittingPanel);
+            app.background_corrected_raw_density_fit = uiaxes(app.FittingPanel);
             xlabel(app.background_corrected_raw_density_fit, 'Optical Density')
             ylabel(app.background_corrected_raw_density_fit, 'Pixel')
             app.background_corrected_raw_density_fit.YColor = [0.9412 0.9412 0.9412];
-            app.background_corrected_raw_density_fit.Position = [247 13 254 209];
+            app.background_corrected_raw_density_fit.Position = [251 7 254 209];
 
             % Create raw_density_fit
-            app.raw_density_fit = uiaxes(app.SelectedBoxFittingPanel);
+            app.raw_density_fit = uiaxes(app.FittingPanel);
             xlabel(app.raw_density_fit, 'Optical Density')
             ylabel(app.raw_density_fit, 'Pixel')
-            app.raw_density_fit.Position = [9 13 254 209];
+            app.raw_density_fit.Position = [17 7 254 209];
 
             % Create RawOpticalDensityLabel
-            app.RawOpticalDensityLabel = uilabel(app.SelectedBoxFittingPanel);
+            app.RawOpticalDensityLabel = uilabel(app.FittingPanel);
             app.RawOpticalDensityLabel.HorizontalAlignment = 'center';
             app.RawOpticalDensityLabel.WordWrap = 'on';
             app.RawOpticalDensityLabel.Position = [82 224 126 22];
             app.RawOpticalDensityLabel.Text = 'Raw Optical Density';
 
             % Create BackgroundCorrectedOpticalDensityLabel
-            app.BackgroundCorrectedOpticalDensityLabel = uilabel(app.SelectedBoxFittingPanel);
+            app.BackgroundCorrectedOpticalDensityLabel = uilabel(app.FittingPanel);
             app.BackgroundCorrectedOpticalDensityLabel.HorizontalAlignment = 'center';
             app.BackgroundCorrectedOpticalDensityLabel.WordWrap = 'on';
-            app.BackgroundCorrectedOpticalDensityLabel.Position = [329 221 126 28];
+            app.BackgroundCorrectedOpticalDensityLabel.Position = [331 221 126 28];
             app.BackgroundCorrectedOpticalDensityLabel.Text = 'Background Corrected Optical Density';
 
             % Create DrawFittingCheckBox
-            app.DrawFittingCheckBox = uicheckbox(app.SelectedBoxFittingPanel);
+            app.DrawFittingCheckBox = uicheckbox(app.FittingPanel);
             app.DrawFittingCheckBox.Text = 'Draw Fitting';
-            app.DrawFittingCheckBox.Position = [513 199 86 22];
+            app.DrawFittingCheckBox.Position = [672 154 86 22];
 
             % Create RsquaredLabel
-            app.RsquaredLabel = uilabel(app.SelectedBoxFittingPanel);
+            app.RsquaredLabel = uilabel(app.FittingPanel);
             app.RsquaredLabel.WordWrap = 'on';
-            app.RsquaredLabel.Position = [514 167 72 22];
+            app.RsquaredLabel.Position = [512 154 72 22];
             app.RsquaredLabel.Text = 'R - squared';
 
             % Create rsquaredField
-            app.rsquaredField = uieditfield(app.SelectedBoxFittingPanel, 'numeric');
+            app.rsquaredField = uieditfield(app.FittingPanel, 'numeric');
             app.rsquaredField.ValueDisplayFormat = '%.2f';
             app.rsquaredField.Editable = 'off';
             app.rsquaredField.HorizontalAlignment = 'center';
-            app.rsquaredField.Position = [584 167 69 22];
+            app.rsquaredField.Position = [588 154 70 22];
 
             % Create BandAreaLabel_1
-            app.BandAreaLabel_1 = uilabel(app.SelectedBoxFittingPanel);
+            app.BandAreaLabel_1 = uilabel(app.FittingPanel);
             app.BandAreaLabel_1.HorizontalAlignment = 'center';
             app.BandAreaLabel_1.WordWrap = 'on';
-            app.BandAreaLabel_1.Position = [513 124 70 28];
+            app.BandAreaLabel_1.Position = [512 112 72 28];
             app.BandAreaLabel_1.Text = 'Band Area 1 (Red)';
 
             % Create BandArea_1
-            app.BandArea_1 = uieditfield(app.SelectedBoxFittingPanel, 'numeric');
+            app.BandArea_1 = uieditfield(app.FittingPanel, 'numeric');
             app.BandArea_1.ValueDisplayFormat = '%.2f';
             app.BandArea_1.Editable = 'off';
             app.BandArea_1.HorizontalAlignment = 'center';
-            app.BandArea_1.Position = [584 128 69 22];
+            app.BandArea_1.Position = [587 116 70 22];
 
             % Create BandRelativeAreaLabel_1
-            app.BandRelativeAreaLabel_1 = uilabel(app.SelectedBoxFittingPanel);
+            app.BandRelativeAreaLabel_1 = uilabel(app.FittingPanel);
             app.BandRelativeAreaLabel_1.WordWrap = 'on';
             app.BandRelativeAreaLabel_1.Enable = 'off';
-            app.BandRelativeAreaLabel_1.Position = [663 117 81 42];
+            app.BandRelativeAreaLabel_1.Position = [671 105 81 42];
             app.BandRelativeAreaLabel_1.Text = 'Band Relative Area 1 (Red)';
 
             % Create BandRelativeArea_1
-            app.BandRelativeArea_1 = uieditfield(app.SelectedBoxFittingPanel, 'numeric');
+            app.BandRelativeArea_1 = uieditfield(app.FittingPanel, 'numeric');
             app.BandRelativeArea_1.ValueDisplayFormat = '%.2f';
             app.BandRelativeArea_1.Editable = 'off';
             app.BandRelativeArea_1.HorizontalAlignment = 'center';
             app.BandRelativeArea_1.Enable = 'off';
-            app.BandRelativeArea_1.Position = [749 127 70 22];
+            app.BandRelativeArea_1.Position = [756 115 70 22];
 
             % Create BandAreaLabel_2
-            app.BandAreaLabel_2 = uilabel(app.SelectedBoxFittingPanel);
+            app.BandAreaLabel_2 = uilabel(app.FittingPanel);
             app.BandAreaLabel_2.HorizontalAlignment = 'center';
             app.BandAreaLabel_2.WordWrap = 'on';
             app.BandAreaLabel_2.Enable = 'off';
-            app.BandAreaLabel_2.Position = [511 86 72 28];
+            app.BandAreaLabel_2.Position = [511 73 72 28];
             app.BandAreaLabel_2.Text = 'Band Area 2 (Blue)';
 
             % Create BandArea_2
-            app.BandArea_2 = uieditfield(app.SelectedBoxFittingPanel, 'numeric');
+            app.BandArea_2 = uieditfield(app.FittingPanel, 'numeric');
             app.BandArea_2.ValueDisplayFormat = '%.2f';
             app.BandArea_2.Editable = 'off';
             app.BandArea_2.HorizontalAlignment = 'center';
             app.BandArea_2.Enable = 'off';
-            app.BandArea_2.Position = [584 89 69 22];
+            app.BandArea_2.Position = [587 76 70 22];
 
             % Create BandRelativeAreaLabel_2
-            app.BandRelativeAreaLabel_2 = uilabel(app.SelectedBoxFittingPanel);
+            app.BandRelativeAreaLabel_2 = uilabel(app.FittingPanel);
             app.BandRelativeAreaLabel_2.WordWrap = 'on';
             app.BandRelativeAreaLabel_2.Enable = 'off';
-            app.BandRelativeAreaLabel_2.Position = [663 79 81 42];
+            app.BandRelativeAreaLabel_2.Position = [670 66 81 42];
             app.BandRelativeAreaLabel_2.Text = 'Band Relative Area 2 (Blue)';
 
             % Create BandRelativeArea_2
-            app.BandRelativeArea_2 = uieditfield(app.SelectedBoxFittingPanel, 'numeric');
+            app.BandRelativeArea_2 = uieditfield(app.FittingPanel, 'numeric');
             app.BandRelativeArea_2.ValueDisplayFormat = '%.2f';
             app.BandRelativeArea_2.Editable = 'off';
             app.BandRelativeArea_2.HorizontalAlignment = 'center';
             app.BandRelativeArea_2.Enable = 'off';
-            app.BandRelativeArea_2.Position = [749 89 70 22];
+            app.BandRelativeArea_2.Position = [756 76 70 22];
 
             % Create BandAreaLabel_3
-            app.BandAreaLabel_3 = uilabel(app.SelectedBoxFittingPanel);
+            app.BandAreaLabel_3 = uilabel(app.FittingPanel);
             app.BandAreaLabel_3.HorizontalAlignment = 'center';
             app.BandAreaLabel_3.WordWrap = 'on';
             app.BandAreaLabel_3.Enable = 'off';
-            app.BandAreaLabel_3.Position = [511 49 72 28];
+            app.BandAreaLabel_3.Position = [511 37 72 28];
             app.BandAreaLabel_3.Text = 'Band Area 3 (Green)';
 
             % Create BandArea_3
-            app.BandArea_3 = uieditfield(app.SelectedBoxFittingPanel, 'numeric');
+            app.BandArea_3 = uieditfield(app.FittingPanel, 'numeric');
             app.BandArea_3.ValueDisplayFormat = '%.2f';
             app.BandArea_3.Editable = 'off';
             app.BandArea_3.HorizontalAlignment = 'center';
             app.BandArea_3.Enable = 'off';
-            app.BandArea_3.Position = [584 53 69 22];
+            app.BandArea_3.Position = [587 40 70 22];
 
             % Create BandRelativeAreaLabel_3
-            app.BandRelativeAreaLabel_3 = uilabel(app.SelectedBoxFittingPanel);
+            app.BandRelativeAreaLabel_3 = uilabel(app.FittingPanel);
             app.BandRelativeAreaLabel_3.WordWrap = 'on';
             app.BandRelativeAreaLabel_3.Enable = 'off';
-            app.BandRelativeAreaLabel_3.Position = [663 42 81 42];
+            app.BandRelativeAreaLabel_3.Position = [668 29 81 42];
             app.BandRelativeAreaLabel_3.Text = 'Band Relative Area 3 (Green)';
 
             % Create BandRelativeArea_3
-            app.BandRelativeArea_3 = uieditfield(app.SelectedBoxFittingPanel, 'numeric');
+            app.BandRelativeArea_3 = uieditfield(app.FittingPanel, 'numeric');
             app.BandRelativeArea_3.ValueDisplayFormat = '%.2f';
             app.BandRelativeArea_3.Editable = 'off';
             app.BandRelativeArea_3.HorizontalAlignment = 'center';
             app.BandRelativeArea_3.Enable = 'off';
-            app.BandRelativeArea_3.Position = [749 52 70 22];
+            app.BandRelativeArea_3.Position = [756 39 70 22];
+
+            % Create NumberofBandsDropDownLabel
+            app.NumberofBandsDropDownLabel = uilabel(app.FittingPanel);
+            app.NumberofBandsDropDownLabel.Position = [512 194 99 22];
+            app.NumberofBandsDropDownLabel.Text = 'Number of Bands';
+
+            % Create NumberofBandsDropDown
+            app.NumberofBandsDropDown = uidropdown(app.FittingPanel);
+            app.NumberofBandsDropDown.Items = {'1', '2', '3'};
+            app.NumberofBandsDropDown.ValueChangedFcn = createCallbackFcn(app, @NumberofBandsDropDownValueChanged, true);
+            app.NumberofBandsDropDown.Position = [614 194 42 22];
+            app.NumberofBandsDropDown.Value = '1';
+
+            % Create FittingOptionsButton
+            app.FittingOptionsButton = uibutton(app.FittingPanel, 'push');
+            app.FittingOptionsButton.ButtonPushedFcn = createCallbackFcn(app, @FittingOptionsButtonPushed, true);
+            app.FittingOptionsButton.Position = [672 194 100 22];
+            app.FittingOptionsButton.Text = 'Fitting Options';
 
             % Show the figure after all components are created
             app.GelBoxUIFigure.Visible = 'on';

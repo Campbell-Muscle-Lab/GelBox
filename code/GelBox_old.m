@@ -1,4 +1,4 @@
-function GelBox
+function GelBox_old
 
 version_string = 'GelBox Version 2.0';
 
