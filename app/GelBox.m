@@ -12,6 +12,7 @@ classdef GelBox < matlab.apps.AppBase
         OutputMenu                   matlab.ui.container.Menu
         GelImageFileInformationMenu  matlab.ui.container.Menu
         SelectedBoxInformationMenu   matlab.ui.container.Menu
+        AnalysisSummaryPlotMenu      matlab.ui.container.Menu
         FittingPanel                 matlab.ui.container.Panel
         FittingOptionsButton         matlab.ui.control.Button
         NumberofBandsDropDown        matlab.ui.control.DropDown
@@ -64,6 +65,7 @@ classdef GelBox < matlab.apps.AppBase
         ImageFileTextDialog % Description
         SelectedBoxTextDialog % Description
         FittingOptions % Description
+        SummaryPlot
     end
     
     methods (Access = public)
@@ -235,12 +237,14 @@ classdef GelBox < matlab.apps.AppBase
                        legend(app.raw_density)
 
 
-
+                       cla(app.background_corrected_raw_density)
                        plot(app.background_corrected_raw_density, ...
                            x-x_back',y,'-.k',"LineWidth",2)
                        hold(app.background_corrected_raw_density,"on")
                        plot(app.background_corrected_raw_density, ...
-                           1:numel(y),zeros(1,numel(y)),'-.m',"LineWidth",2)
+                           zeros(1,numel(y)),y,'-.m',"LineWidth",2)
+                       legend(app.background_corrected_raw_density,'','Baseline', ...
+                           'Location','best')
                        ylim(app.background_corrected_raw_density, ...
                            [1 max(y)]);
                        
@@ -808,6 +812,7 @@ classdef GelBox < matlab.apps.AppBase
             colormap(app.GelBoxUIFigure, 'gray');
             app.fitting_options.shared_shape = true(1,1);
             app.fitting_options.shared_skewness = true(1,1);
+            disableDefaultInteractivity(app.gel_image_axes)
 
 
         end
@@ -1019,6 +1024,8 @@ classdef GelBox < matlab.apps.AppBase
                     app.BandRelativeAreaLabel_3.Enable = 0;
                     end
                 case '2'
+                    app.BandRelativeArea_1.Enable = 1;
+                    app.BandRelativeAreaLabel_1.Enable = 1;
                     app.BandArea_2.Enable = 1;
                     app.BandRelativeArea_2.Enable = 1;
                     app.BandAreaLabel_2.Enable = 1;
@@ -1197,6 +1204,11 @@ classdef GelBox < matlab.apps.AppBase
             app.FittingOptions = FittingOptionsDialog(app);
 
         end
+
+        % Menu selected function: AnalysisSummaryPlotMenu
+        function AnalysisSummaryPlotMenuSelected(app, event)
+            app.SummaryPlot = SummaryPlotWindow(app);
+        end
     end
 
     % Component initialization
@@ -1252,6 +1264,11 @@ classdef GelBox < matlab.apps.AppBase
             app.SelectedBoxInformationMenu.MenuSelectedFcn = createCallbackFcn(app, @SelectedBoxInformationMenuSelected, true);
             app.SelectedBoxInformationMenu.Enable = 'off';
             app.SelectedBoxInformationMenu.Text = 'Selected Box Information';
+
+            % Create AnalysisSummaryPlotMenu
+            app.AnalysisSummaryPlotMenu = uimenu(app.GelBoxUIFigure);
+            app.AnalysisSummaryPlotMenu.MenuSelectedFcn = createCallbackFcn(app, @AnalysisSummaryPlotMenuSelected, true);
+            app.AnalysisSummaryPlotMenu.Text = 'Analysis Summary Plot';
 
             % Create OpticalDensitiesPanel
             app.OpticalDensitiesPanel = uipanel(app.GelBoxUIFigure);
@@ -1328,7 +1345,7 @@ classdef GelBox < matlab.apps.AppBase
             % Create GelImagePanel
             app.GelImagePanel = uipanel(app.GelBoxUIFigure);
             app.GelImagePanel.Title = 'Gel Image';
-            app.GelImagePanel.Position = [854 12 859 565];
+            app.GelImagePanel.Position = [853 10 860 567];
 
             % Create gel_image_axes
             app.gel_image_axes = uiaxes(app.GelImagePanel);
@@ -1336,25 +1353,25 @@ classdef GelBox < matlab.apps.AppBase
             app.gel_image_axes.YTick = [];
             app.gel_image_axes.Box = 'on';
             app.gel_image_axes.Visible = 'off';
-            app.gel_image_axes.Position = [12 11 837 487];
+            app.gel_image_axes.Position = [12 13 837 487];
 
             % Create DeleteBoxButton
             app.DeleteBoxButton = uibutton(app.GelImagePanel, 'push');
             app.DeleteBoxButton.ButtonPushedFcn = createCallbackFcn(app, @DeleteBoxButtonPushed, true);
             app.DeleteBoxButton.Enable = 'off';
-            app.DeleteBoxButton.Position = [127 512 101 22];
+            app.DeleteBoxButton.Position = [127 514 101 22];
             app.DeleteBoxButton.Text = 'Delete Box';
 
             % Create NewBoxButton
             app.NewBoxButton = uibutton(app.GelImagePanel, 'push');
             app.NewBoxButton.ButtonPushedFcn = createCallbackFcn(app, @NewBoxButtonPushed, true);
-            app.NewBoxButton.Position = [13 512 100 22];
+            app.NewBoxButton.Position = [13 514 100 22];
             app.NewBoxButton.Text = 'New Box';
 
             % Create BoxSelectionDropDownLabel
             app.BoxSelectionDropDownLabel = uilabel(app.GelImagePanel);
             app.BoxSelectionDropDownLabel.HorizontalAlignment = 'center';
-            app.BoxSelectionDropDownLabel.Position = [231 513 98 22];
+            app.BoxSelectionDropDownLabel.Position = [231 515 98 22];
             app.BoxSelectionDropDownLabel.Text = 'Box Selection';
 
             % Create BoxSelectionDropDown
@@ -1362,7 +1379,7 @@ classdef GelBox < matlab.apps.AppBase
             app.BoxSelectionDropDown.Items = {};
             app.BoxSelectionDropDown.ValueChangedFcn = createCallbackFcn(app, @BoxSelectionDropDownValueChanged, true);
             app.BoxSelectionDropDown.Placeholder = 'No data';
-            app.BoxSelectionDropDown.Position = [329 513 100 22];
+            app.BoxSelectionDropDown.Position = [329 515 100 22];
             app.BoxSelectionDropDown.Value = {};
 
             % Create FittingPanel
