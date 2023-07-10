@@ -225,8 +225,8 @@ classdef GelBox < matlab.apps.AppBase
                         app.raw_density.XAxis.Exponent = 0;
                         xlim(app.raw_density,[0 x_t_end]);
                         ylim(app.raw_density,[1 max(y)]);
-                        legend(app.raw_density,'','Baseline', ...
-                            'Location','best')
+                        % legend(app.raw_density,'','Baseline', ...
+                        %     'Location','best')
 
 
                         xticks(app.raw_density_fit,x_ticks);
@@ -234,7 +234,7 @@ classdef GelBox < matlab.apps.AppBase
 
                         xlim(app.raw_density_fit,[0 x_t_end]);
                         ylim(app.raw_density_fit,[1 max(y)]);
-                        legend(app.raw_density)
+                        % legend(app.raw_density)
 
 
                         cla(app.background_corrected_raw_density)
@@ -243,8 +243,8 @@ classdef GelBox < matlab.apps.AppBase
                         hold(app.background_corrected_raw_density,"on")
                         plot(app.background_corrected_raw_density, ...
                             zeros(1,numel(y)),y,'-.m',"LineWidth",2)
-                        legend(app.background_corrected_raw_density,'','Baseline', ...
-                            'Location','best')
+                        % legend(app.background_corrected_raw_density,'','Baseline', ...
+                        %     'Location','best')
                         ylim(app.background_corrected_raw_density, ...
                             [1 max(y)]);
 
@@ -324,12 +324,12 @@ classdef GelBox < matlab.apps.AppBase
                         for j = 1 : num_of_bands
                             patch(app.raw_density_fit, ...
                                 x_back+x_bands(j,:), ...
-                                y,color{j},'FaceAlpha',0.25, ...
+                                y,color{j},'FaceAlpha',0.65, ...
                                 'EdgeColor',color{j},'EdgeAlpha',0.25, ...
                                 'LineWidth',2)
                             patch(app.background_corrected_raw_density_fit, ...
                                 x_bands(j,:), ...
-                                y,color{j},'FaceAlpha',0.25, ...
+                                y,color{j},'FaceAlpha',0.65, ...
                                 'EdgeColor',color{j},'EdgeAlpha',0.25, ...
                                 'LineWidth',2)
                         end
@@ -801,7 +801,6 @@ classdef GelBox < matlab.apps.AppBase
 
             % Reset number of bands
             app.NumberofBandsDropDown.Value = '1';
-            app.NumberofBandsDropDownValueChanged;
 
             % Reset box controls
             app.DeleteBoxButton.Enable = 0;
@@ -931,7 +930,7 @@ classdef GelBox < matlab.apps.AppBase
                     app.gel_data.old_height = p(4);
 
                     i=i;
-                    addlistener(app.gel_data.box_handle(i),"MovingROI",@(src,evt) new_box_position2(evt));
+                    addlistener(app.gel_data.box_handle(i),"ROIMoved",@(src,evt) new_box_position2(evt));
                 end
 
                 % Need this to make labels
@@ -942,12 +941,11 @@ classdef GelBox < matlab.apps.AppBase
 
             % Nested function
             function new_box_position2(evt);
-                app.gel_data = guidata(gui.Window);
                 if (isfield(app.gel_data,'box_position'))
                     box_position = app.gel_data.box_position;
                     [r,c]=size(box_position);
                     if (r>=n)&(~isequal(box_position(n,:),evt.CurrentPosition))
-                        update_display(gui,n);
+                        UpdateDisplay(app)
                     end
                 else
                     UpdateDisplay(app)
@@ -969,13 +967,13 @@ classdef GelBox < matlab.apps.AppBase
                 p = app.gel_data.box_handle(n-1).Position;
 
                 app.gel_data.box_handle(n) = images.roi.Rectangle(app.gel_image_axes, ...
-                    'Position',p + [20,0,0,0]);
+                    'Position',p + [120,0,0,0]);
                 for i=1:(n-1)
                     app.gel_data.box_handle(i).InteractionsAllowed = 'none';
                 end
             end
 
-            addlistener(app.gel_data.box_handle(n),"MovingROI", ...
+            addlistener(app.gel_data.box_handle(n),"ROIMoved", ...
                 @(src,evt) new_box_position(evt));
 
             % Set color to last box
