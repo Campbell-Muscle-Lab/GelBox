@@ -9,7 +9,7 @@ classdef GelBox < matlab.apps.AppBase
         InvertImageMenu              matlab.ui.container.Menu
         LoadAnalysisMenu             matlab.ui.container.Menu
         SaveAnalysisMenu             matlab.ui.container.Menu
-        OutputMenu                   matlab.ui.container.Menu
+        ExportResultsMenu            matlab.ui.container.Menu
         GelImageFileInformationMenu  matlab.ui.container.Menu
         SelectedBoxInformationMenu   matlab.ui.container.Menu
         AnalysisSummaryPlotMenu      matlab.ui.container.Menu
@@ -55,19 +55,19 @@ classdef GelBox < matlab.apps.AppBase
         raw_density                  matlab.ui.control.UIAxes
     end
 
-    
+
     properties (Access = public)
         gel_data % Description
         fitting_options
     end
-    
+
     properties (Access = private)
         ImageFileTextDialog % Description
         SelectedBoxTextDialog % Description
         FittingOptions % Description
         SummaryPlot
     end
-    
+
     methods (Access = public)
 
         function UpdateDisplay(app)
@@ -101,7 +101,7 @@ classdef GelBox < matlab.apps.AppBase
                 % Store data for display
                 d=[];
                 for i=1:n
-                    
+
                     d.box(i).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
                     num_of_bands = d.box(i).fitting_mode;
                     % Extract position
@@ -128,26 +128,26 @@ classdef GelBox < matlab.apps.AppBase
                         case 1
                             app.BandRelativeArea_1.Enable = 0;
                             [x_bands,x_fit,r_squared] = ...
-                            FitGaussian(app,y,x,x_back,num_of_bands);
+                                FitGaussian(app,y,x,x_back,num_of_bands);
                         case 2
                             if ~app.BandRelativeArea_1.Enable
                                 app.BandRelativeArea_1.Enable = 1;
                             end
                             [x_bands,x_fit,r_squared] = ...
-                            Fit2Gaussian(app,y,x,x_back,num_of_bands);
+                                Fit2Gaussian(app,y,x,x_back,num_of_bands);
                         case 3
                             if ~app.BandRelativeArea_1.Enable
                                 app.BandRelativeArea_1.Enable = 1;
                             end
                             [x_bands,x_fit,r_squared] = ...
-                            Fit3Gaussian(app,y,x,x_back,num_of_bands);
+                                Fit3Gaussian(app,y,x,x_back,num_of_bands);
                     end
 
                     d.box(i).total_area = trapz(y,x);
                     d.box(i).background_area = trapz(y,x_back);
 
                     for j = 1 : num_of_bands
-                    d.box(i).band_area(j) = trapz(y,x_bands(j,:));
+                        d.box(i).band_area(j) = trapz(y,x_bands(j,:));
                     end
 
                     % Store data for later
@@ -205,127 +205,123 @@ classdef GelBox < matlab.apps.AppBase
 
                     % Display
                     if (i==selected_box)
-                       app.TotalAreaField.Value = d.box(i).total_area;
-                       app.BackgroundAreaField.Value = d.box(i).background_area;
+                        app.TotalAreaField.Value = d.box(i).total_area;
+                        app.BackgroundAreaField.Value = d.box(i).background_area;
 
-                       app.rsquaredField.Value = r_squared; 
+                        app.rsquaredField.Value = r_squared;
                         center_image_with_preserved_aspect_ratio( ...
                             d.box(i).inset, ...
                             app.box_inset);
-                       cla(app.raw_density)
-                       plot(app.raw_density,x,y,"Color",'k',"LineWidth",2)
-                       hold(app.raw_density,"on")
-                       plot(app.raw_density,x_back,y,'-.m',"LineWidth",2)
-                       x_pow = ceil(log10(max(x)));
-                       x_tick_rounder = 10^(x_pow - 1);
-                       x_t_end = ceil(max(x)/x_tick_rounder)*x_tick_rounder;
-                       x_t_mid = round(x_t_end/2);
-                       x_ticks = [0 x_t_mid x_t_end];
-                       xticks(app.raw_density,x_ticks)
-                       app.raw_density.XAxis.Exponent = 0;
-                       xlim(app.raw_density,[0 x_t_end]);
-                       ylim(app.raw_density,[1 max(y)]);
-                       legend(app.raw_density,'','Baseline', ...
-                           'Location','best')
+                        cla(app.raw_density)
+                        plot(app.raw_density,x,y,"Color",'k',"LineWidth",2)
+                        hold(app.raw_density,"on")
+                        plot(app.raw_density,x_back,y,'-.m',"LineWidth",2)
+                        x_pow = ceil(log10(max(x)));
+                        x_tick_rounder = 10^(x_pow - 1);
+                        x_t_end = ceil(max(x)/x_tick_rounder)*x_tick_rounder;
+                        x_t_mid = round(x_t_end/2);
+                        x_ticks = [0 x_t_mid x_t_end];
+                        xticks(app.raw_density,x_ticks)
+                        app.raw_density.XAxis.Exponent = 0;
+                        xlim(app.raw_density,[0 x_t_end]);
+                        ylim(app.raw_density,[1 max(y)]);
+                        legend(app.raw_density,'','Baseline', ...
+                            'Location','best')
 
 
-                       xticks(app.raw_density_fit,x_ticks);
-                       app.raw_density_fit.XAxis.Exponent = 0;
+                        xticks(app.raw_density_fit,x_ticks);
+                        app.raw_density_fit.XAxis.Exponent = 0;
 
-                       xlim(app.raw_density_fit,[0 x_t_end]);
-                       ylim(app.raw_density_fit,[1 max(y)]);
-                       legend(app.raw_density)
+                        xlim(app.raw_density_fit,[0 x_t_end]);
+                        ylim(app.raw_density_fit,[1 max(y)]);
+                        legend(app.raw_density)
 
 
-                       cla(app.background_corrected_raw_density)
-                       plot(app.background_corrected_raw_density, ...
-                           x-x_back',y,'-.k',"LineWidth",2)
-                       hold(app.background_corrected_raw_density,"on")
-                       plot(app.background_corrected_raw_density, ...
-                           zeros(1,numel(y)),y,'-.m',"LineWidth",2)
-                       legend(app.background_corrected_raw_density,'','Baseline', ...
-                           'Location','best')
-                       ylim(app.background_corrected_raw_density, ...
-                           [1 max(y)]);
-                       
-                       x_pow = ceil(log10(max(x-x_back')));
-                       x_tick_rounder = 10^(x_pow - 1);
-                       x_t_end = ceil(max(x-x_back')/x_tick_rounder)*x_tick_rounder;
-                       if min(x-x_back') < 0
-                           x_tick_rounder = -10^(x_pow - 1)*0.75;
-                       else
-                           x_tick_rounder = 10^(x_pow - 1)*0.75;
-                       end
-                       x_t_beginning = ceil(min(x-x_back')/x_tick_rounder)*x_tick_rounder;
-                       x_t_mid = round(x_t_end/2);
-                       if x_t_beginning < 0
-                           x_ticks = [x_t_beginning 0 x_t_mid x_t_end];
-                       else
-                           x_ticks = [x_t_beginning x_t_mid x_t_end];
-                       end
-                       app.background_corrected_raw_density.XAxis.Exponent = 0;
-                       xticks(app.background_corrected_raw_density,x_ticks)
-                       xlim(app.background_corrected_raw_density,[x_t_beginning x_t_end])
-                       ylim(app.background_corrected_raw_density,[1 max(y)]);
+                        cla(app.background_corrected_raw_density)
+                        plot(app.background_corrected_raw_density, ...
+                            x-x_back',y,'-.k',"LineWidth",2)
+                        hold(app.background_corrected_raw_density,"on")
+                        plot(app.background_corrected_raw_density, ...
+                            zeros(1,numel(y)),y,'-.m',"LineWidth",2)
+                        legend(app.background_corrected_raw_density,'','Baseline', ...
+                            'Location','best')
+                        ylim(app.background_corrected_raw_density, ...
+                            [1 max(y)]);
 
-                       xticks(app.background_corrected_raw_density_fit,x_ticks)
+                        x_pow = ceil(log10(max(x-x_back')));
+                        x_tick_rounder = 10^(x_pow - 1);
+                        x_t_end = ceil(max(x-x_back')/x_tick_rounder)*x_tick_rounder;
+                        if min(x-x_back') < 0
+                            x_tick_rounder = -10^(x_pow - 2)*0.25;
+                        else
+                            x_tick_rounder = 10^(x_pow - 2)*0.25;
+                        end
+                        x_t_beginning = ceil(min(x-x_back')/x_tick_rounder)*x_tick_rounder;
+                        x_t_mid = round(x_t_end/2);
+                        x_ticks = [x_t_beginning x_t_mid x_t_end];
+
+                        app.background_corrected_raw_density.XAxis.Exponent = 0;
+                        xticks(app.background_corrected_raw_density,x_ticks)
+                        xlim(app.background_corrected_raw_density,[x_t_beginning x_t_end])
+                        ylim(app.background_corrected_raw_density,[1 max(y)]);
+
+                        xticks(app.background_corrected_raw_density_fit,x_ticks)
                         app.background_corrected_raw_density_fit.XAxis.Exponent = 0;
-                       xlim(app.background_corrected_raw_density_fit,[x_t_beginning x_t_end])
-                       ylim(app.background_corrected_raw_density_fit,[1 max(y)]);
+                        xlim(app.background_corrected_raw_density_fit,[x_t_beginning x_t_end])
+                        ylim(app.background_corrected_raw_density_fit,[1 max(y)]);
 
-                       switch num_of_bands
-                           case 1
-                               color = {'r'};
-                               app.BandArea_1.Value = ...
-                               app.gel_data.summary(i).bottom;
-                           case 2
-                               color = {'r','b'};
-                               total_band = app.gel_data.summary(i).bottom ...
-                                   + app.gel_data.summary(i).top;
-                               app.BandArea_1.Value = ...
-                               app.gel_data.summary(i).bottom;
+                        switch num_of_bands
+                            case 1
+                                color = {'r'};
+                                app.BandArea_1.Value = ...
+                                    app.gel_data.summary(i).bottom;
+                            case 2
+                                color = {'r','b'};
+                                total_band = app.gel_data.summary(i).bottom ...
+                                    + app.gel_data.summary(i).top;
+                                app.BandArea_1.Value = ...
+                                    app.gel_data.summary(i).bottom;
 
-                               app.BandRelativeArea_1.Value = ...
-                               app.gel_data.summary(i).bottom/total_band;
+                                app.BandRelativeArea_1.Value = ...
+                                    app.gel_data.summary(i).bottom/total_band;
 
-                               app.BandArea_2.Value = ...
-                               app.gel_data.summary(i).top;
+                                app.BandArea_2.Value = ...
+                                    app.gel_data.summary(i).top;
 
-                               app.BandRelativeArea_2.Value = ...
-                               app.gel_data.summary(i).top/total_band;
-                           case 3
-                               color = {'r','b','g'};
-                               total_band = app.gel_data.summary(i).bottom ...
-                                   + app.gel_data.summary(i).middle ...
-                                   + app.gel_data.summary(i).top;
+                                app.BandRelativeArea_2.Value = ...
+                                    app.gel_data.summary(i).top/total_band;
+                            case 3
+                                color = {'r','b','y'};
+                                total_band = app.gel_data.summary(i).bottom ...
+                                    + app.gel_data.summary(i).middle ...
+                                    + app.gel_data.summary(i).top;
 
-                               app.BandArea_1.Value = ...
-                               app.gel_data.summary(i).bottom;
+                                app.BandArea_1.Value = ...
+                                    app.gel_data.summary(i).bottom;
 
-                               app.BandRelativeArea_1.Value = ...
-                               app.gel_data.summary(i).bottom/total_band;
+                                app.BandRelativeArea_1.Value = ...
+                                    app.gel_data.summary(i).bottom/total_band;
 
-                               app.BandArea_2.Value = ...
-                               app.gel_data.summary(i).middle;
+                                app.BandArea_2.Value = ...
+                                    app.gel_data.summary(i).middle;
 
-                               app.BandRelativeArea_2.Value = ...
-                               app.gel_data.summary(i).middle/total_band;
+                                app.BandRelativeArea_2.Value = ...
+                                    app.gel_data.summary(i).middle/total_band;
 
-                               app.BandArea_3.Value = ...
-                               app.gel_data.summary(i).top;
+                                app.BandArea_3.Value = ...
+                                    app.gel_data.summary(i).top;
 
-                               app.BandRelativeArea_3.Value = ...
-                               app.gel_data.summary(i).top/total_band;
-                       end
-                        
-                       
-                       cla(app.raw_density_fit)
-                       cla(app.background_corrected_raw_density_fit)
-                       plot(app.raw_density_fit, ...
-                           x,y,"Color",'k',"LineWidth",2)
-                       plot(app.background_corrected_raw_density_fit, ...
-                           x-x_back',y,'-.k',"LineWidth",2)
-                       for j = 1 : num_of_bands
+                                app.BandRelativeArea_3.Value = ...
+                                    app.gel_data.summary(i).top/total_band;
+                        end
+
+
+                        cla(app.raw_density_fit)
+                        cla(app.background_corrected_raw_density_fit)
+
+
+
+                        for j = 1 : num_of_bands
                             patch(app.raw_density_fit, ...
                                 x_back+x_bands(j,:), ...
                                 y,color{j},'FaceAlpha',0.25, ...
@@ -336,25 +332,41 @@ classdef GelBox < matlab.apps.AppBase
                                 y,color{j},'FaceAlpha',0.25, ...
                                 'EdgeColor',color{j},'EdgeAlpha',0.25, ...
                                 'LineWidth',2)
-                       end
-                       ylim(app.raw_density_fit, ...
-                           [1 max(y)]);
-                       ylim(app.background_corrected_raw_density_fit, ...
-                           [1 max(y)]);
+                        end
+
+                        f_color = '#1aff00';
+
+                        hold(app.background_corrected_raw_density_fit,"on")
+                        plot(app.background_corrected_raw_density_fit, ...
+                            x-x_back',y,'-.k',"LineWidth",2)
+                        plot(app.background_corrected_raw_density_fit, ...
+                            x_fit,y,':',"LineWidth",2,"Color",f_color)
+
+                        hold(app.raw_density_fit,"on")
+
+                        plot(app.raw_density_fit, ...
+                            x,y,"Color",'k',"LineWidth",2)
+                        plot(app.raw_density_fit, ...
+                            x_back+x_fit,y,':',"LineWidth",2,"Color",f_color)
+
+                        ylim(app.raw_density_fit, ...
+                            [1 max(y)]);
+                        ylim(app.background_corrected_raw_density_fit, ...
+                            [1 max(y)]);
                     end
                 end
                 app.gel_data.d_box = d;
             end
         end
-        
-       function [y_bands, y_fit,r_squared] = FitGaussian(app,x,y,y_back, ...
+
+        function [y_bands, y_fit,r_squared] = FitGaussian(app,x,y,y_back, ...
                 no_of_bands)
 
-           peaks=find_peaks('x',x, ...
-               'y',y, ...
-               'min_rel_delta_y',0.05, ...
-               'min_x_index_spacing',2);
-            
+            peaks=find_peaks('x',x, ...
+                'y',y, ...
+                'min_rel_delta_y',0.05, ...
+                'min_x_index_spacing',2);
+
             if numel(peaks.max_indices) == no_of_bands
                 first_curve_x_estimate=peaks.max_indices(1);
             else
@@ -374,10 +386,10 @@ classdef GelBox < matlab.apps.AppBase
             first_curve_skew_estimate = 1;
 
             par = [first_curve_x_estimate ...
-                   first_curve_shape_estimate ...
-                   first_curve_amp_estimate ...
-                   first_curve_skew_estimate ...
-                   ];
+                first_curve_shape_estimate ...
+                first_curve_amp_estimate ...
+                first_curve_skew_estimate ...
+                ];
 
             j = 1;
             e = [];
@@ -418,12 +430,12 @@ classdef GelBox < matlab.apps.AppBase
                 end
             end
             function [y_bands,y_fit] = calculate_profile(x,par)
-                
+
                 x1 = par(1);
                 curve_shape1 = par(2);
                 amp1 = par(3);
                 skew1 = par(4);
-                
+
                 y_first = skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
 
                 y_fit = y_first;
@@ -435,17 +447,17 @@ classdef GelBox < matlab.apps.AppBase
                 offset((x-x0)>0) = skew1*(x((x-x0)>0)-x0);
                 y=  A*exp(-gamma*(((x-x0)+offset).^2));
             end
-            
-            
+
+
         end
-        
+
         function [y_bands, y_fit,r_squared] = Fit2Gaussian(app,x,y,...
                 y_back,no_of_bands)
             peaks=find_peaks('x',x, ...
-                             'y',y, ...
-                             'min_rel_delta_y',0.05, ...
-                             'min_x_index_spacing',2);
-            
+                'y',y, ...
+                'min_rel_delta_y',0.05, ...
+                'min_x_index_spacing',2);
+
             if numel(peaks.max_indices) == no_of_bands
                 first_curve_x_estimate=peaks.max_indices(1);
                 second_curve_x_estimate=peaks.max_indices(2);
@@ -465,19 +477,19 @@ classdef GelBox < matlab.apps.AppBase
             first_curve_shape_estimate = alfa_estimate;
             first_curve_amp_estimate = max_value;
             first_curve_skew_estimate = 1;
-    
+
             second_curve_amp_estimate = first_curve_amp_estimate;
             second_curve_shape_estimate = alfa_estimate;
             second_curve_skew_estimate = 1;
 
-            
+
             par = [first_curve_x_estimate ...
-                   first_curve_shape_estimate ...
-                   first_curve_amp_estimate ...
-                   first_curve_skew_estimate ...
-                   second_curve_x_estimate ...
-                   second_curve_amp_estimate ...
-                   ];
+                first_curve_shape_estimate ...
+                first_curve_amp_estimate ...
+                first_curve_skew_estimate ...
+                second_curve_x_estimate ...
+                second_curve_amp_estimate ...
+                ];
 
             if ~app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
                 par(7) = second_curve_shape_estimate;
@@ -498,7 +510,7 @@ classdef GelBox < matlab.apps.AppBase
             opts.MaxFunEvals=10000;
 
             [p_result,fval,exitflag,output] = fminsearch(@profile_error_2gaussian, par, opts);
-            
+
             p_result;
             r_squared = calculate_r_squared(y',y_fit+y_back);
 
@@ -523,7 +535,7 @@ classdef GelBox < matlab.apps.AppBase
                 if any(par<0)
                     trial_e = 10^12;
                 end
-                
+
                 for i = 1:2
                     areas(i) = trapz(x,y_bands(i,:));
                 end
@@ -553,17 +565,17 @@ classdef GelBox < matlab.apps.AppBase
                 skew1 = par(4);
                 x2 = par(5);
                 amp2 = par(6);
-                                
+
                 if ~app.fitting_options.shared_shape && ...
-                    ~app.fitting_options.shared_skewness
+                        ~app.fitting_options.shared_skewness
                     curve_shape2 = par(7);
                     skew2 = par(8);
                 elseif ~app.fitting_options.shared_shape && ...
-                    app.fitting_options.shared_skewness
+                        app.fitting_options.shared_skewness
                     curve_shape2 = par(7);
                     skew2 = skew1;
                 elseif app.fitting_options.shared_shape && ...
-                    ~app.fitting_options.shared_skewness
+                        ~app.fitting_options.shared_skewness
                     curve_shape2 = curve_shape1;
                     skew2 = par(7);
                 else
@@ -589,10 +601,10 @@ classdef GelBox < matlab.apps.AppBase
         function [y_bands, y_fit,r_squared] = Fit3Gaussian(app,x,y,y_back, ...
                 no_of_bands)
             peaks=find_peaks('x',x, ...
-                             'y',y, ...
-                             'min_rel_delta_y',0.05, ...
-                             'min_x_index_spacing',2);
-            
+                'y',y, ...
+                'min_rel_delta_y',0.05, ...
+                'min_x_index_spacing',2);
+
             if numel(peaks.max_indices) == no_of_bands
                 first_curve_x_estimate=peaks.max_indices(1);
                 second_curve_x_estimate=peaks.max_indices(2);
@@ -614,7 +626,7 @@ classdef GelBox < matlab.apps.AppBase
             first_curve_shape_estimate = alfa_estimate;
             first_curve_amp_estimate = max_value;
             first_curve_skew_estimate = 1;
-    
+
             second_curve_amp_estimate = first_curve_amp_estimate;
             second_curve_shape_estimate = alfa_estimate;
             second_curve_skew_estimate = 1;
@@ -624,14 +636,14 @@ classdef GelBox < matlab.apps.AppBase
             third_curve_skew_estimate = 1;
 
             par = [first_curve_x_estimate ...
-                   first_curve_shape_estimate ...
-                   first_curve_amp_estimate ...
-                   first_curve_skew_estimate ...
-                   second_curve_x_estimate ...
-                   second_curve_amp_estimate ...
-                   third_curve_x_estimate ...
-                   third_curve_amp_estimate ...
-                   ];
+                first_curve_shape_estimate ...
+                first_curve_amp_estimate ...
+                first_curve_skew_estimate ...
+                second_curve_x_estimate ...
+                second_curve_amp_estimate ...
+                third_curve_x_estimate ...
+                third_curve_amp_estimate ...
+                ];
 
             if ~app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
                 par(9) = second_curve_shape_estimate;
@@ -681,7 +693,7 @@ classdef GelBox < matlab.apps.AppBase
                 if any(par<0)
                     trial_e = 10^12;
                 end
-                
+
                 for i = 1:3
                     areas(i) = trapz(x,y_bands(i,:));
                 end
@@ -702,7 +714,7 @@ classdef GelBox < matlab.apps.AppBase
                 end
             end
             function [y_bands,y_fit] = calculate_3profile(x,par)
-                
+
                 x1 = par(1);
                 curve_shape1 = par(2);
                 amp1 = par(3);
@@ -711,21 +723,21 @@ classdef GelBox < matlab.apps.AppBase
                 amp2 = par(6);
                 x3 = par(7);
                 amp3 = par(8);
-                
+
                 if ~app.fitting_options.shared_shape && ...
-                    ~app.fitting_options.shared_skewness
+                        ~app.fitting_options.shared_skewness
                     curve_shape2 = par(9);
                     skew2 = par(10);
                     curve_shape3 = par(11);
                     skew3 = par(12);
                 elseif ~app.fitting_options.shared_shape && ...
-                    app.fitting_options.shared_skewness
+                        app.fitting_options.shared_skewness
                     curve_shape2 = par(9);
                     skew2 = skew1;
                     curve_shape3 = par(10);
                     skew3 = skew1;
                 elseif app.fitting_options.shared_shape && ...
-                    ~app.fitting_options.shared_skewness
+                        ~app.fitting_options.shared_skewness
                     curve_shape2 = curve_shape1;
                     skew2 = par(9);
                     curve_shape3 = curve_shape1;
@@ -736,7 +748,7 @@ classdef GelBox < matlab.apps.AppBase
                     curve_shape3 = curve_shape1;
                     skew3 = skew1;
                 end
-              
+
                 y_first = skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
                 y_second = skewed_Gaussian(x,x2,curve_shape2,amp2,skew2);
                 y_third = skewed_Gaussian(x,x3,curve_shape3,amp3,skew3);
@@ -754,16 +766,16 @@ classdef GelBox < matlab.apps.AppBase
                 y=  A*exp(-gamma*(((x-x0)+offset).^2));
             end
         end
-        
+
         function UpdateFittingOptions(app,shape,skewness)
             app.fitting_options.shared_shape = shape;
             app.fitting_options.shared_skewness = skewness;
             UpdateDisplay(app)
         end
     end
-    
+
     methods (Access = private)
-        
+
         function ResetDisplay(app)
 
             % Clear the figure displays
@@ -786,7 +798,7 @@ classdef GelBox < matlab.apps.AppBase
             app.BandRelativeArea_1.Value = 0;
             app.BandRelativeArea_2.Value = 0;
             app.BandRelativeArea_3.Value = 0;
-            
+
             % Reset number of bands
             app.NumberofBandsDropDown.Value = '1';
             app.NumberofBandsDropDownValueChanged;
@@ -796,10 +808,10 @@ classdef GelBox < matlab.apps.AppBase
             control_strings = {'1'};
             app.BoxSelectionDropDown.Items = control_strings;
             app.BoxSelectionDropDown.Value = control_strings{1};
-            
+
         end
     end
-    
+
 
     % Callbacks that handle component events
     methods (Access = private)
@@ -823,10 +835,11 @@ classdef GelBox < matlab.apps.AppBase
                 {'*.png','PNG';'*.tif','TIF'}, ...
                 'Select image file');
             if (path_string~=0)
-                
+
                 ResetDisplay(app)
                 app.GelImageFileInformationMenu.Enable = 1;
                 app.SelectedBoxInformationMenu.Enable = 1;
+                app.AnalysisSummaryPlotMenu.Enable = 1;
                 app.gel_data = [];
 
                 app.gel_data.invert_status = 0;
@@ -835,10 +848,10 @@ classdef GelBox < matlab.apps.AppBase
                 if (ndims(app.gel_data.im_data)==3)
                     app.gel_data.im_data = rgb2gray(app.gel_data.im_data);
                 end
-                
+
                 center_image_with_preserved_aspect_ratio( ...
-                app.gel_data.im_data, ...
-                app.gel_image_axes);
+                    app.gel_data.im_data, ...
+                    app.gel_image_axes);
 
                 app.gel_data.imfinfo = imfinfo(app.gel_data.image_file_string);
 
@@ -868,11 +881,11 @@ classdef GelBox < matlab.apps.AppBase
                 {'*.gdf','Gel data file'},'Select file to load prior analysis');
 
             if (path_string~=0)
-                
+
                 app.DeleteBoxButton.Enable = 1;
-                app.OutputButton.Enable = 1;
                 app.GelImageFileInformationMenu.Enable = 1;
                 app.SelectedBoxInformationMenu.Enable = 1;
+                app.AnalysisSummaryPlotMenu.Enable = 1;
 
                 temp = load(fullfile(path_string,file_string),'-mat','save_data');
                 save_data = temp.save_data;
@@ -924,7 +937,7 @@ classdef GelBox < matlab.apps.AppBase
                 % Need this to make labels
                 drawnow;
             end
-            
+
             UpdateDisplay(app)
 
             % Nested function
@@ -984,7 +997,7 @@ classdef GelBox < matlab.apps.AppBase
 
             app.BoxSelectionDropDown.Items = control_strings;
             app.BoxSelectionDropDown.Value = control_strings{n};
-            
+
             app.DeleteBoxButton.Enable = 1;
             app.SelectedBoxInformationMenu.Enable = 1;
             UpdateDisplay(app);
@@ -997,7 +1010,7 @@ classdef GelBox < matlab.apps.AppBase
                         UpdateDisplay(app);
                     end
                 else
-                        UpdateDisplay(app);
+                    UpdateDisplay(app);
                 end
             end
 
@@ -1006,22 +1019,22 @@ classdef GelBox < matlab.apps.AppBase
         % Value changed function: NumberofBandsDropDown
         function NumberofBandsDropDownValueChanged(app, event)
             value = app.NumberofBandsDropDown.Value;
-            
+
             switch value
                 case '1'
                     try
-                    app.BandArea_2.Value = 0;
-                    app.BandArea_2.Enable = 0;
-                    app.BandRelativeArea_2.Value = 0;
-                    app.BandRelativeArea_2.Enable = 0;
-                    app.BandAreaLabel_2.Enable = 0;
-                    app.BandRelativeAreaLabel_2.Enable = 0;
-                    app.BandArea_3.Value = 0;
-                    app.BandArea_3.Enable = 0;
-                    app.BandRelativeArea_3.Value = 0;
-                    app.BandRelativeArea_3.Enable = 0;
-                    app.BandAreaLabel_3.Enable = 0;
-                    app.BandRelativeAreaLabel_3.Enable = 0;
+                        app.BandArea_2.Value = 0;
+                        app.BandArea_2.Enable = 0;
+                        app.BandRelativeArea_2.Value = 0;
+                        app.BandRelativeArea_2.Enable = 0;
+                        app.BandAreaLabel_2.Enable = 0;
+                        app.BandRelativeAreaLabel_2.Enable = 0;
+                        app.BandArea_3.Value = 0;
+                        app.BandArea_3.Enable = 0;
+                        app.BandRelativeArea_3.Value = 0;
+                        app.BandRelativeArea_3.Enable = 0;
+                        app.BandAreaLabel_3.Enable = 0;
+                        app.BandRelativeAreaLabel_3.Enable = 0;
                     end
                 case '2'
                     app.BandRelativeArea_1.Enable = 1;
@@ -1031,12 +1044,12 @@ classdef GelBox < matlab.apps.AppBase
                     app.BandAreaLabel_2.Enable = 1;
                     app.BandRelativeAreaLabel_2.Enable = 1;
                     try
-                    app.BandArea_3.Value = 0;
-                    app.BandArea_3.Enable = 0;
-                    app.BandRelativeArea_3.Enable = 0;
-                    app.BandRelativeArea_3.Value = 0;
-                    app.BandAreaLabel_3.Enable = 0;
-                    app.BandRelativeAreaLabel_3.Enable = 0;
+                        app.BandArea_3.Value = 0;
+                        app.BandArea_3.Enable = 0;
+                        app.BandRelativeArea_3.Enable = 0;
+                        app.BandRelativeArea_3.Value = 0;
+                        app.BandAreaLabel_3.Enable = 0;
+                        app.BandRelativeAreaLabel_3.Enable = 0;
                     end
 
                 case '3'
@@ -1080,7 +1093,7 @@ classdef GelBox < matlab.apps.AppBase
         function BoxSelectionDropDownValueChanged(app, event)
             selected_box = str2num(app.BoxSelectionDropDown.Value);
             control_strings = app.BoxSelectionDropDown.Items;
-            
+
             n = numel(control_strings);
             for i=1:n
                 if (i~=selected_box)
@@ -1093,15 +1106,15 @@ classdef GelBox < matlab.apps.AppBase
             end
 
             UpdateDisplay(app)
-            
-            
+
+
         end
 
         % Button pushed function: DeleteBoxButton
         function DeleteBoxButtonPushed(app, event)
             selected_box = str2num(app.BoxSelectionDropDown.Value);
             control_strings = app.BoxSelectionDropDown.Items;
-            
+
             delete(app.gel_data.box_handle(selected_box))
             delete(app.gel_data.box_label(selected_box))
             app.gel_data.box_handle(selected_box) = [];
@@ -1132,7 +1145,7 @@ classdef GelBox < matlab.apps.AppBase
                     app.gel_data.box_handle(i).InteractionsAllowed = 'all';
                 end
             end
-            
+
             app.gel_data.box_label = [];
             for i = 1:n
                 p = app.gel_data.box_handle(i).Position;
@@ -1144,14 +1157,16 @@ classdef GelBox < matlab.apps.AppBase
             end
         end
 
-        % Menu selected function: OutputMenu
+        % Menu selected function: ExportResultsMenu
         function OutputButtonPushed(app, event)
             d = [];
             d.image_file{1} = app.gel_data.image_file_string;
             n = numel(app.gel_data.box_handle);
-
+            for i = 2 : n
+            d.image_file{i,1} = '';
+            end
             for i=1:n
-                d.band(i) = i;
+                d.box(i) = i;
                 d.total_area(i) = app.gel_data.box_data(i).total_area;
                 d.background_area(i) = app.gel_data.box_data(i).background_area;
                 num_of_bands = numel(app.gel_data.box_data(i).band_area);
@@ -1172,12 +1187,74 @@ classdef GelBox < matlab.apps.AppBase
                 d.band_width(i) = app.gel_data.box_data(i).position(3);
                 d.band_height(i) = app.gel_data.box_data(i).position(4);
                 d.fitting_mode{i} = app.gel_data.box_data(i).fitting_mode;
-                d.num_of_bands(i) = band_orientation;
+                d.num_of_bands(i) = num_of_bands;
                 d.r_squared(i) = app.gel_data.summary(i).r_squared;
             end
 
             [file_string,path_string] = uiputfile2( ...
                 {'*.xlsx','Excel file'},'Select file for results');
+            
+            d_out = d;
+            names = fieldnames(d_out);
+            
+            for j = 1 : length(d_out)
+                for i = 1 : numel(names)
+
+                    [row,col] = size(d_out(j).(names{i}));
+
+                    if row == 1 && col ~= 1
+                        d_out(j).(names{i}) = (d_out(j).(names{i}))';
+                    end
+                end
+                
+            end
+            
+            output_file = fullfile(path_string,file_string);
+            writetable(struct2table(d_out),output_file)
+             
+            output_file_string_f = strrep(output_file,'.xlsx','_fits.xlsx');
+            output_file_string_i = strrep(output_file,'.xlsx','_insets.xlsx');
+            summary = app.gel_data.summary;
+
+            for i = 1:n
+                i_name = sprintf('box_%i',i);
+                insets.(i_name) = summary(i).inset;
+            end
+
+            switch num_of_bands
+                case 1
+                    summary = rmfield(summary,'bottom');
+
+                case 2
+                    summary = rmfield(summary,'bottom');
+                    summary = rmfield(summary,'top');
+
+
+                case 3
+                    summary = rmfield(summary,'bottom');
+                    summary = rmfield(summary,'middle');
+                    summary = rmfield(summary,'top');
+
+            end
+            summary = rmfield(summary,'r_squared');
+            summary = rmfield(summary,'inset');
+
+            names = fieldnames(summary);
+            for j = 1 : length(summary)
+                for i = 1 : numel(names)
+
+                    [row,col] = size(summary(j).(names{i}));
+
+                    if row == 1 && col ~= 1
+                        summary(j).(names{i}) = (summary(j).(names{i}))';
+                    end
+                end
+                sheet = sprintf('box_%i',j);
+                writetable(struct2table(summary(j)),output_file_string_f,'Sheet',sheet)
+                writematrix(insets.(sheet),output_file_string_i,'Sheet',sheet)
+            end
+
+
         end
 
         % Menu selected function: GelImageFileInformationMenu
@@ -1191,7 +1268,7 @@ classdef GelBox < matlab.apps.AppBase
             delete(app.SelectedBoxTextDialog)
             delete(app.FittingOptions)
             delete(app)
-            
+
         end
 
         % Menu selected function: SelectedBoxInformationMenu
@@ -1248,10 +1325,10 @@ classdef GelBox < matlab.apps.AppBase
             app.SaveAnalysisMenu.MenuSelectedFcn = createCallbackFcn(app, @SaveAnalysisButtonPushed, true);
             app.SaveAnalysisMenu.Text = 'Save Analysis';
 
-            % Create OutputMenu
-            app.OutputMenu = uimenu(app.FileMenu);
-            app.OutputMenu.MenuSelectedFcn = createCallbackFcn(app, @OutputButtonPushed, true);
-            app.OutputMenu.Text = 'Output';
+            % Create ExportResultsMenu
+            app.ExportResultsMenu = uimenu(app.FileMenu);
+            app.ExportResultsMenu.MenuSelectedFcn = createCallbackFcn(app, @OutputButtonPushed, true);
+            app.ExportResultsMenu.Text = 'Export Results';
 
             % Create GelImageFileInformationMenu
             app.GelImageFileInformationMenu = uimenu(app.GelBoxUIFigure);
@@ -1268,6 +1345,7 @@ classdef GelBox < matlab.apps.AppBase
             % Create AnalysisSummaryPlotMenu
             app.AnalysisSummaryPlotMenu = uimenu(app.GelBoxUIFigure);
             app.AnalysisSummaryPlotMenu.MenuSelectedFcn = createCallbackFcn(app, @AnalysisSummaryPlotMenuSelected, true);
+            app.AnalysisSummaryPlotMenu.Enable = 'off';
             app.AnalysisSummaryPlotMenu.Text = 'Analysis Summary Plot';
 
             % Create OpticalDensitiesPanel
@@ -1427,7 +1505,7 @@ classdef GelBox < matlab.apps.AppBase
 
             % Create rsquaredField
             app.rsquaredField = uieditfield(app.FittingPanel, 'numeric');
-            app.rsquaredField.ValueDisplayFormat = '%.2f';
+            app.rsquaredField.ValueDisplayFormat = '%.3f';
             app.rsquaredField.Editable = 'off';
             app.rsquaredField.HorizontalAlignment = 'center';
             app.rsquaredField.Position = [588 154 70 22];
@@ -1497,8 +1575,8 @@ classdef GelBox < matlab.apps.AppBase
             app.BandAreaLabel_3.HorizontalAlignment = 'center';
             app.BandAreaLabel_3.WordWrap = 'on';
             app.BandAreaLabel_3.Enable = 'off';
-            app.BandAreaLabel_3.Position = [511 37 72 28];
-            app.BandAreaLabel_3.Text = 'Band Area 3 (Green)';
+            app.BandAreaLabel_3.Position = [511 35 72 30];
+            app.BandAreaLabel_3.Text = 'Band Area 3 (Yellow)';
 
             % Create BandArea_3
             app.BandArea_3 = uieditfield(app.FittingPanel, 'numeric');
@@ -1513,7 +1591,7 @@ classdef GelBox < matlab.apps.AppBase
             app.BandRelativeAreaLabel_3.WordWrap = 'on';
             app.BandRelativeAreaLabel_3.Enable = 'off';
             app.BandRelativeAreaLabel_3.Position = [668 29 81 42];
-            app.BandRelativeAreaLabel_3.Text = 'Band Relative Area 3 (Green)';
+            app.BandRelativeAreaLabel_3.Text = 'Band Relative Area 3 (Yellow)';
 
             % Create BandRelativeArea_3
             app.BandRelativeArea_3 = uieditfield(app.FittingPanel, 'numeric');
