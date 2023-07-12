@@ -10,9 +10,10 @@ classdef GelBox < matlab.apps.AppBase
         LoadAnalysisMenu             matlab.ui.container.Menu
         SaveAnalysisMenu             matlab.ui.container.Menu
         ExportResultsMenu            matlab.ui.container.Menu
+        DataAnalysisMenu             matlab.ui.container.Menu
         GelImageFileInformationMenu  matlab.ui.container.Menu
         SelectedBoxInformationMenu   matlab.ui.container.Menu
-        AnalysisSummaryPlotMenu      matlab.ui.container.Menu
+        SummaryPlotMenu              matlab.ui.container.Menu
         FittingPanel                 matlab.ui.container.Panel
         FittingOptionsButton         matlab.ui.control.Button
         NumberofBandsDropDown        matlab.ui.control.DropDown
@@ -528,12 +529,12 @@ classdef GelBox < matlab.apps.AppBase
 
                 for i = 1:2
                     if any(y_bands(i,:)<0)
-                        trial_e = 10^12;
+                        trial_e = trial_e + 10^12;
                     end
                 end
 
                 if any(par<0)
-                    trial_e = 10^12;
+                    trial_e = trial_e + 10^12;
                 end
 
                 for i = 1:2
@@ -541,7 +542,13 @@ classdef GelBox < matlab.apps.AppBase
                 end
 
                 if any(areas<0)
-                    trial_e = 10^12;
+                    trial_e = trial_e + 10^12;
+                end
+
+               positions = [par(1) par(5)];
+
+                if any(positions>numel(x))
+                    trial_e = trial_e + 10^12;
                 end
 
                 r_squared_iter = calculate_r_squared(target,y_fit);
@@ -610,9 +617,9 @@ classdef GelBox < matlab.apps.AppBase
                 second_curve_x_estimate=peaks.max_indices(2);
                 third_curve_x_estimate=peaks.max_indices(3);
             else
-                first_curve_x_estimate = 0.3*length(x);
-                second_curve_x_estimate = 0.6*length(x);
-                third_curve_x_estimate = 0.9*length(x);
+                first_curve_x_estimate = 0.2*length(x);
+                second_curve_x_estimate = 0.3*length(x);
+                third_curve_x_estimate = 0.6*length(x);
             end
 
             target = y';
@@ -671,13 +678,10 @@ classdef GelBox < matlab.apps.AppBase
             [p_result,fval,exitflag,output] = fminsearch(@profile_error_3gaussian, par, opts);
 
             r_squared = calculate_r_squared(y',y_fit+y_back);
-
             function trial_e = profile_error_3gaussian(par)
-
                 [y_bands,y_fit] = calculate_3profile(x,par);
-
+                
                 e(j) = 0;
-
                 for i  = 1 : numel(target)
                     e(j) = e(j) + (y_fit(i) - target(i))^2;
                 end
@@ -686,12 +690,12 @@ classdef GelBox < matlab.apps.AppBase
 
                 for i = 1:3
                     if any(y_bands(i,:)<0)
-                        trial_e = 10^12;
+                        trial_e = trial_e + 10^12;
                     end
                 end
 
                 if any(par<0)
-                    trial_e = 10^12;
+                    trial_e = trial_e + 10^12;
                 end
 
                 for i = 1:3
@@ -699,7 +703,13 @@ classdef GelBox < matlab.apps.AppBase
                 end
 
                 if any(areas<0)
-                    trial_e = 10^12;
+                    trial_e = trial_e + 10^12;
+                end
+
+                positions = [par(1) par(5) par(7)];
+
+                if any(positions>numel(x))
+                    trial_e = trial_e + 10^12;
                 end
 
                 r_squared_iter = calculate_r_squared(target,y_fit);
@@ -836,9 +846,7 @@ classdef GelBox < matlab.apps.AppBase
             if (path_string~=0)
 
                 ResetDisplay(app)
-                app.GelImageFileInformationMenu.Enable = 1;
-                app.SelectedBoxInformationMenu.Enable = 1;
-                app.AnalysisSummaryPlotMenu.Enable = 1;
+                app.DataAnalysisMenu.Enable = 1;
                 app.gel_data = [];
 
                 app.gel_data.invert_status = 0;
@@ -882,9 +890,7 @@ classdef GelBox < matlab.apps.AppBase
             if (path_string~=0)
 
                 app.DeleteBoxButton.Enable = 1;
-                app.GelImageFileInformationMenu.Enable = 1;
-                app.SelectedBoxInformationMenu.Enable = 1;
-                app.AnalysisSummaryPlotMenu.Enable = 1;
+                app.DataAnalysisMenu.Enable = 1;
 
                 temp = load(fullfile(path_string,file_string),'-mat','save_data');
                 save_data = temp.save_data;
@@ -930,7 +936,7 @@ classdef GelBox < matlab.apps.AppBase
                     app.gel_data.old_height = p(4);
 
                     i=i;
-                    addlistener(app.gel_data.box_handle(i),"ROIMoved",@(src,evt) new_box_position2(evt));
+                    addlistener(app.gel_data.box_handle(i),"MovingROI",@(src,evt) new_box_position2(evt));
                 end
 
                 % Need this to make labels
@@ -973,7 +979,7 @@ classdef GelBox < matlab.apps.AppBase
                 end
             end
 
-            addlistener(app.gel_data.box_handle(n),"ROIMoved", ...
+            addlistener(app.gel_data.box_handle(n),"MovingROI", ...
                 @(src,evt) new_box_position(evt));
 
             % Set color to last box
@@ -1021,6 +1027,7 @@ classdef GelBox < matlab.apps.AppBase
             switch value
                 case '1'
                     try
+                        app.BandRelativeAreaLabel_1.Enable = 0;
                         app.BandArea_2.Value = 0;
                         app.BandArea_2.Enable = 0;
                         app.BandRelativeArea_2.Value = 0;
@@ -1051,6 +1058,8 @@ classdef GelBox < matlab.apps.AppBase
                     end
 
                 case '3'
+                    app.BandRelativeArea_1.Enable = 1;
+                    app.BandRelativeAreaLabel_1.Enable = 1;
                     app.BandArea_2.Enable = 1;
                     app.BandRelativeArea_2.Enable = 1;
                     app.BandAreaLabel_2.Enable = 1;
@@ -1280,7 +1289,7 @@ classdef GelBox < matlab.apps.AppBase
 
         end
 
-        % Menu selected function: AnalysisSummaryPlotMenu
+        % Menu selected function: SummaryPlotMenu
         function AnalysisSummaryPlotMenuSelected(app, event)
             app.SummaryPlot = SummaryPlotWindow(app);
         end
@@ -1311,45 +1320,53 @@ classdef GelBox < matlab.apps.AppBase
             % Create InvertImageMenu
             app.InvertImageMenu = uimenu(app.FileMenu);
             app.InvertImageMenu.MenuSelectedFcn = createCallbackFcn(app, @InvertImageButtonPushed, true);
+            app.InvertImageMenu.Separator = 'on';
             app.InvertImageMenu.Text = 'Invert Image';
 
             % Create LoadAnalysisMenu
             app.LoadAnalysisMenu = uimenu(app.FileMenu);
             app.LoadAnalysisMenu.MenuSelectedFcn = createCallbackFcn(app, @LoadAnalysisButtonPushed, true);
+            app.LoadAnalysisMenu.Separator = 'on';
             app.LoadAnalysisMenu.Text = 'Load Analysis';
 
             % Create SaveAnalysisMenu
             app.SaveAnalysisMenu = uimenu(app.FileMenu);
             app.SaveAnalysisMenu.MenuSelectedFcn = createCallbackFcn(app, @SaveAnalysisButtonPushed, true);
+            app.SaveAnalysisMenu.Separator = 'on';
             app.SaveAnalysisMenu.Text = 'Save Analysis';
 
             % Create ExportResultsMenu
             app.ExportResultsMenu = uimenu(app.FileMenu);
             app.ExportResultsMenu.MenuSelectedFcn = createCallbackFcn(app, @OutputButtonPushed, true);
+            app.ExportResultsMenu.Separator = 'on';
             app.ExportResultsMenu.Text = 'Export Results';
 
+            % Create DataAnalysisMenu
+            app.DataAnalysisMenu = uimenu(app.GelBoxUIFigure);
+            app.DataAnalysisMenu.Enable = 'off';
+            app.DataAnalysisMenu.Text = 'Data Analysis';
+
             % Create GelImageFileInformationMenu
-            app.GelImageFileInformationMenu = uimenu(app.GelBoxUIFigure);
+            app.GelImageFileInformationMenu = uimenu(app.DataAnalysisMenu);
             app.GelImageFileInformationMenu.MenuSelectedFcn = createCallbackFcn(app, @GelImageFileInformationMenuSelected, true);
-            app.GelImageFileInformationMenu.Enable = 'off';
             app.GelImageFileInformationMenu.Text = 'Gel Image File Information';
 
             % Create SelectedBoxInformationMenu
-            app.SelectedBoxInformationMenu = uimenu(app.GelBoxUIFigure);
+            app.SelectedBoxInformationMenu = uimenu(app.DataAnalysisMenu);
             app.SelectedBoxInformationMenu.MenuSelectedFcn = createCallbackFcn(app, @SelectedBoxInformationMenuSelected, true);
-            app.SelectedBoxInformationMenu.Enable = 'off';
+            app.SelectedBoxInformationMenu.Separator = 'on';
             app.SelectedBoxInformationMenu.Text = 'Selected Box Information';
 
-            % Create AnalysisSummaryPlotMenu
-            app.AnalysisSummaryPlotMenu = uimenu(app.GelBoxUIFigure);
-            app.AnalysisSummaryPlotMenu.MenuSelectedFcn = createCallbackFcn(app, @AnalysisSummaryPlotMenuSelected, true);
-            app.AnalysisSummaryPlotMenu.Enable = 'off';
-            app.AnalysisSummaryPlotMenu.Text = 'Analysis Summary Plot';
+            % Create SummaryPlotMenu
+            app.SummaryPlotMenu = uimenu(app.DataAnalysisMenu);
+            app.SummaryPlotMenu.MenuSelectedFcn = createCallbackFcn(app, @AnalysisSummaryPlotMenuSelected, true);
+            app.SummaryPlotMenu.Separator = 'on';
+            app.SummaryPlotMenu.Text = 'Summary Plot';
 
             % Create OpticalDensitiesPanel
             app.OpticalDensitiesPanel = uipanel(app.GelBoxUIFigure);
             app.OpticalDensitiesPanel.Title = 'Optical Densities';
-            app.OpticalDensitiesPanel.Position = [7 299 836 278];
+            app.OpticalDensitiesPanel.Position = [875 299 836 278];
 
             % Create raw_density
             app.raw_density = uiaxes(app.OpticalDensitiesPanel);
@@ -1421,14 +1438,13 @@ classdef GelBox < matlab.apps.AppBase
             % Create GelImagePanel
             app.GelImagePanel = uipanel(app.GelBoxUIFigure);
             app.GelImagePanel.Title = 'Gel Image';
-            app.GelImagePanel.Position = [853 10 860 567];
+            app.GelImagePanel.Position = [6 10 860 567];
 
             % Create gel_image_axes
             app.gel_image_axes = uiaxes(app.GelImagePanel);
             app.gel_image_axes.XTick = [];
             app.gel_image_axes.YTick = [];
             app.gel_image_axes.Box = 'on';
-            app.gel_image_axes.Visible = 'off';
             app.gel_image_axes.Position = [12 13 837 487];
 
             % Create DeleteBoxButton
@@ -1461,7 +1477,7 @@ classdef GelBox < matlab.apps.AppBase
             % Create FittingPanel
             app.FittingPanel = uipanel(app.GelBoxUIFigure);
             app.FittingPanel.Title = 'Fitting';
-            app.FittingPanel.Position = [7 10 836 277];
+            app.FittingPanel.Position = [875 10 836 277];
 
             % Create background_corrected_raw_density_fit
             app.background_corrected_raw_density_fit = uiaxes(app.FittingPanel);
