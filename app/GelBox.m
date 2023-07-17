@@ -15,7 +15,7 @@ classdef GelBox < matlab.apps.AppBase
         SelectedBoxInformationMenu   matlab.ui.container.Menu
         SummaryPlotMenu              matlab.ui.container.Menu
         FittingPanel                 matlab.ui.container.Panel
-        FittingOptionsButton         matlab.ui.control.Button
+        FittingParametersButton      matlab.ui.control.Button
         NumberofBandsDropDown        matlab.ui.control.DropDown
         NumberofBandsDropDownLabel   matlab.ui.control.Label
         BandRelativeArea_3           matlab.ui.control.NumericEditField
@@ -60,6 +60,7 @@ classdef GelBox < matlab.apps.AppBase
     properties (Access = public)
         gel_data % Description
         fitting_options
+        parametersupdated = 0
     end
 
     properties (Access = private)
@@ -128,20 +129,32 @@ classdef GelBox < matlab.apps.AppBase
                     switch num_of_bands
                         case 1
                             app.BandRelativeArea_1.Enable = 0;
+                            if ~app.parametersupdated
+                            EstimateFittingParameters(app,y,x, ...
+                                x_back,num_of_bands)
+                            end
                             [x_bands,x_fit,r_squared] = ...
-                                FitGaussian(app,y,x,x_back,num_of_bands);
+                                FitGaussian(app,y,x,x_back);
                         case 2
                             if ~app.BandRelativeArea_1.Enable
                                 app.BandRelativeArea_1.Enable = 1;
                             end
+                            if ~app.parametersupdated
+                            EstimateFittingParameters(app,y,x, ...
+                                x_back,num_of_bands)
+                            end
                             [x_bands,x_fit,r_squared] = ...
-                                Fit2Gaussian(app,y,x,x_back,num_of_bands);
+                                Fit2Gaussian(app,y,x,x_back);
                         case 3
                             if ~app.BandRelativeArea_1.Enable
                                 app.BandRelativeArea_1.Enable = 1;
                             end
+                            if ~app.parametersupdated
+                                EstimateFittingParameters(app,y,x, ...
+                                    x_back,num_of_bands)
+                            end
                             [x_bands,x_fit,r_squared] = ...
-                                Fit3Gaussian(app,y,x,x_back,num_of_bands);
+                                Fit3Gaussian(app,y,x,x_back);
                     end
 
                     d.box(i).total_area = trapz(y,x);
@@ -360,37 +373,17 @@ classdef GelBox < matlab.apps.AppBase
             end
         end
 
-        function [y_bands, y_fit,r_squared] = FitGaussian(app,x,y,y_back, ...
-                no_of_bands)
+        function [y_bands, y_fit,r_squared] = FitGaussian(app,x,y,y_back)
 
-            peaks=find_peaks('x',x, ...
-                'y',y, ...
-                'min_rel_delta_y',0.05, ...
-                'min_x_index_spacing',2);
-
-            if numel(peaks.max_indices) == no_of_bands
-                first_curve_x_estimate=peaks.max_indices(1);
-            else
-                first_curve_x_estimate = 0.5*length(x);
-            end
-
+            par = [app.gel_data.par_est.peak_location(1) ...
+                app.gel_data.par_est.shape_parameter(1) ...
+                app.gel_data.par_est.amplitude(1) ...
+                app.gel_data.par_est.skew_parameter(1) ...
+                ];
+            
             target = y';
 
             target = target - y_back;
-            [max_value,~]=max(target);
-
-            half_distance=(0.1*length(x));
-            alfa_estimate = -log(0.5)/(half_distance^2);
-
-            first_curve_shape_estimate = alfa_estimate;
-            first_curve_amp_estimate = max_value;
-            first_curve_skew_estimate = 1;
-
-            par = [first_curve_x_estimate ...
-                first_curve_shape_estimate ...
-                first_curve_amp_estimate ...
-                first_curve_skew_estimate ...
-                ];
 
             j = 1;
             e = [];
@@ -453,57 +446,36 @@ classdef GelBox < matlab.apps.AppBase
         end
 
         function [y_bands, y_fit,r_squared] = Fit2Gaussian(app,x,y,...
-                y_back,no_of_bands)
-            peaks=find_peaks('x',x, ...
-                'y',y, ...
-                'min_rel_delta_y',0.05, ...
-                'min_x_index_spacing',2);
+                y_back)
 
-            if numel(peaks.max_indices) == no_of_bands
-                first_curve_x_estimate=peaks.max_indices(1);
-                second_curve_x_estimate=peaks.max_indices(2);
-            else
-                first_curve_x_estimate = 0.3*length(x);
-                second_curve_x_estimate = 0.6*length(x);
-            end
+            par = [app.gel_data.par_est.peak_location(1) ...
+                   app.gel_data.par_est.shape_parameter(1)...
+                   app.gel_data.par_est.amplitude(1) ...
+                   app.gel_data.par_est.skew_parameter(1) ...
+                   app.gel_data.par_est.peak_location(2) ...
+                   app.gel_data.par_est.amplitude(2) ...
+                  ];
 
-            target = y';
-
-            target = target - y_back;
-            [max_value,~]=max(target);
-
-            half_distance=(0.1*length(x));
-            alfa_estimate = -log(0.5)/(half_distance^2);
-
-            first_curve_shape_estimate = alfa_estimate;
-            first_curve_amp_estimate = max_value;
-            first_curve_skew_estimate = 1;
-
-            second_curve_amp_estimate = first_curve_amp_estimate;
-            second_curve_shape_estimate = alfa_estimate;
-            second_curve_skew_estimate = 1;
-
-
-            par = [first_curve_x_estimate ...
-                first_curve_shape_estimate ...
-                first_curve_amp_estimate ...
-                first_curve_skew_estimate ...
-                second_curve_x_estimate ...
-                second_curve_amp_estimate ...
-                ];
-
-            if ~app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
-                par(7) = second_curve_shape_estimate;
-                par(8) = second_curve_skew_estimate;
-            elseif ~app.fitting_options.shared_shape && app.fitting_options.shared_skewness
-                par(7) = second_curve_shape_estimate;
-            elseif app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
-                par(7) = second_curve_skew_estimate;
+            if numel(unique(app.gel_data.par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) ~= 1
+                par(7) = app.gel_data.par_est.shape_parameter(2);
+                par(8) = app.gel_data.par_est.skew_parameter(2);
+            elseif numel(unique(app.gel_data.par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) == 1
+                par(7) = app.gel_data.par_est.shape_parameter(2);
+            elseif numel(unique(app.gel_data.par_est.shape_parameter)) == 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) ~= 1
+                par(7) = app.gel_data.par_est.skew_parameter(2);
             end
 
 
             j = 1;
             e = [];
+
+
+            target = y';
+
+            target = target - y_back;
 
             opts=optimset('fminsearch');
             opts.Display='off';
@@ -573,16 +545,16 @@ classdef GelBox < matlab.apps.AppBase
                 x2 = par(5);
                 amp2 = par(6);
 
-                if ~app.fitting_options.shared_shape && ...
-                        ~app.fitting_options.shared_skewness
+                if numel(unique(app.gel_data.par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) ~= 1
                     curve_shape2 = par(7);
                     skew2 = par(8);
-                elseif ~app.fitting_options.shared_shape && ...
-                        app.fitting_options.shared_skewness
+                elseif numel(unique(app.gel_data.par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) == 1
                     curve_shape2 = par(7);
                     skew2 = skew1;
-                elseif app.fitting_options.shared_shape && ...
-                        ~app.fitting_options.shared_skewness
+                elseif numel(unique(app.gel_data.par_est.shape_parameter)) == 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) ~= 1
                     curve_shape2 = curve_shape1;
                     skew2 = par(7);
                 else
@@ -605,70 +577,43 @@ classdef GelBox < matlab.apps.AppBase
             end
         end
 
-        function [y_bands, y_fit,r_squared] = Fit3Gaussian(app,x,y,y_back, ...
-                no_of_bands)
-            peaks=find_peaks('x',x, ...
-                'y',y, ...
-                'min_rel_delta_y',0.05, ...
-                'min_x_index_spacing',2);
+        function [y_bands, y_fit,r_squared] = Fit3Gaussian(app,x,y,y_back)
 
-            if numel(peaks.max_indices) == no_of_bands
-                first_curve_x_estimate=peaks.max_indices(1);
-                second_curve_x_estimate=peaks.max_indices(2);
-                third_curve_x_estimate=peaks.max_indices(3);
-            else
-                first_curve_x_estimate = 0.2*length(x);
-                second_curve_x_estimate = 0.3*length(x);
-                third_curve_x_estimate = 0.6*length(x);
+            par = [app.gel_data.par_est.peak_location(1) ...
+                app.gel_data.par_est.shape_parameter(1)...
+                app.gel_data.par_est.amplitude(1) ...
+                app.gel_data.par_est.skew_parameter(1) ...
+                app.gel_data.par_est.peak_location(2) ...
+                app.gel_data.par_est.amplitude(2) ...
+                app.gel_data.par_est.peak_location(3) ...
+                app.gel_data.par_est.amplitude(3) ...
+                ];
+
+            if numel(unique(app.gel_data.par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) ~= 1
+                par(9) = app.gel_data.par_est.shape_parameter(2);
+                par(10) = app.gel_data.par_est.skew_parameter(2);
+                par(11) = app.gel_data.par_est.shape_parameter(3);
+                par(12) = app.gel_data.par_est.skew_parameter(3);
+            elseif numel(unique(app.gel_data.par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) == 1
+                par(9) = app.gel_data.par_est.shape_parameter(2);
+                par(10) = app.gel_data.par_est.shape_parameter(3);
+            elseif numel(unique(app.gel_data.par_est.shape_parameter)) == 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) ~= 1
+                par(9) = app.gel_data.par_est.skew_parameter(2);
+                par(10) = app.gel_data.par_est.skew_parameter(3);
+
             end
+
+            
+            j = 1;
+            e = [];
+            
 
             target = y';
 
             target = target - y_back;
-            [max_value,~]=max(target);
-
-            half_distance=(0.1*length(x));
-            alfa_estimate = -log(0.5)/(half_distance^2);
-
-            first_curve_shape_estimate = alfa_estimate;
-            first_curve_amp_estimate = max_value;
-            first_curve_skew_estimate = 1;
-
-            second_curve_amp_estimate = first_curve_amp_estimate;
-            second_curve_shape_estimate = alfa_estimate;
-            second_curve_skew_estimate = 1;
-
-            third_curve_amp_estimate = first_curve_amp_estimate;
-            third_curve_shape_estimate = alfa_estimate;
-            third_curve_skew_estimate = 1;
-
-            par = [first_curve_x_estimate ...
-                first_curve_shape_estimate ...
-                first_curve_amp_estimate ...
-                first_curve_skew_estimate ...
-                second_curve_x_estimate ...
-                second_curve_amp_estimate ...
-                third_curve_x_estimate ...
-                third_curve_amp_estimate ...
-                ];
-
-            if ~app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
-                par(9) = second_curve_shape_estimate;
-                par(10) = second_curve_skew_estimate;
-                par(11) = third_curve_shape_estimate;
-                par(12) = third_curve_skew_estimate;
-            elseif ~app.fitting_options.shared_shape && app.fitting_options.shared_skewness
-                par(9) = second_curve_shape_estimate;
-                par(10) = third_curve_shape_estimate;
-            elseif app.fitting_options.shared_shape && ~app.fitting_options.shared_skewness
-                par(9) = second_curve_skew_estimate;
-                par(10) = third_curve_skew_estimate;
-
-            end
-
-
-            j = 1;
-            e = [];
 
             opts=optimset('fminsearch');
             opts.Display='off';
@@ -734,20 +679,20 @@ classdef GelBox < matlab.apps.AppBase
                 x3 = par(7);
                 amp3 = par(8);
 
-                if ~app.fitting_options.shared_shape && ...
-                        ~app.fitting_options.shared_skewness
+                if numel(unique(app.gel_data.par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) ~= 1
                     curve_shape2 = par(9);
                     skew2 = par(10);
                     curve_shape3 = par(11);
                     skew3 = par(12);
-                elseif ~app.fitting_options.shared_shape && ...
-                        app.fitting_options.shared_skewness
+                elseif numel(unique(app.gel_data.par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) == 1
                     curve_shape2 = par(9);
                     skew2 = skew1;
                     curve_shape3 = par(10);
                     skew3 = skew1;
-                elseif app.fitting_options.shared_shape && ...
-                        ~app.fitting_options.shared_skewness
+                elseif numel(unique(app.gel_data.par_est.shape_parameter)) == 1 && ...
+                    numel(unique(app.gel_data.par_est.skew_parameter)) ~= 1
                     curve_shape2 = curve_shape1;
                     skew2 = par(9);
                     curve_shape3 = curve_shape1;
@@ -777,10 +722,143 @@ classdef GelBox < matlab.apps.AppBase
             end
         end
 
-        function UpdateFittingOptions(app,shape,skewness)
-            app.fitting_options.shared_shape = shape;
-            app.fitting_options.shared_skewness = skewness;
+        function UpdateFittingOptions(app)
+            app.parametersupdated = 1;
             UpdateDisplay(app)
+        end
+        
+        function EstimateFittingParameters(app,x,y,y_back, ...
+                no_of_bands)
+
+            switch no_of_bands
+                case 1 
+
+                    peaks=find_peaks('x',x, ...
+                        'y',y, ...
+                        'min_rel_delta_y',0.05, ...
+                        'min_x_index_spacing',2);
+
+                     if numel(peaks.max_indices) == no_of_bands
+                         first_curve_x_estimate=peaks.max_indices(1);
+                     else
+                         first_curve_x_estimate = 0.5*length(x);
+                     end
+
+                     target = y';
+
+                     target = target - y_back;
+                     [max_value,~]=max(target);
+
+                     half_distance=(0.1*length(x));
+                     alfa_estimate = -log(0.5)/(half_distance^2);
+
+                     first_curve_shape_estimate = alfa_estimate;
+                     first_curve_amp_estimate = max_value;
+                     first_curve_skew_estimate = 1;
+
+
+                     app.gel_data.par_est.band_no  = 1;
+                     app.gel_data.par_est.peak_location = first_curve_x_estimate;
+                     app.gel_data.par_est.shape_parameter = first_curve_shape_estimate;
+                     app.gel_data.par_est.amplitude = first_curve_amp_estimate;
+                     app.gel_data.par_est.skew_parameter = first_curve_skew_estimate;
+
+                case 2
+
+                    peaks=find_peaks('x',x, ...
+                        'y',y, ...
+                        'min_rel_delta_y',0.05, ...
+                        'min_x_index_spacing',2);
+
+                    if numel(peaks.max_indices) == no_of_bands
+                        first_curve_x_estimate=peaks.max_indices(1);
+                        second_curve_x_estimate=peaks.max_indices(2);
+                    else
+                        first_curve_x_estimate = 0.3*length(x);
+                        second_curve_x_estimate = 0.6*length(x);
+                    end
+
+                    target = y';
+
+                    target = target - y_back;
+                    [max_value,~]=max(target);
+
+                    half_distance=(0.1*length(x));
+                    alfa_estimate = -log(0.5)/(half_distance^2);
+
+                    first_curve_shape_estimate = alfa_estimate;
+                    first_curve_amp_estimate = max_value;
+                    first_curve_skew_estimate = 1;
+
+                    second_curve_amp_estimate = first_curve_amp_estimate;
+                    second_curve_shape_estimate = alfa_estimate;
+                    second_curve_skew_estimate = 1;
+
+                     app.gel_data.par_est.band_no  = [1;2];
+                     app.gel_data.par_est.peak_location = ...
+                     [first_curve_x_estimate;second_curve_x_estimate];
+                     app.gel_data.par_est.shape_parameter = ...
+                     [first_curve_shape_estimate;second_curve_shape_estimate];
+                     app.gel_data.par_est.amplitude = ...
+                         [first_curve_amp_estimate;second_curve_amp_estimate];
+                     app.gel_data.par_est.skew_parameter = ...
+                     [first_curve_skew_estimate;second_curve_skew_estimate];
+
+                case 3
+                    peaks=find_peaks('x',x, ...
+                        'y',y, ...
+                        'min_rel_delta_y',0.05, ...
+                        'min_x_index_spacing',2);
+                    if numel(peaks.max_indices) == no_of_bands
+                        first_curve_x_estimate=peaks.max_indices(1);
+                        second_curve_x_estimate=peaks.max_indices(2);
+                        third_curve_x_estimate=peaks.max_indices(3);
+                    else
+                        first_curve_x_estimate = 0.2*length(x);
+                        second_curve_x_estimate = 0.3*length(x);
+                        third_curve_x_estimate = 0.6*length(x);
+                    end
+                    target = y';
+
+                    target = target - y_back;
+                    [max_value,~]=max(target);
+
+                    half_distance=(0.1*length(x));
+                    alfa_estimate = -log(0.5)/(half_distance^2);
+
+                    first_curve_shape_estimate = alfa_estimate;
+                    first_curve_amp_estimate = max_value;
+                    first_curve_skew_estimate = 1;
+
+                    second_curve_amp_estimate = first_curve_amp_estimate;
+                    second_curve_shape_estimate = alfa_estimate;
+                    second_curve_skew_estimate = 1;
+
+                    third_curve_amp_estimate = first_curve_amp_estimate;
+                    third_curve_shape_estimate = alfa_estimate;
+                    third_curve_skew_estimate = 1;
+
+                    app.gel_data.par_est.band_no  = [1;2;3];
+                    app.gel_data.par_est.peak_location = ...
+                        [first_curve_x_estimate;...
+                        second_curve_x_estimate;...
+                        third_curve_x_estimate];
+                    app.gel_data.par_est.shape_parameter = ...
+                        [first_curve_shape_estimate;...
+                        second_curve_shape_estimate;...
+                        third_curve_shape_estimate];
+                    app.gel_data.par_est.amplitude = ...
+                        [first_curve_amp_estimate;...
+                        second_curve_amp_estimate;...
+                        third_curve_amp_estimate];
+                    app.gel_data.par_est.skew_parameter = ...
+                        [first_curve_skew_estimate;...
+                        second_curve_skew_estimate;...
+                        third_curve_skew_estimate];
+            end
+
+
+            
         end
     end
 
@@ -1220,12 +1298,10 @@ classdef GelBox < matlab.apps.AppBase
             writetable(struct2table(d_out),output_file)
              
             output_file_string_f = strrep(output_file,'.xlsx','_fits.xlsx');
-            output_file_string_i = strrep(output_file,'.xlsx','_insets.xlsx');
             summary = app.gel_data.summary;
 
             for i = 1:n
                 i_name = sprintf('box_%i',i);
-                insets.(i_name) = summary(i).inset;
             end
 
             switch num_of_bands
@@ -1258,7 +1334,6 @@ classdef GelBox < matlab.apps.AppBase
                 end
                 sheet = sprintf('box_%i',j);
                 writetable(struct2table(summary(j)),output_file_string_f,'Sheet',sheet)
-                writematrix(insets.(sheet),output_file_string_i,'Sheet',sheet)
             end
 
 
@@ -1283,8 +1358,8 @@ classdef GelBox < matlab.apps.AppBase
             app.SelectedBoxTextDialog = SelectedBoxDialog(app);
         end
 
-        % Button pushed function: FittingOptionsButton
-        function FittingOptionsButtonPushed(app, event)
+        % Button pushed function: FittingParametersButton
+        function FittingParametersButtonPushed(app, event)
             app.FittingOptions = FittingOptionsDialog(app);
 
         end
@@ -1627,11 +1702,11 @@ classdef GelBox < matlab.apps.AppBase
             app.NumberofBandsDropDown.Position = [614 194 42 22];
             app.NumberofBandsDropDown.Value = '1';
 
-            % Create FittingOptionsButton
-            app.FittingOptionsButton = uibutton(app.FittingPanel, 'push');
-            app.FittingOptionsButton.ButtonPushedFcn = createCallbackFcn(app, @FittingOptionsButtonPushed, true);
-            app.FittingOptionsButton.Position = [672 194 100 22];
-            app.FittingOptionsButton.Text = 'Fitting Options';
+            % Create FittingParametersButton
+            app.FittingParametersButton = uibutton(app.FittingPanel, 'push');
+            app.FittingParametersButton.ButtonPushedFcn = createCallbackFcn(app, @FittingParametersButtonPushed, true);
+            app.FittingParametersButton.Position = [666 193 113 23];
+            app.FittingParametersButton.Text = 'Fitting Parameters';
 
             % Show the figure after all components are created
             app.GelBoxUIFigure.Visible = 'on';

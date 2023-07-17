@@ -86,9 +86,30 @@ end
 
         trial_e = e(end);
 
-        if any(par<0)
-            trial_e = 10^6;
+        for i = 1:2
+            if any(y_bands(i,:)<0)
+                trial_e = trial_e + 10^12;
+            end
         end
+
+        if any(par<0)
+            trial_e = trial_e + 10^12;
+        end
+
+        for i = 1:2
+            areas(i) = trapz(x,y_bands(i,:));
+        end
+
+        if any(areas<0)
+            trial_e = trial_e + 10^12;
+        end
+
+        positions = [par(1) par(5)];
+
+        if any(positions>numel(x))
+            trial_e = trial_e + 10^12;
+        end
+
 
         j = j + 1;
         if fig_disp
