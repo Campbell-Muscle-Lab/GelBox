@@ -64,6 +64,7 @@ params.panel_label_y_offset=0;
 params.panel_label_font_size=12;
 params.y_adjust = 1;                % scales to match x axes
 params.gui_scale_factor = 0;
+params.clip_x_axis = 0;
 
 % Update
 params=parse_pv_pairs(params,varargin);
@@ -200,12 +201,30 @@ end
 
 % Draw x axis
 if (~params.x_axis_off)
+    if(params.clip_x_axis)
+        c = 'w';
+    else
+        c = params.axis_color;
+    end
     line([params.x_ticks(1)*[1 1] params.x_ticks(end)*[1 1]], ...
         [bottom x_axis_y_location x_axis_y_location bottom], ...
         'LineWidth',params.axis_line_width, ...
-        'Color',params.axis_color, ...
+        'Color',c, ...
         'Clipping','off', ...
         'Parent',params.axis_handle);
+    
+    if(params.clip_x_axis)
+        
+        line([params.x_tick_label_positions(1)*[1 1] params.x_tick_label_positions(end)*[1 1]], ...
+            [bottom x_axis_y_location x_axis_y_location bottom], ...
+            'LineWidth',params.axis_line_width, ...
+            'Color',params.axis_color, ...
+            'Clipping','off', ...
+            'Parent',params.axis_handle);
+    end
+        
+        
+    
 
     % Draw the additional x_axis ticks
     if (isempty(params.x_tick_labels))
