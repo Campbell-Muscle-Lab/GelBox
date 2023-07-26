@@ -65,6 +65,7 @@ classdef GelBox_exported < matlab.apps.AppBase
         box_changed = 0
         loaded_analysis = 0
         par_est_na = 0
+        single_box_callback
     end
 
     properties (Access = private)
@@ -77,8 +78,6 @@ classdef GelBox_exported < matlab.apps.AppBase
     methods (Access = public)
 
         function UpdateDisplay(app)
-            %             temp_strings = get(gui.fitting_mode,'String');
-            %             app.gel_data.fitting_mode = temp_strings{get(gui.fitting_mode,'Value')};
             if (isfield(app.gel_data,'box_handle'))
                 n = numel(app.gel_data.box_handle);
                 t = size(app.gel_data.par_update,2);
@@ -111,7 +110,15 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                 % Store data for display
                 d=[];
-                for i=1:n
+                if app.single_box_callback
+                    disp_start = selected_box;
+                    disp_end = selected_box;
+                else
+                    disp_start = 1;
+                    disp_end = n;
+                end
+                
+                for i = disp_start:disp_end
 
                     d.box(i).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
                     num_of_bands = d.box(i).fitting_mode;
@@ -348,11 +355,11 @@ classdef GelBox_exported < matlab.apps.AppBase
 
 
                         for j = 1 : num_of_bands
-                            patch(app.raw_density_fit, ...
-                                x_back+x_bands(j,:), ...
-                                y,color{j},'FaceAlpha',0.65, ...
-                                'EdgeColor',color{j},'EdgeAlpha',0.25, ...
-                                'LineWidth',2)
+%                             patch(app.raw_density_fit, ...
+%                                 x_back+x_bands(j,:), ...
+%                                 y,color{j},'FaceAlpha',0.65, ...
+%                                 'EdgeColor',color{j},'EdgeAlpha',0.25, ...
+%                                 'LineWidth',2)
                             patch(app.background_corrected_raw_density_fit, ...
                                 x_bands(j,:), ...
                                 y,color{j},'FaceAlpha',0.65, ...
@@ -412,8 +419,8 @@ classdef GelBox_exported < matlab.apps.AppBase
             opts.Display='off';
             opts.MaxIter=1000;
             opts.MaxFunEvals=10000;
-
-            [p_result,fval,exitflag,output] = fminsearch(@profile_error_1gaussian, par, opts);
+            
+            [~,~,~,~] = fminsearch(@profile_error_1gaussian, par, opts);
 
             r_squared = calculate_r_squared(y',y_fit+y_back);
 
@@ -674,8 +681,8 @@ classdef GelBox_exported < matlab.apps.AppBase
             opts.Display='off';
             opts.MaxIter=1000;
             opts.MaxFunEvals=10000;
-
-            [p_result,fval,exitflag,output] = fminsearch(@profile_error_3gaussian, par, opts);
+            
+            [~,~,~,~] = fminsearch(@profile_error_3gaussian, par, opts);
 
             r_squared = calculate_r_squared(y',y_fit+y_back);
             function trial_e = profile_error_3gaussian(par)
@@ -1156,11 +1163,19 @@ classdef GelBox_exported < matlab.apps.AppBase
                     [r,c]=size(box_position);
                     if (r>=n)&(~isequal(box_position(n,:),evt.CurrentPosition))
                         app.new_box = n;
+                        old_size = box_position(n,3:4);
+                        current_size = evt.CurrentPosition(3:4);
+                        if isequal(old_size,current_size)
+                            app.single_box_callback = 1;                            
+                        end
                         UpdateDisplay(app)
+                        app.single_box_callback = 0;
                     end
                 else
                     app.new_box = n;
+                    app.single_box_callback = 1;
                     UpdateDisplay(app)
+                    app.single_box_callback = 0;
                 end
             end
         end
@@ -1219,11 +1234,21 @@ classdef GelBox_exported < matlab.apps.AppBase
                     [r,c]=size(box_position);
                     if (r>=n)&(~isequal(box_position(n,:),evt.CurrentPosition))
                         app.new_box = n;
+                        old_size = box_position(n,3:4);
+                        current_size = evt.CurrentPosition(3:4);
+                        if isequal(old_size,current_size)
+                            app.single_box_callback = 1;                            
+                        end
                         UpdateDisplay(app);
+                        app.single_box_callback = 0;
+
                     end
                 else
                     app.new_box = n;
+                    app.single_box_callback = 1;
                     UpdateDisplay(app);
+                    app.single_box_callback = 0;
+
                 end
             end
 
@@ -1330,10 +1355,9 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.box_handle(i).InteractionsAllowed = 'all';
                 end
             end
-%             app.new_box = 0;
+            app.single_box_callback = 1;
             UpdateDisplay(app)
-
-
+            app.single_box_callback = 0;
         end
 
         % Button pushed function: DeleteBoxButton
