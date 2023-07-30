@@ -5,7 +5,7 @@ has_childre: False
 ---
 
 # Examples
-This page shows the GelBox 3 screenshots of the demonstrated gel analysis in the manuscript. Clicking on any of the images on this page will open a larger version in a new browswer window.
+This page shows the GelBox 3 screenshots of the demonstrated gel analysis in the manuscript. Clicking on any of the images on this page will open a larger version in a new browser window.
 
 ## Titin Gel Example
 ### Titin Gel Box 1
