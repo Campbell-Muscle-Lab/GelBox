@@ -43,6 +43,8 @@ classdef GelBox_exported < matlab.apps.AppBase
         DeleteBoxButton              matlab.ui.control.Button
         gel_image_axes               matlab.ui.control.UIAxes
         OpticalDensitiesPanel        matlab.ui.container.Panel
+        BackgroundCorrAreaField      matlab.ui.control.NumericEditField
+        BackgroundCorrAreaLabel      matlab.ui.control.Label
         BackgroundAreaField          matlab.ui.control.NumericEditField
         BackgroundAreaLabel          matlab.ui.control.Label
         TotalAreaField               matlab.ui.control.NumericEditField
@@ -159,25 +161,35 @@ classdef GelBox_exported < matlab.apps.AppBase
                     switch num_of_bands
                         case 1
                             app.BandRelativeArea_1.Enable = 0;
-                            [x_bands,x_fit,r_squared] = ...
+                            [x_bands,x_fit,r_squared,par_fit] = ...
                                 FitGaussian(app,y,x,x_back,i);
                         case 2
                             if ~app.BandRelativeArea_1.Enable
                                 app.BandRelativeArea_1.Enable = 1;
                             end
-                            [x_bands,x_fit,r_squared] = ...
+                            [x_bands,x_fit,r_squared,par_fit] = ...
                                 Fit2Gaussian(app,y,x,x_back,i);
+                            
                         case 3
                             if ~app.BandRelativeArea_1.Enable
                                 app.BandRelativeArea_1.Enable = 1;
                             end
-                            [x_bands,x_fit,r_squared] = ...
+                            [x_bands,x_fit,r_squared,par_fit] = ...
                                 Fit3Gaussian(app,y,x,x_back,i);
+                    end
+                    
+                    fnames = fieldnames(par_fit);
+                    for k = 1:numel(fnames)
+                        app.gel_data.par_fit(i).(fnames{k}) = ...
+                            [];
+                        app.gel_data.par_fit(i).(fnames{k}) = ...
+                            par_fit.(fnames{k});
                     end
 
                     d.box(i).total_area = trapz(y,x);
                     d.box(i).background_area = trapz(y,x_back);
-
+                    d.box(i).background_corr_area = trapz(y,(x'-x_back));
+                    
                     for j = 1 : num_of_bands
                         d.box(i).band_area(j) = trapz(y,x_bands(j,:));
                     end
@@ -240,7 +252,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     if (i==selected_box)
                         app.TotalAreaField.Value = d.box(i).total_area;
                         app.BackgroundAreaField.Value = d.box(i).background_area;
-
+                        app.BackgroundCorrAreaField.Value = d.box(i).background_corr_area;
                         app.rsquaredField.Value = r_squared;
                         center_image_with_preserved_aspect_ratio( ...
                             d.box(i).inset, ...
@@ -258,8 +270,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.raw_density.XAxis.Exponent = 0;
                         xlim(app.raw_density,[0 x_t_end]);
                         ylim(app.raw_density,[1 max(y)]);
-                        % legend(app.raw_density,'','Baseline', ...
-                        %     'Location','best')
+                        legend(app.raw_density,'','Baseline', ...
+                            'Location','northeast')
 
 
                         xticks(app.raw_density_fit,x_ticks);
@@ -276,8 +288,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                         hold(app.background_corrected_raw_density,"on")
                         plot(app.background_corrected_raw_density, ...
                             zeros(1,numel(y)),y,'-.m',"LineWidth",2)
-                        % legend(app.background_corrected_raw_density,'','Baseline', ...
-                        %     'Location','best')
+                        legend(app.background_corrected_raw_density,'','Baseline', ...
+                            'Location','northeast')
                         ylim(app.background_corrected_raw_density, ...
                             [1 max(y)]);
 
@@ -392,7 +404,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             end
         end
 
-        function [y_bands, y_fit,r_squared] = FitGaussian(app,x,y,y_back,box_no)
+        function [y_bands, y_fit,r_squared,par_fit] = FitGaussian(app,x,y,y_back,box_no)
 
             par_est = struct();
             box_pars = struct();
@@ -420,10 +432,15 @@ classdef GelBox_exported < matlab.apps.AppBase
             opts.MaxIter=1000;
             opts.MaxFunEvals=10000;
             
-            [~,~,~,~] = fminsearch(@profile_error_1gaussian, par, opts);
-
+            [p_result,~,~,~] = fminsearch(@profile_error_1gaussian, par, opts);
+            par_fit.band_no = [1];
+            par_fit.peak_location(1,1) = p_result(1);
+            par_fit.shape_parameter(1,1) = p_result(2);
+            par_fit.amplitude(1,1) = p_result(3);
+            par_fit.skew_parameter(1,1) = p_result(4);
+            
             r_squared = calculate_r_squared(y',y_fit+y_back);
-
+            
             function trial_e = profile_error_1gaussian(par)
 
                 [y_bands,y_fit] = calculate_profile(x,par);
@@ -493,7 +510,7 @@ classdef GelBox_exported < matlab.apps.AppBase
 
         end
 
-        function [y_bands, y_fit,r_squared] = Fit2Gaussian(app,x,y,...
+        function [y_bands, y_fit,r_squared,par_fit] = Fit2Gaussian(app,x,y,...
                 y_back,box_no)
             par_est = struct();
             box_pars = struct();
@@ -537,9 +554,32 @@ classdef GelBox_exported < matlab.apps.AppBase
             opts.MaxIter=1000;
             opts.MaxFunEvals=10000;
 
-            [p_result,fval,exitflag,output] = fminsearch(@profile_error_2gaussian, par, opts);
+            [p_result,~,~,~] = fminsearch(@profile_error_2gaussian, par, opts);
+            par_fit.band_no = [1;2];
+            par_fit.peak_location(1,1) = p_result(1);
+            par_fit.shape_parameter(1,1) = p_result(2);
+            par_fit.amplitude(1,1) = p_result(3);
+            par_fit.skew_parameter(1,1) = p_result(4);
+            par_fit.peak_location(2,1) = p_result(5);
+            par_fit.amplitude(2,1) = p_result(6);
+            
+            if numel(unique(par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(par_est.skew_parameter)) ~= 1
+                par_fit.shape_parameter(2,1) = p_result(7);
+                par_fit.skew_parameter(2,1) = p_result(8);
+            elseif numel(unique(par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(par_est.skew_parameter)) == 1
+                par_fit.shape_parameter(2,1) = p_result(7);
+                par_fit.skew_parameter(2,1) = par_fit.skew_parameter(1);
+            elseif numel(unique(par_est.shape_parameter)) == 1 && ...
+                    numel(unique(par_est.skew_parameter)) ~= 1
+                par_fit.shape_parameter(2,1) = par_fit.shape_parameter(1);
+                par_fit.skew_parameter(2,1) = p_result(7);
+            else
+                par_fit.shape_parameter(2,1) = par_fit.shape_parameter(1);
+                par_fit.skew_parameter(2,1) = par_fit.skew_parameter(1);
+            end
 
-            p_result;
             r_squared = calculate_r_squared(y',y_fit+y_back);
             function trial_e = profile_error_2gaussian(par)
 
@@ -631,7 +671,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             end
         end
 
-        function [y_bands, y_fit,r_squared] = Fit3Gaussian(app,x,y,y_back,box_no)
+        function [y_bands, y_fit,r_squared,par_fit] = Fit3Gaussian(app,x,y,y_back,box_no)
             par_est = struct();
             box_pars = struct();
             box_pars = app.gel_data.par_est(box_no);
@@ -682,7 +722,43 @@ classdef GelBox_exported < matlab.apps.AppBase
             opts.MaxIter=1000;
             opts.MaxFunEvals=10000;
             
-            [~,~,~,~] = fminsearch(@profile_error_3gaussian, par, opts);
+            [p_result,~,~,~] = fminsearch(@profile_error_3gaussian, par, opts);
+            
+            par_fit.band_no = [1;2;3];
+            par_fit.peak_location(1,1) = p_result(1);
+            par_fit.shape_parameter(1,1) = p_result(2);
+            par_fit.amplitude(1,1) = p_result(3);
+            par_fit.skew_parameter(1,1) = p_result(4);
+            par_fit.peak_location(2,1) = p_result(5);
+            par_fit.amplitude(2,1) = p_result(6);
+            par_fit.peak_location(3,1) = p_result(7);
+            par_fit.amplitude(3,1) = p_result(8);
+            
+            if numel(unique(par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(par_est.skew_parameter)) ~= 1
+                par_fit.shape_parameter(2,1) = p_result(9);
+                par_fit.skew_parameter(2,1) = p_result(10);
+                par_fit.shape_parameter(3,1) = p_result(11);
+                par_fit.skew_parameter(3,1) = p_result(12);
+            elseif numel(unique(par_est.shape_parameter)) ~= 1 && ...
+                    numel(unique(par_est.skew_parameter)) == 1
+                par_fit.shape_parameter(2,1) = p_result(9);
+                par_fit.skew_parameter(2,1) = par_fit.skew_parameter(1,1);
+                par_fit.shape_parameter(3,1) = p_result(10);
+                par_fit.skew_parameter(3,1) = par_fit.skew_parameter(1,1);
+            elseif numel(unique(par_est.shape_parameter)) == 1 && ...
+                    numel(unique(par_est.skew_parameter)) ~= 1
+                par_fit.shape_parameter(2,1) = par_fit.shape_parameter(1,1);
+                par_fit.skew_parameter(2,1) = p_result(9);
+                par_fit.shape_parameter(3,1) = par_fit.shape_parameter(1,1);
+                par_fit.skew_parameter(3,1) = p_result(10);
+            else
+                par_fit.shape_parameter(2,1) = par_fit.shape_parameter(1,1);
+                par_fit.skew_parameter(2,1) = par_fit.skew_parameter(1,1);
+                par_fit.shape_parameter(3,1) = par_fit.shape_parameter(1,1);
+                par_fit.skew_parameter(3,1) = par_fit.skew_parameter(1,1);
+                
+            end
 
             r_squared = calculate_r_squared(y',y_fit+y_back);
             function trial_e = profile_error_3gaussian(par)
@@ -1138,8 +1214,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                     end
 
                     p = app.gel_data.box_handle(i).Position;
-                    app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
-                        'Parent',app.gel_image_axes);
+                    app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-10,sprintf('%.0f',i), ...
+                        'Parent',app.gel_image_axes,'FontWeight',"bold");
 
                     app.gel_data.old_width = p(3);
                     app.gel_data.old_height = p(4);
@@ -1194,7 +1270,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 p = app.gel_data.box_handle(n-1).Position;
 
                 app.gel_data.box_handle(n) = images.roi.Rectangle(app.gel_image_axes, ...
-                    'Position',p + [120,0,0,0]);
+                    'Position',p + [150,0,0,0]);
                 for i=1:(n-1)
                     app.gel_data.box_handle(i).InteractionsAllowed = 'none';
                 end
@@ -1213,7 +1289,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             % Add in a label
             p = app.gel_data.box_handle(n).Position;
             app.gel_data.box_label(n) = text(app.gel_image_axes, ...
-                p(1)+p(3),p(2)-50,sprintf('%.0f',n));
+                p(1)+p(3),p(2)-10,sprintf('%.0f',n),'FontWeight',"bold");
 
             % Update zoom control
             for i=1:n
@@ -1226,7 +1302,9 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.DeleteBoxButton.Enable = 1;
             app.SelectedBoxInformationMenu.Enable = 1;
             app.new_box = n;
-            UpdateDisplay(app);
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
 
             function new_box_position(evt);
                 if (isfield(app.gel_data,'box_position'))
@@ -1326,6 +1404,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             for j = 1:number_of_boxes
                 for i = 1:numel(names)
                     save_data.par_est(j).(names{i}) = app.gel_data.par_est(j).(names{i});
+                    save_data.par_fit(j).(names{i}) = app.gel_data.par_fit(j).(names{i});
                 end
             end
 
@@ -1383,7 +1462,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 app.BoxSelectionDropDown.Value = num2str(selected_box-1);
             end
 
-            new_selected_box = app.BoxSelectionDropDown.Value;
+            new_selected_box = str2num(app.BoxSelectionDropDown.Value);
 
             for i=1:n
                 delete(app.gel_data.box_label(i));
@@ -1399,8 +1478,8 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.gel_data.box_label = [];
             for i = 1:n
                 p = app.gel_data.box_handle(i).Position;
-                app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
-                    'Parent',app.gel_image_axes);
+                app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-10,sprintf('%.0f',i), ...
+                    'Parent',app.gel_image_axes,'FontWeight',"bold");
 
                 app.gel_data.old_width = p(3);
                 app.gel_data.old_height = p(4);
@@ -1541,6 +1620,16 @@ classdef GelBox_exported < matlab.apps.AppBase
         % Menu selected function: SummaryPlotMenu
         function AnalysisSummaryPlotMenuSelected(app, event)
             app.SummaryPlot = SummaryPlotWindow(app);
+        end
+
+        % Value changed function: DrawFittingCheckBox
+        function DrawFittingCheckBoxValueChanged(app, event)
+            value = app.DrawFittingCheckBox.Value;
+            if value
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+            end
         end
     end
 
@@ -1684,6 +1773,19 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BackgroundAreaField.HorizontalAlignment = 'center';
             app.BackgroundAreaField.Position = [732 110 85 22];
 
+            % Create BackgroundCorrAreaLabel
+            app.BackgroundCorrAreaLabel = uilabel(app.OpticalDensitiesPanel);
+            app.BackgroundCorrAreaLabel.WordWrap = 'on';
+            app.BackgroundCorrAreaLabel.Position = [661 67 81 30];
+            app.BackgroundCorrAreaLabel.Text = 'Background Corr. Area';
+
+            % Create BackgroundCorrAreaField
+            app.BackgroundCorrAreaField = uieditfield(app.OpticalDensitiesPanel, 'numeric');
+            app.BackgroundCorrAreaField.ValueDisplayFormat = '%.2f';
+            app.BackgroundCorrAreaField.Editable = 'off';
+            app.BackgroundCorrAreaField.HorizontalAlignment = 'center';
+            app.BackgroundCorrAreaField.Position = [732 71 85 22];
+
             % Create GelImagePanel
             app.GelImagePanel = uipanel(app.GelBoxUIFigure);
             app.GelImagePanel.Title = 'Gel Image';
@@ -1757,6 +1859,7 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             % Create DrawFittingCheckBox
             app.DrawFittingCheckBox = uicheckbox(app.FittingPanel);
+            app.DrawFittingCheckBox.ValueChangedFcn = createCallbackFcn(app, @DrawFittingCheckBoxValueChanged, true);
             app.DrawFittingCheckBox.Text = 'Draw Fitting';
             app.DrawFittingCheckBox.Position = [672 154 86 22];
 
