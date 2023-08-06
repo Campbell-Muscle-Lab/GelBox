@@ -29,9 +29,17 @@ Change the peak locations for both band 1 and band 2 and click the Update Fittin
 
 <a href="media/parameters_changed.png" target="_blank">![Parameters changed](media/parameters_changed.png)</a>
 
-Please note that upon changing the peak locations, GelBox 3 successfully detected the two peaks. You can look for better fits by changing the size and position the region of interest (ROI) box.
+Please note that after changing the peak locations, GelBox 3 successfully detected the two peaks. You can look for better fits by changing the size and position the region of interest (ROI) box.
 
 <a href="media/drag_box_down.png" target="_blank">![Drag box down](media/drag_box_down.png)</a>
+
+Change the peak estimate of the peak one and constrain it to capture the amplitude accurately. Use the constrain checkbox, shown in the red rectangle.
+
+<a href="media/constrain_parameter.png" target="_blank">![Drag box down](media/constrain_parameter.png)</a>
+
+After constraining the peak amplitude, the new fit accurately predicts the peak amplitude.
+
+<a href="media/constrained_parameter_new_fit.png" target="_blank">![Drag box down](media/constrained_parameter_new_fit.png)</a>
 
 Further improvement can be made by changing the shape parameter of the second band using the Fitting Parameters.
 

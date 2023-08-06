@@ -105,7 +105,7 @@ Click the Fitting Parameters button, and it opens a new window. The window shows
 
 <a href="media/fitting_parameters.png" target="_blank">![Two bands](media/fitting_parameters.png)</a>
 
-The Starting Parameter Estimates table is editable, except for the Band No column. Let's change the shape parameter value of band two from 0.0059 to 0.0050, then click the Update Starting Parameter Estimates button, shown in the red rectangle. This button starts over the fitting process with new starting parameters. Please note that the changing the shape parameter results in a slighlty better fit and the relative area values are changed by 0.02, highlighted in red rectangle below.
+The Starting Parameter Estimates table is editable, except for the Band No column. Let's change the shape parameter value of band two from 0.0057 to 0.0050, then click the Update Starting Parameter Estimates button, shown in the red rectangle. This button starts over the fitting process with new starting parameters. Please note that the changing the shape parameter results in a slighlty better fit and the relative area values are changed by 0.01, highlighted in red rectangle below. You can also constrain the parameter values using the checkboxes, so that GelBox 3 will not adjust the selected parameter.
 
 <a href="media/fitting_parameters_changed.png" target="_blank">![Two bands](media/fitting_parameters_changed.png)</a>
 
