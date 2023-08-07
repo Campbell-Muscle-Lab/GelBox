@@ -23,7 +23,7 @@ After a few seconds, you should see a program window. This is the main GelBox pr
 
 <a href="media/startup_window.png" target="_blank">![Startup window](media/startup_window.png)</a>
 
-Click the File button on the toolbar. The file button opens a dropdown menu, which is highlighted in a red rectangle in the image below. click the Load Analysis button.
+Click the File button on the toolbar. The file button opens a dropdown menu, which is highlighted in the red rectangle in the image below. Click the Load Analysis button.
 
 <a href="media/load_file_button.png" target="_blank">![Load file button](media/load_file_button.png)</a>
 
