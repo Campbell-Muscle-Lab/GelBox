@@ -133,7 +133,7 @@ Once you finish your analysis, click the File button on the toolbar (red rectang
 
 <a href="media/output_results.png" target="_blank">![Output results](media/output_results.png)</a>
 
-The save Analysis button opens the following file dialog box, which allows you to save GelBox 3 analysis files in a unique .gdf format. This file format can be loaded to GelBox 3 to revisit the analysis. Name your file and click Save.
+The Save Analysis button opens the following file dialog box, which allows you to save GelBox 3 analysis files in a unique .gdf format. This file format can be loaded to GelBox 3 to revisit the analysis. Name your file and click Save.
 
 <a href="media/save_analysis_file_dialog.png" target="_blank">![Save analysis file dialog](media/save_analysis_file_dialog.png)</a>
 
@@ -156,8 +156,7 @@ Summary Excel file has multiple sheets. The first sheet is the Summary sheet, an
 + num_of_bands: number of bands
 + r_squared: R-Squared value of the fit
 
-<a href="media/excel_file.PNG" target="_blank">![excel fits](media/excel_file.PNG)</a>
-
+<a href="media/excel_file.PNG" target="_blank">![excel file](media/excel_file.png)</a>
 
 The following sheets are named after the boxes. There is a sheet for each box in the analysis. Here are the brief descriptions of each column.
 + x: raw optical density value
