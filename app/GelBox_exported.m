@@ -131,7 +131,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     set(app.gel_data.box_label(i),'String',sprintf('%.0f',i));
                     set(app.gel_data.box_label(i), ...
                         'Position',[d.box(i).position(1)+d.box(i).position(3) ...
-                        d.box(i).position(2)-50]);
+                        d.box(i).position(2)-10]);
 
                     % Calculate profile
                     d.box(i).inset = imcrop(app.gel_data.im_data, ...
@@ -430,8 +430,8 @@ classdef GelBox_exported < matlab.apps.AppBase
             end
             
             par = [par_est.peak_location(1) ...
-                par_est.shape_parameter(1) ...
                 par_est.amplitude(1) ...
+                par_est.width_parameter(1) ...
                 par_est.skew_parameter(1) ...
                 ];
             
@@ -470,8 +470,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                         
             par_fit.band_no = [1];
             par_fit.peak_location(1,1) = p_result(1);
-            par_fit.shape_parameter(1,1) = p_result(2);
-            par_fit.amplitude(1,1) = p_result(3);
+            par_fit.amplitude(1,1) = p_result(2);
+            par_fit.width_parameter(1,1) = p_result(3);
             par_fit.skew_parameter(1,1) = p_result(4);
             
             r_squared = calculate_r_squared(y',y_fit+y_back);
@@ -526,11 +526,11 @@ classdef GelBox_exported < matlab.apps.AppBase
             function [y_bands,y_fit] = calculate_profile(x,par)
 
                 x1 = par(1);
-                curve_shape1 = par(2);
-                amp1 = par(3);
+                amp1 = par(2);
+                width1 = par(3);
                 skew1 = par(4);
 
-                y_first = skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
+                y_first = skewed_Gaussian(x,x1,width1,amp1,skew1);
 
                 y_fit = y_first;
                 y_bands(1,:) = y_first;
@@ -564,29 +564,36 @@ classdef GelBox_exported < matlab.apps.AppBase
             end
 
             par = [par_est.peak_location(1) ...
-                   par_est.shape_parameter(1)...
                    par_est.amplitude(1) ...
+                   par_est.width_parameter(1)...
                    par_est.skew_parameter(1) ...
                    par_est.peak_location(2) ...
                    par_est.amplitude(2) ...
                   ];
-
-            if (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    (any(par_con.shape_parameter)&& ...
+            
+            width_and_skew = 0;
+            width = 0;
+            skew = 0;
+            
+            if (any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (any(par_con.width_parameter)&& ...
                     any(par_con.skew_parameter))
-                par(7) = par_est.shape_parameter(2);
+                par(7) = par_est.width_parameter(2);
                 par(8) = par_est.skew_parameter(2);
-            elseif (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) == 1) || ...
-                    (any(par_con.shape_parameter) && ...
+                width_and_skew = 1;
+            elseif (any(par_est.width_parameter(2:end)~=0) && ...
+                    ~any(par_est.skew_parameter(2:end)~=0))|| ...
+                    (any(par_con.width_parameter) && ...
                     ~any(par_con.skew_parameter))
-                par(7) = par_est.shape_parameter(2);
-            elseif (numel(unique(par_est.shape_parameter)) == 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    (~any(par_con.shape_parameter) && ...
+                par(7) = par_est.width_parameter(2);
+                width = 1;
+            elseif (~any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (~any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
                 par(7) = par_est.skew_parameter(2);
+                skew = 1;
             end
 
 
@@ -607,19 +614,53 @@ classdef GelBox_exported < matlab.apps.AppBase
             upper_bounds=Inf*ones(1,no_of_parameters);
             
             no_of_bands = numel(par_con.(names{m}));
-            
+          
             l = 1;
-            for u = 1 : no_of_bands
+            for u = 1 : 1
                 for m = 2 : numel(names)
                     if par_con.(names{m})(u)
                         lower_bounds(l) = par_est.(names{m})(u);
                         upper_bounds(l) = par_est.(names{m})(u);
-                        
                     end
                     l = l + 1;
                 end
             end
             
+            if par_con.peak_location(2)
+                lower_bounds(5) = par_est.peak_location(2);
+                upper_bounds(5) = par_est.peak_location(2);
+            end
+            
+            if par_con.amplitude(2)
+                lower_bounds(6) = par_est.amplitude(2);
+                upper_bounds(6) = par_est.amplitude(2);
+            end
+            
+            if width_and_skew
+                if par_con.width_parameter(2)
+                    lower_bounds(7) = par_est.width_parameter(2);
+                    upper_bounds(7) = par_est.width_parameter(2);
+                end
+                if par_con.skew_parameter(2)
+                    lower_bounds(8) = par_est.skew_parameter(2);
+                    upper_bounds(8) = par_est.skew_parameter(2);
+                end
+            end
+            
+            if width
+                if par_con.width_parameter(2)
+                    lower_bounds(7) = par_est.width_parameter(2);
+                    upper_bounds(7) = par_est.width_parameter(2);
+                end
+            end
+            
+            if skew
+                if par_con.skew_parameter(2)
+                    lower_bounds(7) = par_est.skew_parameter(2);
+                    upper_bounds(7) = par_est.skew_parameter(2);
+                end
+            end
+                        
             opts=optimset('fminsearch');
             opts.Display='off';
             opts.MaxIter=1000;
@@ -632,33 +673,33 @@ classdef GelBox_exported < matlab.apps.AppBase
             
             par_fit.band_no = [1;2];
             par_fit.peak_location(1,1) = p_result(1);
-            par_fit.shape_parameter(1,1) = p_result(2);
-            par_fit.amplitude(1,1) = p_result(3);
+            par_fit.amplitude(1,1) = p_result(2);
+            par_fit.width_parameter(1,1) = p_result(3);
             par_fit.skew_parameter(1,1) = p_result(4);
             par_fit.peak_location(2,1) = p_result(5);
             par_fit.amplitude(2,1) = p_result(6);
             
-            if (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    (any(par_con.shape_parameter) && ...
+            if (any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
-                par_fit.shape_parameter(2,1) = p_result(7);
+                par_fit.width_parameter(2,1) = p_result(7);
                 par_fit.skew_parameter(2,1) = p_result(8);
-            elseif (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) == 1) || ...
-                    (any(par_con.shape_parameter) && ...
+            elseif (any(par_est.width_parameter(2:end)~=0) && ...
+                    ~any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (any(par_con.width_parameter) && ...
                     ~any(par_con.skew_parameter))
-                par_fit.shape_parameter(2,1) = p_result(7);
-                par_fit.skew_parameter(2,1) = par_fit.skew_parameter(1);
-            elseif (numel(unique(par_est.shape_parameter)) == 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    (~any(par_con.shape_parameter) && ...
+                par_fit.width_parameter(2,1) = p_result(7);
+                par_fit.skew_parameter(2,1) = 0;
+            elseif (~any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (~any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
-                par_fit.shape_parameter(2,1) = par_fit.shape_parameter(1);
+                par_fit.width_parameter(2,1) = 0;
                 par_fit.skew_parameter(2,1) = p_result(7);
             else
-                par_fit.shape_parameter(2,1) = par_fit.shape_parameter(1);
-                par_fit.skew_parameter(2,1) = par_fit.skew_parameter(1);
+                par_fit.width_parameter(2,1) = 0;
+                par_fit.skew_parameter(2,1) = 0;
             end
 
             r_squared = calculate_r_squared(y',y_fit+y_back);
@@ -714,37 +755,37 @@ classdef GelBox_exported < matlab.apps.AppBase
             function [y_bands,y_fit] = calculate_2profile(x,par)
 
                 x1 = par(1);
-                curve_shape1 = par(2);
-                amp1 = par(3);
+                amp1 = par(2);
+                width1 = par(3);
                 skew1 = par(4);
                 x2 = par(5);
                 amp2 = par(6);
 
-                if (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    (any(par_con.shape_parameter) && ...
+                if (any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
-                    curve_shape2 = par(7);
-                    skew2 = par(8);
-                elseif (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) == 1) || ...
-                    (any(par_con.shape_parameter) && ...
+                    width2 = width1 + par(7);
+                    skew2 = skew1 + par(8);
+                elseif (any(par_est.width_parameter(2:end)~=0) && ...
+                    ~any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (any(par_con.width_parameter) && ...
                     ~any(par_con.skew_parameter))
-                    curve_shape2 = par(7);
-                    skew2 = skew1;
-                elseif (numel(unique(par_est.shape_parameter)) == 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    (~any(par_con.shape_parameter) && ...
+                    width2 = width1 + par(7);
+                    skew2 = skew1 + 0;
+                elseif (~any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (~any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
-                    curve_shape2 = curve_shape1;
-                    skew2 = par(7);
+                    width2 = width1 + 0;
+                    skew2 = skew1 + par(7);
                 else
-                    curve_shape2 = curve_shape1;
-                    skew2 = skew1;
+                    width2 = width1 + 0;
+                    skew2 = skew1 + 0;
                 end
 
-                y_first = skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
-                y_second = skewed_Gaussian(x,x2,curve_shape2,amp2,skew2);
+                y_first = skewed_Gaussian(x,x1,width1,amp1,skew1);
+                y_second = skewed_Gaussian(x,x2,width2,amp2,skew2);
 
                 y_fit = y_first + y_second;
                 y_bands(1,:) = y_first;
@@ -777,36 +818,42 @@ classdef GelBox_exported < matlab.apps.AppBase
             end
             
             par = [par_est.peak_location(1) ...
-                par_est.shape_parameter(1)...
                 par_est.amplitude(1) ...
+                par_est.width_parameter(1)...
                 par_est.skew_parameter(1) ...
                 par_est.peak_location(2) ...
                 par_est.amplitude(2) ...
                 par_est.peak_location(3) ...
                 par_est.amplitude(3) ...
                 ];
-
-            if (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    (any(par_con.shape_parameter) && ...
+            
+            width_and_skew = 0;
+            width = 0;
+            skew = 0;
+            
+            if (any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0))  || ...
+                    (any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
-                par(9) = par_est.shape_parameter(2);
+                par(9) = par_est.width_parameter(2);
                 par(10) = par_est.skew_parameter(2);
-                par(11) = par_est.shape_parameter(3);
+                par(11) = par_est.width_parameter(3);
                 par(12) = par_est.skew_parameter(3);
-            elseif (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) == 1) || ...
-                    (any(par_con.shape_parameter) && ...
+                width_and_skew = 1;
+            elseif (any(par_est.width_parameter(2:end)~=0) && ...
+                    ~any(par_est.skew_parameter(2:end)~=0))  || ...
+                    (any(par_con.width_parameter) && ...
                     ~any(par_con.skew_parameter))
-                par(9) = par_est.shape_parameter(2);
-                par(10) = par_est.shape_parameter(3);
-            elseif (numel(unique(par_est.shape_parameter)) == 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    ~(any(par_con.shape_parameter) && ...
+                par(9) = par_est.width_parameter(2);
+                par(10) = par_est.width_parameter(3);
+                width = 1;
+            elseif (~any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0))  || ...
+                    (~any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
                 par(9) = par_est.skew_parameter(2);
                 par(10) = par_est.skew_parameter(3);
-
+                skew = 1;
             end
 
             
@@ -830,7 +877,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             no_of_bands = numel(par_con.(names{m}));
             
             l = 1;
-            for u = 1 : no_of_bands
+            for u = 1 : 1
                 for m = 2 : numel(names)
                     if par_con.(names{m})(u)
                         lower_bounds(l) = par_est.(names{m})(u);
@@ -840,6 +887,69 @@ classdef GelBox_exported < matlab.apps.AppBase
                 end
             end
             
+            if par_con.peak_location(2)
+                lower_bounds(5) = par_est.peak_location(2);
+                upper_bounds(5) = par_est.peak_location(2);
+            end
+            
+            if par_con.amplitude(2)
+                lower_bounds(6) = par_est.amplitude(2);
+                upper_bounds(6) = par_est.amplitude(2);
+            end
+            
+            if par_con.peak_location(3)
+                lower_bounds(7) = par_est.peak_location(3);
+                upper_bounds(7) = par_est.peak_location(3);
+            end
+            
+            if par_con.amplitude(3)
+                lower_bounds(8) = par_est.amplitude(3);
+                upper_bounds(8) = par_est.amplitude(3);
+            end
+            
+            if width_and_skew
+                if par_con.width_parameter(2)
+                    lower_bounds(9) = par_est.width_parameter(2);
+                    upper_bounds(9) = par_est.width_parameter(2);
+                end
+                if par_con.skew_parameter(2)
+                    lower_bounds(10) = par_est.skew_parameter(2);
+                    upper_bounds(10) = par_est.skew_parameter(2);
+                end
+                if par_con.width_parameter(3)
+                    lower_bounds(11) = par_est.width_parameter(2);
+                    upper_bounds(11) = par_est.width_parameter(2);
+                end
+                if par_con.skew_parameter(3)
+                    lower_bounds(12) = par_est.skew_parameter(2);
+                    upper_bounds(11) = par_est.skew_parameter(2);
+                end
+            end
+            
+            if width
+                if par_con.width_parameter(2)
+                    lower_bounds(9) = par_est.width_parameter(2);
+                    upper_bounds(9) = par_est.width_parameter(2);
+                end
+                if par_con.width_parameter(3)
+                    lower_bounds(10) = par_est.width_parameter(3);
+                    upper_bounds(10) = par_est.width_parameter(3);
+                end
+            end
+
+            if skew
+                if par_con.skew_parameter(2)
+                    lower_bounds(9) = par_est.skew_parameter(2);
+                    upper_bounds(9) = par_est.skew_parameter(2);
+                end
+
+                if par_con.skew_parameter(3)
+                    lower_bounds(10) = par_est.skew_parameter(2);
+                    upper_bounds(10) = par_est.skew_parameter(2);
+                end
+            end
+            
+
             opts=optimset('fminsearch');
             opts.Display='off';
             opts.MaxIter=1000;
@@ -852,43 +962,43 @@ classdef GelBox_exported < matlab.apps.AppBase
             
             par_fit.band_no = [1;2;3];
             par_fit.peak_location(1,1) = p_result(1);
-            par_fit.shape_parameter(1,1) = p_result(2);
-            par_fit.amplitude(1,1) = p_result(3);
+            par_fit.amplitude(1,1) = p_result(2);
+            par_fit.width_parameter(1,1) = p_result(3);
             par_fit.skew_parameter(1,1) = p_result(4);
             par_fit.peak_location(2,1) = p_result(5);
             par_fit.amplitude(2,1) = p_result(6);
             par_fit.peak_location(3,1) = p_result(7);
             par_fit.amplitude(3,1) = p_result(8);
             
-            if (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    (any(par_con.shape_parameter) && ...
+            if (any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0))  || ...
+                    (any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
-                par_fit.shape_parameter(2,1) = p_result(9);
+                par_fit.width_parameter(2,1) = p_result(9);
                 par_fit.skew_parameter(2,1) = p_result(10);
-                par_fit.shape_parameter(3,1) = p_result(11);
+                par_fit.width_parameter(3,1) = p_result(11);
                 par_fit.skew_parameter(3,1) = p_result(12);
-            elseif (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) == 1) || ...
-                    (any(par_con.shape_parameter) && ...
+            elseif (any(par_est.width_parameter(2:end)~=0) && ...
+                    ~any(par_est.skew_parameter(2:end)~=0))  || ...
+                    (any(par_con.width_parameter) && ...
                     ~any(par_con.skew_parameter))
-                par_fit.shape_parameter(2,1) = p_result(9);
-                par_fit.skew_parameter(2,1) = par_fit.skew_parameter(1,1);
-                par_fit.shape_parameter(3,1) = p_result(10);
-                par_fit.skew_parameter(3,1) = par_fit.skew_parameter(1,1);
-            elseif (numel(unique(par_est.shape_parameter)) == 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    ~(any(par_con.shape_parameter) && ...
+                par_fit.width_parameter(2,1) = p_result(9);
+                par_fit.skew_parameter(2,1) = 0;
+                par_fit.width_parameter(3,1) = p_result(10);
+                par_fit.skew_parameter(3,1) = 0;
+            elseif (~any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0))  || ...
+                    (~any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
-                par_fit.shape_parameter(2,1) = par_fit.shape_parameter(1,1);
+                par_fit.width_parameter(2,1) = 0;
                 par_fit.skew_parameter(2,1) = p_result(9);
-                par_fit.shape_parameter(3,1) = par_fit.shape_parameter(1,1);
+                par_fit.width_parameter(3,1) = 0;
                 par_fit.skew_parameter(3,1) = p_result(10);
             else
-                par_fit.shape_parameter(2,1) = par_fit.shape_parameter(1,1);
-                par_fit.skew_parameter(2,1) = par_fit.skew_parameter(1,1);
-                par_fit.shape_parameter(3,1) = par_fit.shape_parameter(1,1);
-                par_fit.skew_parameter(3,1) = par_fit.skew_parameter(1,1);
+                par_fit.width_parameter(2,1) = 0;
+                par_fit.skew_parameter(2,1) = 0;
+                par_fit.width_parameter(3,1) = 0;
+                par_fit.skew_parameter(3,1) = 0;
                 
             end
 
@@ -941,48 +1051,48 @@ classdef GelBox_exported < matlab.apps.AppBase
             function [y_bands,y_fit] = calculate_3profile(x,par)
 
                 x1 = par(1);
-                curve_shape1 = par(2);
-                amp1 = par(3);
+                amp1 = par(2);
+                width1 = par(3);
                 skew1 = par(4);
                 x2 = par(5);
                 amp2 = par(6);
                 x3 = par(7);
                 amp3 = par(8);
 
-                if (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    (any(par_con.shape_parameter) && ...
+                if (any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
-                    curve_shape2 = par(9);
-                    skew2 = par(10);
-                    curve_shape3 = par(11);
-                    skew3 = par(12);
-                elseif (numel(unique(par_est.shape_parameter)) ~= 1 && ...
-                    numel(unique(par_est.skew_parameter)) == 1) || ...
-                    (any(par_con.shape_parameter) && ...
+                    width2 = width1 + par(9);
+                    skew2 = skew1 + par(10);
+                    width3 = width1 + par(11);
+                    skew3 = skew1 + par(12);
+                elseif (any(par_est.width_parameter(2:end)~=0) && ...
+                    ~any(par_est.skew_parameter(2:end)~=0))|| ...
+                    (any(par_con.width_parameter) && ...
                     ~any(par_con.skew_parameter))
-                    curve_shape2 = par(9);
-                    skew2 = skew1;
-                    curve_shape3 = par(10);
-                    skew3 = skew1;
-                elseif (numel(unique(par_est.shape_parameter)) == 1 && ...
-                    numel(unique(par_est.skew_parameter)) ~= 1) || ...
-                    ~(any(par_con.shape_parameter) && ...
+                    width2 = width1 + par(9);
+                    skew2 = skew1 + 0;
+                    width3 = width1 + par(10);
+                    skew3 = skew1 + 0;
+                elseif (~any(par_est.width_parameter(2:end)~=0) && ...
+                    any(par_est.skew_parameter(2:end)~=0)) || ...
+                    (~any(par_con.width_parameter) && ...
                     any(par_con.skew_parameter))
-                    curve_shape2 = curve_shape1;
-                    skew2 = par(9);
-                    curve_shape3 = curve_shape1;
-                    skew3 = par(10);
+                    width2 = width1 + 0;
+                    skew2 = skew1 + par(9);
+                    width3 = width1 + 0;
+                    skew3 = skew1 + par(10);
                 else
-                    curve_shape2 = curve_shape1;
-                    skew2 = skew1;
-                    curve_shape3 = curve_shape1;
-                    skew3 = skew1;
+                    width2 = width1 + 0;
+                    skew2 = skew1 + 0;
+                    width3 = width1 + 0;
+                    skew3 = skew1 + 0;
                 end
 
-                y_first = skewed_Gaussian(x,x1,curve_shape1,amp1,skew1);
-                y_second = skewed_Gaussian(x,x2,curve_shape2,amp2,skew2);
-                y_third = skewed_Gaussian(x,x3,curve_shape3,amp3,skew3);
+                y_first = skewed_Gaussian(x,x1,width1,amp1,skew1);
+                y_second = skewed_Gaussian(x,x2,width2,amp2,skew2);
+                y_third = skewed_Gaussian(x,x3,width3,amp3,skew3);
 
 
                 y_fit = y_first + y_second + y_third;
@@ -1029,21 +1139,21 @@ classdef GelBox_exported < matlab.apps.AppBase
                      half_distance=(0.1*length(x));
                      alfa_estimate = -log(0.5)/(half_distance^2);
 
-                     first_curve_shape_estimate = alfa_estimate;
+                     first_curve_width_estimate = alfa_estimate;
                      first_curve_amp_estimate = max_value;
                      first_curve_skew_estimate = 1;
 
 
                      par_est.band_no  = 1;
                      par_est.peak_location = first_curve_x_estimate;
-                     par_est.shape_parameter = first_curve_shape_estimate;
                      par_est.amplitude = first_curve_amp_estimate;
+                     par_est.width_parameter = first_curve_width_estimate;
                      par_est.skew_parameter = first_curve_skew_estimate;
                      
                      par_con.band_no  = 1;
                      par_con.peak_location = false;
-                     par_con.shape_parameter = false;
                      par_con.amplitude = false;
+                     par_con.width_parameter = false;
                      par_con.skew_parameter = false;
 
                 case 2
@@ -1069,28 +1179,28 @@ classdef GelBox_exported < matlab.apps.AppBase
                     half_distance=(0.1*length(x));
                     alfa_estimate = -log(0.5)/(half_distance^2);
 
-                    first_curve_shape_estimate = alfa_estimate;
+                    first_curve_width_estimate = alfa_estimate;
                     first_curve_amp_estimate = max_value;
                     first_curve_skew_estimate = 1;
 
                     second_curve_amp_estimate = first_curve_amp_estimate;
-                    second_curve_shape_estimate = alfa_estimate;
-                    second_curve_skew_estimate = 1;
+                    second_curve_width_offset = 0;
+                    second_curve_skew_offset = 0;
 
                      par_est.band_no  = [1;2];
                      par_est.peak_location = ...
                      [first_curve_x_estimate;second_curve_x_estimate];
-                     par_est.shape_parameter = ...
-                     [first_curve_shape_estimate;second_curve_shape_estimate];
                      par_est.amplitude = ...
                          [first_curve_amp_estimate;second_curve_amp_estimate];
+                     par_est.width_parameter = ...
+                     [first_curve_width_estimate;second_curve_width_offset];
                      par_est.skew_parameter = ...
-                     [first_curve_skew_estimate;second_curve_skew_estimate];
+                     [first_curve_skew_estimate;second_curve_skew_offset];
                      
                      par_con.band_no  = [1;2];
                      par_con.peak_location = [false;false];
-                     par_con.shape_parameter = [false;false];
                      par_con.amplitude = [false;false];
+                     par_con.width_parameter = [false;false];
                      par_con.skew_parameter = [false;false];
 
                 case 3
@@ -1115,31 +1225,31 @@ classdef GelBox_exported < matlab.apps.AppBase
                     half_distance=(0.1*length(x));
                     alfa_estimate = -log(0.5)/(half_distance^2);
 
-                    first_curve_shape_estimate = alfa_estimate;
+                    first_curve_width_estimate = alfa_estimate;
                     first_curve_amp_estimate = max_value;
                     first_curve_skew_estimate = 1;
 
                     second_curve_amp_estimate = first_curve_amp_estimate;
-                    second_curve_shape_estimate = alfa_estimate;
-                    second_curve_skew_estimate = 1;
+                    second_curve_width_estimate = 0;
+                    second_curve_skew_estimate = 0;
 
                     third_curve_amp_estimate = first_curve_amp_estimate;
-                    third_curve_shape_estimate = alfa_estimate;
-                    third_curve_skew_estimate = 1;
+                    third_curve_width_estimate = 0;
+                    third_curve_skew_estimate = 0;
 
                     par_est.band_no  = [1;2;3];
                     par_est.peak_location = ...
                         [first_curve_x_estimate;...
                         second_curve_x_estimate;...
                         third_curve_x_estimate];
-                    par_est.shape_parameter = ...
-                        [first_curve_shape_estimate;...
-                        second_curve_shape_estimate;...
-                        third_curve_shape_estimate];
                     par_est.amplitude = ...
                         [first_curve_amp_estimate;...
                         second_curve_amp_estimate;...
                         third_curve_amp_estimate];
+                    par_est.width_parameter = ...
+                        [first_curve_width_estimate;...
+                        second_curve_width_estimate;...
+                        third_curve_width_estimate];
                     par_est.skew_parameter = ...
                         [first_curve_skew_estimate;...
                         second_curve_skew_estimate;...
@@ -1147,8 +1257,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                     
                      par_con.band_no  = [1;2;3];
                      par_con.peak_location = [false;false;false];
-                     par_con.shape_parameter = [false;false;false];
-                     par_con.amplitude = [false;false;false;];
+                     par_con.amplitude = [false;false;false];
+                     par_con.width_parameter = [false;false;false];
                      par_con.skew_parameter = [false;false;false];
             end
 
@@ -1281,24 +1391,29 @@ classdef GelBox_exported < matlab.apps.AppBase
                 center_image_with_preserved_aspect_ratio( ...
                     app.gel_data.im_data, ...
                     app.gel_image_axes);
-
+                if isfield(save_data,'par_fit')
+                    band_no = numel(save_data.par_fit);
+                end
+                
                 n=size(save_data.box_position,1);
-                names = {'band_no','peak_location','shape_parameter','amplitude','skew_parameter'};
+                names = {'band_no','peak_location','width_parameter','amplitude','skew_parameter'};
                 for j = 1:n
                     for i = 1:numel(names)
-                        if isfield(save_data,'par_est')
-                        app.gel_data.par_est(j).(names{i}) = save_data.par_est(j).(names{i});
-                        app.loaded_analysis = 1;
-                        else
-                        app.gel_data.par_est(j).(names{i}) = [];
-                        app.par_est_na = 1;
-                        end
-                        
-                        if isfield(save_data,'par_con')
-                        app.gel_data.par_con(j).(names{i}) = save_data.par_con(j).(names{i});
-                        app.loaded_analysis = 1;
-                        else
-                        app.gel_data.par_con(j).(names{i}) = [];
+                        for k = 1:band_no
+                            if isfield(save_data,'par_est')
+                                app.gel_data.par_est(j).(names{i})(k) = save_data.par_est(j).(names{i})(k);
+                                app.loaded_analysis = 1;
+                            else
+                                app.gel_data.par_est(j).(names{i})(k) = [];
+                                app.par_est_na = 1;
+                            end
+
+                            if isfield(save_data,'par_con')
+                                app.gel_data.par_con(j).(names{i})(k) = save_data.par_con(j).(names{i})(k);
+                                app.loaded_analysis = 1;
+                            else
+                                app.gel_data.par_con(j).(names{i})(k) = false;
+                            end
                         end
                     end
                 end
@@ -1377,8 +1492,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                     end
 
                     p = app.gel_data.box_handle(i).Position;
-                    app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-10,sprintf('%.0f',i), ...
-                        'Parent',app.gel_image_axes,'FontWeight',"bold");
+                    app.gel_data.box_label(i) = text(p(1)+p(3)+50,p(2)-20,sprintf('%.0f',i), ...
+                        'Parent',app.gel_image_axes,'FontWeight',"bold","FontSize",18);
 
                     app.gel_data.old_width = p(3);
                     app.gel_data.old_height = p(4);
@@ -1453,7 +1568,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             % Add in a label
             p = app.gel_data.box_handle(n).Position;
             app.gel_data.box_label(n) = text(app.gel_image_axes, ...
-                p(1)+p(3),p(2)-10,sprintf('%.0f',n),'FontWeight',"bold");
+                p(1)+p(3)+50,p(2)-20,sprintf('%.0f',n),'FontWeight',"bold","FontSize",18);
 
             % Update zoom control
             for i=1:n
@@ -1567,7 +1682,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             save_data.imfinfo = app.gel_data.imfinfo;
             
             number_of_boxes = size(save_data.box_position,1);
-            names = {'band_no','peak_location','shape_parameter','amplitude','skew_parameter'};
+            names = {'band_no','peak_location','width_parameter','amplitude','skew_parameter'};
             for j = 1:number_of_boxes
                 for i = 1:numel(names)
                     save_data.par_est(j).(names{i}) = app.gel_data.par_est(j).(names{i});
@@ -1611,6 +1726,12 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             delete(app.gel_data.box_handle(selected_box))
             delete(app.gel_data.box_label(selected_box))
+            field_names = fieldnames(app.gel_data.par_est);
+            
+            for u = 1 : numel(field_names)
+                app.gel_data.par_est(selected_box).(field_names{u}) = [];
+            end
+            
             app.gel_data.box_handle(selected_box) = [];
             app.gel_data.box_label(selected_box) = [];
 
@@ -1643,12 +1764,17 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.gel_data.box_label = [];
             for i = 1:n
                 p = app.gel_data.box_handle(i).Position;
-                app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-10,sprintf('%.0f',i), ...
-                    'Parent',app.gel_image_axes,'FontWeight',"bold");
+                app.gel_data.box_label(i) = text(p(1)+p(3)+50,p(2)-20,sprintf('%.0f',i), ...
+                    'Parent',app.gel_image_axes,'FontWeight',"bold",'FontSize',18);
 
                 app.gel_data.old_width = p(3);
                 app.gel_data.old_height = p(4);
             end
+            
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+            
         end
 
         % Menu selected function: ExportResultsMenu
