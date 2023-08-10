@@ -17,16 +17,15 @@ The problem is that the software has not found a good fit. There are two distinc
 
 <a href="media/single_curve.png" target="_blank">![Single curve](media/single_curve.png)</a>
 
-It is not always easy to identify the situation. One possible first step is visualizing the fitting process to observe how the function develops through iterations. Draw Fitting checkbox, shown in the red rectangle, lets users visualize fitting. As soon as the box is checked, the fitting starts over. Please note that this might take a little longer as each fitting iteration is plotted simultaneously.
+It is not always easy to identify the situation. One possible first step is visualizing the fitting process to observe how the function develops through iterations. Draw Fitting checkbox, shown in the red rectangle, lets users visualize fitting. As soon as the box is checked, the fitting starts over. This may take a little longer as each fitting iteration is plotted simultaneously.
 
-
-<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/fa935211-d4ef-42d3-9535-f9f59259ab55" controls="controls" style="max-width: 730px;"></video>
+<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/710c836b-d14c-420c-b576-38354203d007" controls="controls" style="max-width: 730px;"></video>
 
 The first couple of iterations shows that the application does not accurately predict the peak locations. Click the Fitting Parameters in the Fitting panel for the starting parameter estimates. Although the peak locations are roughly around 37 and 70 for band 1 and band 2, only the peak location of band 1 is correctly estimated.
 
 <a href="media/change_parameters.png" target="_blank">![Change parameters](media/change_parameters.png)</a>
 
-Change the peak locations for band 2 to 70 and click the Update Fitting button.
+Change the peak location of band 2 to 70 and click the Update Fitting button.
 
 <a href="media/parameters_changed.png" target="_blank">![Parameters changed](media/parameters_changed.png)</a>
 
