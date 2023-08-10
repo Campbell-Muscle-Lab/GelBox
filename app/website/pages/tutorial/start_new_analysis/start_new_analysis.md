@@ -105,7 +105,7 @@ Click the Fitting Parameters button, and it opens a new window. The window shows
 
 <a href="media/fitting_parameters.png" target="_blank">![Two bands](media/fitting_parameters.png)</a>
 
-The Starting Parameter Estimates table is editable, except for the Band No column. Let's change the shape parameter value of band two from 0.0057 to 0.0050, then click the Update Starting Parameter Estimates button, shown in the red rectangle. This button starts over the fitting process with new starting parameters. Please note that the changing the shape parameter results in a slighlty better fit and the relative area values are changed by 0.01, highlighted in red rectangle below. You can also constrain the parameter values using the checkboxes, so that GelBox 3 will not adjust the selected parameter.
+The Starting Parameter Estimates table is editable, except for the Band No column. Let's change the width offset value of band two from 0 to -0.0004, shown in the red rectangle in the Fittin Parameters window, then click the Update Fitting button in the red rectangle. This button starts over the fitting process with new starting parameters. Please note that changing the width offset results in a slightly better fit, and the relative area values are changed by 0.02, highlighted in the red rectangle below. You can also constrain the parameter values using the checkboxes so that GelBox 3 will not adjust the selected parameter.
 
 <a href="media/fitting_parameters_changed.png" target="_blank">![Two bands](media/fitting_parameters_changed.png)</a>
 
@@ -129,15 +129,15 @@ Clicking the Selected Box Information button opens the following window.
 
 <a href="media/selected_box_information.png" target="_blank">![Output results](media/selected_box_information.png)</a>
 
-Once you finish your analysis, click the File button on the toolbar (red rectangle )to save your analysis and export the analysis summary as an Excel file.
+Once you finish your analysis, click the File button on the toolbar to save your analysis, shown in the red rectangle. The Save Analysis button opens the following file dialog box, which allows you to save GelBox 3 analysis files in a unique .gdf format. This file format can be loaded to GelBox 3 to revisit the analysis. Name your file and click Save.
 
-<a href="media/output_results.png" target="_blank">![Output results](media/output_results.png)</a>
-
-The Save Analysis button opens the following file dialog box, which allows you to save GelBox 3 analysis files in a unique .gdf format. This file format can be loaded to GelBox 3 to revisit the analysis. Name your file and click Save.
+<a href="media/save_analysis_file.png" target="_blank">![Save analysis file](media/save_analysis_file.png)</a>
 
 <a href="media/save_analysis_file_dialog.png" target="_blank">![Save analysis file dialog](media/save_analysis_file_dialog.png)</a>
 
-The export Results button opens a file dialog box for the summary Excel file. Name your file and click Save.
+The Export Results button opens a file dialog box for the summary Excel file. Name your file and click Save.
+
+<a href="media/output_results.png" target="_blank">![Output results](media/output_results.png)</a>
 
 <a href="media/output_results_file_dialog.png" target="_blank">![Output excel file dialog](media/output_results_file_dialog.png)</a>
 
@@ -168,7 +168,7 @@ The following sheets are named after the boxes. There is a sheet for each box in
 
 <a href="media/excel_fits.PNG" target="_blank">![excel fits](media/excel_fits.PNG)</a>
 
-In addition, users can generate summary plots for their analysis. Click the Data Analysis button on the toolbar. The Summary Plot button is located at the bottom of the dropdown, shown in red rectangle.
+In addition, users can generate summary plots for their analysis. Click the Data Analysis button on the toolbar. The Summary Plot button is located at the bottom of the dropdown, shown in the red rectangle.
 
 <a href="media/band_labels.png" target="_blank">![summary plot menu](media/band_labels.png)</a>
 

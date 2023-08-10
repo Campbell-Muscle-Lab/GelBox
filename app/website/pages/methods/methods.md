@@ -10,9 +10,9 @@ GelBox 3 fits the summation of Gaussian functions to the densitometry profile us
 
 ![Gaussian equation](media/gaussian_equation.png)
 
-where x is the position along the height of the region of interest (ROI), n is the number of bands, A<sub>i</sub> and x<sub>i</sub> are the peak amplitude, and its location, respectively, α determines the curvature, and ϕ is the skewness parameter. 
+where x is the position along the height of the region of interest (ROI), n is the number of bands, A<sub>i</sub> and x<sub>i</sub> are the peak amplitude, and its location, respectively, α determines the width, and ϕ is the skew parameter. 
 
-Each parameter alters the shape of the function. While the peak amplitude sets the maximum value, its location shifts the curve along the x direction (Panels A and B in the below figure). As the α parameter increases, the curve's width decreases (Panel C in the below figure). A non-zero skewness parameter allows the function to be asymmetric (Panel D in the below figure). GelBox 3 assigns identical shape and skewness parameters to functions assuming the proteins run in similar shapes. This assumption can be overwritten through adjustable starting parameter estimates.
+Each parameter alters the shape of the function. While the peak amplitude sets the maximum value, its location shifts the curve along the x direction (Panels A and B in the below figure). As the α parameter increases, the curve's width decreases (Panel C in the below figure). A non-zero skew parameter allows the function to be asymmetric (Panel D in the below figure). GelBox 3 estimates the width and skew parameters for the first band, then they are shared through the bands with an offset term. GelBox 3 sets offset terms 0 assuming the proteins run in similar shapes. This assumption can be overwritten through adjustable starting parameter estimates.
 
 ![Gaussian parameters](media/figure_gaussian_parameters.png)
 
