@@ -44,7 +44,7 @@ GelBox can work with both fluorescent and non-fluorescent images. In the case of
 
 <a href="media/invert_image.png" target="_blank">![Invert image](media/invert_image.png)</a>
 
-Clicking the Invert Image button transforms bright pixels to dark pixels and vice versa. The inverted image appears in the Gel Image panel.
+Clicking the Invert Image button transforms bright pixels into dark pixels and vice versa. The inverted image appears in the Gel Image panel.
 
 <a href="media/inverted_image.png" target="_blank">![Inverted image](media/inverted_image.png)</a>
 
@@ -68,7 +68,7 @@ Zoomed-in image shows the second, third, and fourth lane of the gel.
 
 You can now zoom into the lane of interest by using the mouse's scroll wheel or changing the mouse cursor mode to MATLAB's zoom-in feature. This feature appears on the top right corner of the image axes. It is hidden, but it appears as you hover over the image.
 
-The next step is to draw an ROI box for analysis. Box controls are placed above the image axes, shown in red rectangle.
+The next step is to draw an ROI box for analysis. Box controls are placed above the image axes, shown in red the rectangle.
 
 <a href="media/new_box.png" target="_blank">![New box](media/new_box.png)</a>
 
@@ -95,7 +95,7 @@ The newly generated box appears light green. The GelBox 3 automatically processe
 
 The box can be resized and dragged along the image. The fitting process automatically follows the position of the box. You can explore a better fit by replacing or resizing the box.
 
-<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/57e4dd0d-7a9a-45c1-8eaf-675f5119d8ba" controls="controls" style="max-width: 730px;"></video>
+<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/4f51f4ea-d6d5-4de1-afe5-0f68c5822f22" controls="controls" style="max-width: 730px;"></video>
 
 The fitting parameters are initialized by GelBox 3 and can be edited using the Fitting Parameters button (red rectangle) in the Fitting Panel.
 
@@ -109,7 +109,7 @@ The Starting Parameter Estimates table is editable, except for the Band No colum
 
 <a href="media/fitting_parameters_changed.png" target="_blank">![Two bands](media/fitting_parameters_changed.png)</a>
 
-Usually, there is more than one lane of interest in gels. Once you are completed with the current box, generate your next box as mentioned above. GelBox 3 will automatically place a new box near the old box. All the boxes have the same dimensions. The new box becomes the selected box (light green), and the old box is shown in red. Drag the new box to the desired position. Please note that the inset and density figures are updated as the box moves.
+Usually, there is more than one lane of interest in gels. Once you complete the current box, generate your next box as mentioned above. GelBox 3 will automatically place a new box near the old box. All the boxes have the same dimensions. The new box becomes the selected box (light green), and the old box is shown in red. Drag the new box to the desired position. Please note that the inset and density figures are updated as the box moves.
 
 <a href="media/box_2.png" target="_blank">![Box 2](media/box_2.png)</a>
 
@@ -119,7 +119,7 @@ You can change the selected box using the Box Selection dropdown, shown in a rec
 
 The second box can also be dragged around the image. However, when the selected box is resized, all the existing boxes also change their size. Please note that the fits may change as a result of resizing. Make sure to check all the existing boxes to verify fits.
 
-<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/c3bc0ba9-5a59-405e-b01a-bcba2f3b403e" controls="controls" style="max-width: 730px;"></video>
+<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/91779d2c-4cfa-4a82-bf70-88011d417572" controls="controls" style="max-width: 730px;"></video>
 
 The new box positions, sizes, and area values can be accessed through the Selected Box Information window. Click the Data Analysis button on the toolbar, shown in the red rectangle. 
 
