@@ -68,6 +68,7 @@ classdef GelBox_exported < matlab.apps.AppBase
         loaded_analysis = 0
         par_est_na = 0
         single_box_callback
+        d
     end
 
     properties (Access = private)
@@ -110,8 +111,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.box_position(i,:) = app.gel_data.box_handle(i).Position;
                 end
 
-                % Store data for display
-                d=[];
                 if app.single_box_callback
                     disp_start = selected_box;
                     disp_end = selected_box;
@@ -122,25 +121,25 @@ classdef GelBox_exported < matlab.apps.AppBase
                 
                 for i = disp_start:disp_end
 
-                    d.box(i).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
-                    num_of_bands = d.box(i).fitting_mode;
+                    app.d.box(i).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
+                    num_of_bands = app.d.box(i).fitting_mode;
                     % Extract position
-                    d.box(i).position = app.gel_data.box_handle(i).Position;
+                    app.d.box(i).position = app.gel_data.box_handle(i).Position;
 
                     % Label it
                     set(app.gel_data.box_label(i),'String',sprintf('%.0f',i));
                     set(app.gel_data.box_label(i), ...
-                        'Position',[d.box(i).position(1)+d.box(i).position(3) ...
-                        d.box(i).position(2)-10]);
+                        'Position',[app.d.box(i).position(1)+app.d.box(i).position(3)+10 ...
+                        app.d.box(i).position(2)-50]);
 
                     % Calculate profile
-                    d.box(i).inset = imcrop(app.gel_data.im_data, ...
-                        d.box(i).position);
-                    summary_position = [d.box(i).position(1)-10, d.box(i).position(2)-10, d.box(i).position(3)+20, d.box(i).position(4)+20];
-                    d.box(i).summary_inset = imcrop(app.gel_data.im_data, ...
+                    app.d.box(i).inset = imcrop(app.gel_data.im_data, ...
+                        app.d.box(i).position);
+                    summary_position = [app.d.box(i).position(1)-10, app.d.box(i).position(2)-10, app.d.box(i).position(3)+20, app.d.box(i).position(4)+20];
+                    app.d.box(i).summary_inset = imcrop(app.gel_data.im_data, ...
                         summary_position);
                     
-                    m = imcomplement(d.box(i).inset);
+                    m = imcomplement(app.d.box(i).inset);
 
                     x = flipud(mean(m,2));
                     y = 1:size(m,1);
@@ -191,17 +190,17 @@ classdef GelBox_exported < matlab.apps.AppBase
                             par_fit.(fnames{k});
                     end
 
-                    d.box(i).total_area = trapz(y,x);
-                    d.box(i).background_area = trapz(y,x_back);
-                    d.box(i).background_corr_area = trapz(y,(x'-x_back));
+                    app.d.box(i).total_area = trapz(y,x);
+                    app.d.box(i).background_area = trapz(y,x_back);
+                    app.d.box(i).background_corr_area = trapz(y,(x'-x_back));
                     
                     for j = 1 : num_of_bands
-                        d.box(i).band_area(j) = trapz(y,x_bands(j,:));
+                        app.d.box(i).band_area(j) = trapz(y,x_bands(j,:));
                     end
 
                     % Store data for later
 
-                    app.gel_data.box_data(i) = d.box(i);
+                    app.gel_data.box_data(i) = app.d.box(i);
                     app.gel_data.summary(i).x = x;
                     app.gel_data.summary(i).y = y;
                     app.gel_data.summary(i).x_fit = x_fit;
@@ -214,13 +213,13 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                         if peak_band_2 > peak_band_1
 
-                            app.gel_data.summary(i).bottom = d.box(i).band_area(1);
-                            app.gel_data.summary(i).top = d.box(i).band_area(2);
+                            app.gel_data.summary(i).bottom = app.d.box(i).band_area(1);
+                            app.gel_data.summary(i).top = app.d.box(i).band_area(2);
                             app.gel_data.summary(i).band_1 = x_bands(1,:);
                             app.gel_data.summary(i).band_2 = x_bands(2,:);
                         else
-                            app.gel_data.summary(i).bottom = d.box(i).band_area(2);
-                            app.gel_data.summary(i).top = d.box(i).band_area(1);
+                            app.gel_data.summary(i).bottom = app.d.box(i).band_area(2);
+                            app.gel_data.summary(i).top = app.d.box(i).band_area(1);
                             app.gel_data.summary(i).band_1 = x_bands(2,:);
                             app.gel_data.summary(i).band_2 = x_bands(1,:);
                         end
@@ -233,11 +232,11 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                         %sort
                         [~,sort_ix] = sort(peak_band);
-                        app.gel_data.summary(i).bottom = d.box(i).band_area( ...
+                        app.gel_data.summary(i).bottom = app.d.box(i).band_area( ...
                             sort_ix(1));
-                        app.gel_data.summary(i).middle = d.box(i).band_area( ...
+                        app.gel_data.summary(i).middle = app.d.box(i).band_area( ...
                             sort_ix(2));
-                        app.gel_data.summary(i).top = d.box(i).band_area( ...
+                        app.gel_data.summary(i).top = app.d.box(i).band_area( ...
                             sort_ix(3));
                         app.gel_data.summary(i).band_1 = x_bands( ...
                             sort_ix(1),:);
@@ -247,22 +246,22 @@ classdef GelBox_exported < matlab.apps.AppBase
                             sort_ix(3),:);
                     else
                         app.gel_data.summary(i).band_1 = x_bands(1,:);
-                        app.gel_data.summary(i).bottom = d.box(i).band_area;
+                        app.gel_data.summary(i).bottom = app.d.box(i).band_area;
                     end
 
-                    app.gel_data.summary(i).inset = d.box(i).inset;
-                    app.gel_data.summary(i).summary_inset = d.box(i).summary_inset;
+                    app.gel_data.summary(i).inset = app.d.box(i).inset;
+                    app.gel_data.summary(i).summary_inset = app.d.box(i).summary_inset;
                     app.gel_data.summary(i).r_squared = r_squared;
-                    app.gel_data.summary(i).box_position = d.box(i).position;
+                    app.gel_data.summary(i).box_position = app.d.box(i).position;
 
                     % Display
                     if (i==selected_box)
-                        app.TotalAreaField.Value = d.box(i).total_area;
-                        app.BackgroundAreaField.Value = d.box(i).background_area;
-                        app.BackgroundCorrAreaField.Value = d.box(i).background_corr_area;
+                        app.TotalAreaField.Value = app.d.box(i).total_area;
+                        app.BackgroundAreaField.Value = app.d.box(i).background_area;
+                        app.BackgroundCorrAreaField.Value = app.d.box(i).background_corr_area;
                         app.rsquaredField.Value = r_squared;
                         center_image_with_preserved_aspect_ratio( ...
-                            d.box(i).inset, ...
+                            app.d.box(i).inset, ...
                             app.box_inset);
                         cla(app.raw_density)
                         plot(app.raw_density,x,y,"Color",'k',"LineWidth",2)
@@ -407,7 +406,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                             [1 max(y)]);
                     end
                 end
-                app.gel_data.d_box = d;
+                app.gel_data.d_box = app.d;
             end
         end
 
@@ -612,6 +611,11 @@ classdef GelBox_exported < matlab.apps.AppBase
             
             lower_bounds=zeros(1,no_of_parameters);
             upper_bounds=Inf*ones(1,no_of_parameters);
+            if no_of_parameters > 6
+                for t = 7:numel(par)
+                    lower_bounds(t)=-inf;
+                end
+            end
             
             no_of_bands = numel(par_con.(names{m}));
           
@@ -873,7 +877,11 @@ classdef GelBox_exported < matlab.apps.AppBase
             
             lower_bounds=zeros(1,no_of_parameters);
             upper_bounds=Inf*ones(1,no_of_parameters);
-            
+            if no_of_parameters > 6
+                for t = 7:numel(par)
+                    lower_bounds(t)=-inf;
+                end
+            end
             no_of_bands = numel(par_con.(names{m}));
             
             l = 1;
@@ -1334,6 +1342,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                 app.DataAnalysisMenu.Enable = 1;
                 app.gel_data = [];
                 app.gel_data.par_update = 0;
+                app.d=[];
+
 
                 app.gel_data.invert_status = 0;
                 app.gel_data.image_file_string = fullfile(path_string,file_string);
@@ -1383,6 +1393,7 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                 % Restore
                 app.gel_data = [];
+                app.d=[];
                 app.gel_data.image_file_string = save_data.image_file_string;
                 app.gel_data.im_data = save_data.im_data;
                 app.gel_data.imfinfo = save_data.imfinfo;
@@ -1392,16 +1403,16 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.im_data, ...
                     app.gel_image_axes);
                 if isfield(save_data,'par_fit')
-                    band_no = numel(save_data.par_fit);
+                    band_no = numel(save_data.par_fit(1).band_no);
                 end
                 
                 n=size(save_data.box_position,1);
-                names = {'band_no','peak_location','width_parameter','amplitude','skew_parameter'};
+                names = {'band_no','peak_location','amplitude','width_parameter','skew_parameter'};
                 for j = 1:n
                     for i = 1:numel(names)
                         for k = 1:band_no
-                            if isfield(save_data,'par_est')
-                                app.gel_data.par_est(j).(names{i})(k) = save_data.par_est(j).(names{i})(k);
+                            if isfield(save_data,'par_fit')
+                                app.gel_data.par_est(j).(names{i})(k) = save_data.par_fit(j).(names{i})(k);
                                 app.loaded_analysis = 1;
                             else
                                 app.gel_data.par_est(j).(names{i})(k) = [];
@@ -1492,7 +1503,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     end
 
                     p = app.gel_data.box_handle(i).Position;
-                    app.gel_data.box_label(i) = text(p(1)+p(3)+50,p(2)-20,sprintf('%.0f',i), ...
+                    app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
                         'Parent',app.gel_image_axes,'FontWeight',"bold","FontSize",18);
 
                     app.gel_data.old_width = p(3);
@@ -1568,7 +1579,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             % Add in a label
             p = app.gel_data.box_handle(n).Position;
             app.gel_data.box_label(n) = text(app.gel_image_axes, ...
-                p(1)+p(3)+50,p(2)-20,sprintf('%.0f',n),'FontWeight',"bold","FontSize",18);
+                p(1)+p(3),p(2)-50,sprintf('%.0f',n),'FontWeight',"bold","FontSize",18);
 
             % Update zoom control
             for i=1:n
@@ -1682,7 +1693,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             save_data.imfinfo = app.gel_data.imfinfo;
             
             number_of_boxes = size(save_data.box_position,1);
-            names = {'band_no','peak_location','width_parameter','amplitude','skew_parameter'};
+            names = {'band_no','peak_location','amplitude','width_parameter','skew_parameter'};
             for j = 1:number_of_boxes
                 for i = 1:numel(names)
                     save_data.par_est(j).(names{i}) = app.gel_data.par_est(j).(names{i});
@@ -1734,6 +1745,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             
             app.gel_data.box_handle(selected_box) = [];
             app.gel_data.box_label(selected_box) = [];
+            app.gel_data.box_position(selected_box) = [];
 
             n = numel(control_strings) - 1;
             control_strings = {};
@@ -1764,7 +1776,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.gel_data.box_label = [];
             for i = 1:n
                 p = app.gel_data.box_handle(i).Position;
-                app.gel_data.box_label(i) = text(p(1)+p(3)+50,p(2)-20,sprintf('%.0f',i), ...
+                app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
                     'Parent',app.gel_image_axes,'FontWeight',"bold",'FontSize',18);
 
                 app.gel_data.old_width = p(3);
@@ -1779,42 +1791,42 @@ classdef GelBox_exported < matlab.apps.AppBase
 
         % Menu selected function: ExportResultsMenu
         function OutputButtonPushed(app, event)
-            d = [];
-            d.image_file{1} = app.gel_data.image_file_string;
+            o = [];
+            o.image_file{1} = app.gel_data.image_file_string;
             n = numel(app.gel_data.box_handle);
             for i = 2 : n
-            d.image_file{i,1} = '';
+            o.image_file{i,1} = '';
             end
             for i=1:n
-                d.box(i) = i;
-                d.total_area(i) = app.gel_data.box_data(i).total_area;
-                d.background_area(i) = app.gel_data.box_data(i).background_area;
+                o.box(i) = i;
+                o.total_area(i) = app.gel_data.box_data(i).total_area;
+                o.background_area(i) = app.gel_data.box_data(i).background_area;
                 num_of_bands = numel(app.gel_data.box_data(i).band_area);
                 switch num_of_bands
                     case 1
-                        d.band_area_bottom(i) = app.gel_data.summary(i).bottom;
+                        o.band_area_bottom(i) = app.gel_data.summary(i).bottom;
                     case 2
-                        d.band_area_bottom(i) = app.gel_data.summary(i).bottom;
-                        d.band_area_top(i) = app.gel_data.summary(i).top;
+                        o.band_area_bottom(i) = app.gel_data.summary(i).bottom;
+                        o.band_area_top(i) = app.gel_data.summary(i).top;
                     case 3
-                        d.band_area_bottom(i) = app.gel_data.summary(i).bottom;
-                        d.band_area_middle(i) = app.gel_data.summary(i).middle;
-                        d.band_area_top(i) = app.gel_data.summary(i).top;
+                        o.band_area_bottom(i) = app.gel_data.summary(i).bottom;
+                        o.band_area_middle(i) = app.gel_data.summary(i).middle;
+                        o.band_area_top(i) = app.gel_data.summary(i).top;
                 end
 
-                d.band_left(i) = app.gel_data.box_data(i).position(1);
-                d.band_top(i) = app.gel_data.box_data(i).position(2);
-                d.band_width(i) = app.gel_data.box_data(i).position(3);
-                d.band_height(i) = app.gel_data.box_data(i).position(4);
-                d.fitting_mode{i} = app.gel_data.box_data(i).fitting_mode;
-                d.num_of_bands(i) = num_of_bands;
-                d.r_squared(i) = app.gel_data.summary(i).r_squared;
+                o.band_left(i) = app.gel_data.box_data(i).position(1);
+                o.band_top(i) = app.gel_data.box_data(i).position(2);
+                o.band_width(i) = app.gel_data.box_data(i).position(3);
+                o.band_height(i) = app.gel_data.box_data(i).position(4);
+                o.fitting_mode{i} = app.gel_data.box_data(i).fitting_mode;
+                o.num_of_bands(i) = num_of_bands;
+                o.r_squared(i) = app.gel_data.summary(i).r_squared;
             end
 
             [file_string,path_string] = uiputfile2( ...
                 {'*.xlsx','Excel file'},'Select file for results');
             
-            d_out = d;
+            d_out = o;
             names = fieldnames(d_out);
             
             for j = 1 : length(d_out)
