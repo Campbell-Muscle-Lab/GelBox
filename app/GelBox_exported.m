@@ -39,9 +39,10 @@ classdef GelBox_exported < matlab.apps.AppBase
         GelImagePanel                matlab.ui.container.Panel
         BoxSelectionDropDown         matlab.ui.control.DropDown
         BoxSelectionDropDownLabel    matlab.ui.control.Label
-        NewBoxButton                 matlab.ui.control.Button
         DeleteBoxButton              matlab.ui.control.Button
-        gel_image_axes               matlab.ui.control.UIAxes
+        NewBoxButton                 matlab.ui.control.Button
+        AdjustImageButton            matlab.ui.control.Button
+        gel_image_axis               matlab.ui.control.UIAxes
         OpticalDensitiesPanel        matlab.ui.container.Panel
         BackgroundCorrAreaField      matlab.ui.control.NumericEditField
         BackgroundCorrAreaLabel      matlab.ui.control.Label
@@ -67,8 +68,11 @@ classdef GelBox_exported < matlab.apps.AppBase
         box_changed = 0
         loaded_analysis = 0
         par_est_na = 0
+        image_adjusted = 0
         single_box_callback
         d
+        par_fit_na = 0 % Description
+        moving_box = 0 % Description
     end
 
     properties (Access = private)
@@ -76,6 +80,7 @@ classdef GelBox_exported < matlab.apps.AppBase
         SelectedBoxTextDialog % Description
         FittingOptions % Description
         SummaryPlot
+        AdjustImage
     end
 
     methods (Access = public)
@@ -147,7 +152,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                     x_back = linspace(x(1),x(end),numel(y));
                     box_no = str2num(app.BoxSelectionDropDown.Value);
                     
-                    if app.loaded_analysis || app.parameters_updated || app.gel_data.par_update(i)
+                    if (app.loaded_analysis && (app.new_box <= length(app.gel_data.par_est))) ...
+                        || app.parameters_updated || app.gel_data.par_update(i) || app.moving_box
                     elseif app.new_box || app.mode_updated || app.par_est_na
                         [par_est,par_con] = EstimateFittingParameters(app,y,x, ...
                             x_back,num_of_bands);
@@ -262,7 +268,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.rsquaredField.Value = r_squared;
                         center_image_with_preserved_aspect_ratio( ...
                             app.d.box(i).inset, ...
-                            app.box_inset);
+                            app.box_inset,[]);
                         cla(app.raw_density)
                         plot(app.raw_density,x,y,"Color",'k',"LineWidth",2)
                         hold(app.raw_density,"on")
@@ -411,7 +417,7 @@ classdef GelBox_exported < matlab.apps.AppBase
         end
 
         function [y_bands, y_fit,r_squared,par_fit] = FitGaussian(app,x,y,y_back,box_no)
-
+            
             par_est = struct();
             par_con = struct();
             
@@ -1273,6 +1279,17 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             
         end
+        
+        function ImageAdjusted(app)
+                if ~isempty(app.gel_data.adjusted_image)
+                    app.gel_data.im_data = app.gel_data.adjusted_image;
+                    app.image_adjusted = 1;
+                    center_image_with_preserved_aspect_ratio( ...
+                        app.gel_data.im_data, ...
+                        app.gel_image_axis,[]);
+                end
+                UpdateDisplay(app)
+        end
     end
 
     methods (Access = private)
@@ -1327,7 +1344,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             colormap(app.GelBoxUIFigure, 'gray');
             app.fitting_options.shared_shape = true(1,1);
             app.fitting_options.shared_skewness = true(1,1);
-            disableDefaultInteractivity(app.gel_image_axes)
+            disableDefaultInteractivity(app.gel_image_axis)
 
         end
 
@@ -1351,10 +1368,10 @@ classdef GelBox_exported < matlab.apps.AppBase
                 if (ndims(app.gel_data.im_data)==3)
                     app.gel_data.im_data = rgb2gray(app.gel_data.im_data);
                 end
-
+                app.gel_data.original_image = app.gel_data.im_data;
                 center_image_with_preserved_aspect_ratio( ...
                     app.gel_data.im_data, ...
-                    app.gel_image_axes);
+                    app.gel_image_axis,[]);
 
                 app.gel_data.imfinfo = imfinfo(app.gel_data.image_file_string);
 
@@ -1365,9 +1382,10 @@ classdef GelBox_exported < matlab.apps.AppBase
         % Menu selected function: InvertImageMenu
         function InvertImageButtonPushed(app, event)
             app.gel_data.im_data = imcomplement(app.gel_data.im_data);
+            app.gel_data.original_image = app.gel_data.im_data;
             center_image_with_preserved_aspect_ratio( ...
                 app.gel_data.im_data, ...
-                app.gel_image_axes);
+                app.gel_image_axis,[]);
             app.gel_data.invert_status = 1;
         end
 
@@ -1397,13 +1415,64 @@ classdef GelBox_exported < matlab.apps.AppBase
                 app.gel_data.image_file_string = save_data.image_file_string;
                 app.gel_data.im_data = save_data.im_data;
                 app.gel_data.imfinfo = save_data.imfinfo;
+                app.new_box = 0;
 
 
                 center_image_with_preserved_aspect_ratio( ...
                     app.gel_data.im_data, ...
-                    app.gel_image_axes);
+                    app.gel_image_axis,[]);
                 if isfield(save_data,'par_fit')
                     band_no = numel(save_data.par_fit(1).band_no);
+                elseif isfield(save_data,'par_est')
+                    band_no = numel(save_data.par_est(1).band_no);
+                else 
+                    band_no = 1;
+                end
+                
+                % Check if this was a legacy gelbox gdf
+                if isfield(save_data,'par_est')
+                    ext_par_names = fieldnames(save_data.par_est);
+
+                    if any(strcmp(ext_par_names,'shape_parameter'))
+
+                        if isfield(save_data,'par_fit')
+                            for i = 1 : length(save_data.par_fit)
+                                save_data.par_fit(i).width_parameter = save_data.par_fit(i).shape_parameter;
+                            end
+                            save_data.par_fit = rmfield(save_data.par_fit,'shape_parameter');
+                        end
+
+                        if isfield(save_data,'par_est')
+                            for i = 1 : length(save_data.par_est)
+                                save_data.par_est(i).width_parameter = save_data.par_est(i).shape_parameter;
+                                if band_no > 1
+                                    save_data.par_est(i).width_parameter(2) = save_data.par_est(i).width_parameter(2) - save_data.par_est(i).width_parameter(1);
+                                    save_data.par_est(i).skew_parameter(2) = save_data.par_est(i).skew_parameter(2) - save_data.par_est(i).skew_parameter(1);
+                                end
+                            end
+                            save_data.par_est = rmfield(save_data.par_est,'shape_parameter');
+                        end
+
+                        if isfield(save_data,'par_con')
+                            for i = 1 : length(save_data.par_con)
+                                save_data.par_con(i).width_parameter = save_data.par_con(i).shape_parameter;
+                            end
+                            save_data.par_con = rmfield(save_data.par_con,'shape_parameter');
+                        end
+                    end
+                end
+                % Check if there were image adjustments
+                
+                if isfield(save_data, 'original_image')
+                    app.gel_data.original_image = save_data.original_image;
+                end
+                
+                if isfield(save_data, 'adjusted_image')
+                    app.gel_data.adjusted_image = save_data.adjusted_image;
+                end
+                
+                if isfield(save_data, 'image_adjustments')
+                    app.gel_data.image_adjustments = save_data.image_adjustments;
                 end
                 
                 n=size(save_data.box_position,1);
@@ -1415,8 +1484,14 @@ classdef GelBox_exported < matlab.apps.AppBase
                                 app.gel_data.par_est(j).(names{i})(k) = save_data.par_fit(j).(names{i})(k);
                                 app.loaded_analysis = 1;
                             else
+                                app.gel_data.par_est(j).(names{i})(k) = 0;
                                 app.gel_data.par_est(j).(names{i})(k) = [];
-                                app.par_est_na = 1;
+                                app.par_fit_na = 1;
+                            end
+                            
+                            if isfield(save_data,'par_est') && ~isfield(save_data,'par_fit')
+                                app.gel_data.par_est(j).(names{i})(k) = save_data.par_est(j).(names{i})(k);
+                                app.loaded_analysis = 1;
                             end
 
                             if isfield(save_data,'par_con')
@@ -1483,7 +1558,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 end
 
                 for i=1:n
-                    app.gel_data.box_handle(i) = images.roi.Rectangle(app.gel_image_axes, ...
+                    app.gel_data.box_handle(i) = images.roi.Rectangle(app.gel_image_axis, ...
                         'Position',save_data.box_position(i,:));
                     control_strings{i} = sprintf('%.0f',i);
                 end
@@ -1504,7 +1579,7 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                     p = app.gel_data.box_handle(i).Position;
                     app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
-                        'Parent',app.gel_image_axes,'FontWeight',"bold","FontSize",18);
+                        'Parent',app.gel_image_axis,'FontWeight',"bold","FontSize",18);
 
                     app.gel_data.old_width = p(3);
                     app.gel_data.old_height = p(4);
@@ -1518,7 +1593,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             end
 
             UpdateDisplay(app)
-            app.loaded_analysis = 0;
+%             app.loaded_analysis = 0;
             app.par_est_na = 0;
 
             % Nested function
@@ -1533,14 +1608,18 @@ classdef GelBox_exported < matlab.apps.AppBase
                         if isequal(old_size,current_size)
                             app.single_box_callback = 1;                            
                         end
+                        app.moving_box = 1;
                         UpdateDisplay(app)
+                        app.moving_box = 0;
                         app.single_box_callback = 0;
                     end
                 else
                     app.new_box = n;
                     app.single_box_callback = 1;
+                    app.moving_box = 1;
                     UpdateDisplay(app)
                     app.single_box_callback = 0;
+                    app.moving_box = 0;
                 end
             end
         end
@@ -1550,7 +1629,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             if (~isfield(app.gel_data,'box_handle'))
                 app.DeleteBoxButton.Enable = 1;
                 n=1;
-                app.gel_data.box_handle(n) = drawrectangle(app.gel_image_axes);
+                app.gel_data.box_handle(n) = drawrectangle(app.gel_image_axis);
                 p = app.gel_data.box_handle(n).Position;
                 app.gel_data.old_width = p(3);
                 app.gel_data.old_height = p(4);
@@ -1558,7 +1637,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 n = 1 + numel(app.gel_data.box_handle);
                 p = app.gel_data.box_handle(n-1).Position;
 
-                app.gel_data.box_handle(n) = images.roi.Rectangle(app.gel_image_axes, ...
+                app.gel_data.box_handle(n) = images.roi.Rectangle(app.gel_image_axis, ...
                     'Position',p + [150,0,0,0]);
                 for i=1:(n-1)
                     app.gel_data.box_handle(i).InteractionsAllowed = 'none';
@@ -1578,7 +1657,7 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             % Add in a label
             p = app.gel_data.box_handle(n).Position;
-            app.gel_data.box_label(n) = text(app.gel_image_axes, ...
+            app.gel_data.box_label(n) = text(app.gel_image_axis, ...
                 p(1)+p(3),p(2)-50,sprintf('%.0f',n),'FontWeight',"bold","FontSize",18);
 
             % Update zoom control
@@ -1607,15 +1686,19 @@ classdef GelBox_exported < matlab.apps.AppBase
                         if isequal(old_size,current_size)
                             app.single_box_callback = 1;                            
                         end
+                        app.moving_box = 1;
                         UpdateDisplay(app);
                         app.single_box_callback = 0;
+                        app.moving_box = 0;
 
                     end
                 else
                     app.new_box = n;
                     app.single_box_callback = 1;
+                    app.moving_box = 1;
                     UpdateDisplay(app);
                     app.single_box_callback = 0;
+                    app.moving_box = 0;
 
                 end
             end
@@ -1691,6 +1774,9 @@ classdef GelBox_exported < matlab.apps.AppBase
             end
             save_data.im_data = app.gel_data.im_data;
             save_data.imfinfo = app.gel_data.imfinfo;
+            save_data.original_image = app.gel_data.original_image;
+            save_data.adjusted_image = app.gel_data.adjusted_image;
+            save_data.image_adjustments = app.gel_data.image_adjustments;
             
             number_of_boxes = size(save_data.box_position,1);
             names = {'band_no','peak_location','amplitude','width_parameter','skew_parameter'};
@@ -1777,7 +1863,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             for i = 1:n
                 p = app.gel_data.box_handle(i).Position;
                 app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
-                    'Parent',app.gel_image_axes,'FontWeight',"bold",'FontSize',18);
+                    'Parent',app.gel_image_axis,'FontWeight',"bold",'FontSize',18);
 
                 app.gel_data.old_width = p(3);
                 app.gel_data.old_height = p(4);
@@ -1935,6 +2021,11 @@ classdef GelBox_exported < matlab.apps.AppBase
             UpdateDisplay(app)
             app.single_box_callback = 0;
             end
+        end
+
+        % Button pushed function: AdjustImageButton
+        function AdjustImageButtonPushed(app, event)
+            app.AdjustImage = AdjustImageWindow(app);
         end
     end
 
@@ -2096,30 +2187,36 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.GelImagePanel.Title = 'Gel Image';
             app.GelImagePanel.Position = [6 10 860 567];
 
-            % Create gel_image_axes
-            app.gel_image_axes = uiaxes(app.GelImagePanel);
-            app.gel_image_axes.XTick = [];
-            app.gel_image_axes.YTick = [];
-            app.gel_image_axes.Box = 'on';
-            app.gel_image_axes.Position = [12 13 837 487];
+            % Create gel_image_axis
+            app.gel_image_axis = uiaxes(app.GelImagePanel);
+            app.gel_image_axis.XTick = [];
+            app.gel_image_axis.YTick = [];
+            app.gel_image_axis.Box = 'on';
+            app.gel_image_axis.Position = [12 13 837 487];
+
+            % Create AdjustImageButton
+            app.AdjustImageButton = uibutton(app.GelImagePanel, 'push');
+            app.AdjustImageButton.ButtonPushedFcn = createCallbackFcn(app, @AdjustImageButtonPushed, true);
+            app.AdjustImageButton.Position = [16 507 100 22];
+            app.AdjustImageButton.Text = 'Adjust Image';
+
+            % Create NewBoxButton
+            app.NewBoxButton = uibutton(app.GelImagePanel, 'push');
+            app.NewBoxButton.ButtonPushedFcn = createCallbackFcn(app, @NewBoxButtonPushed, true);
+            app.NewBoxButton.Position = [130 507 100 22];
+            app.NewBoxButton.Text = 'New Box';
 
             % Create DeleteBoxButton
             app.DeleteBoxButton = uibutton(app.GelImagePanel, 'push');
             app.DeleteBoxButton.ButtonPushedFcn = createCallbackFcn(app, @DeleteBoxButtonPushed, true);
             app.DeleteBoxButton.Enable = 'off';
-            app.DeleteBoxButton.Position = [127 514 101 22];
+            app.DeleteBoxButton.Position = [247 507 101 22];
             app.DeleteBoxButton.Text = 'Delete Box';
-
-            % Create NewBoxButton
-            app.NewBoxButton = uibutton(app.GelImagePanel, 'push');
-            app.NewBoxButton.ButtonPushedFcn = createCallbackFcn(app, @NewBoxButtonPushed, true);
-            app.NewBoxButton.Position = [13 514 100 22];
-            app.NewBoxButton.Text = 'New Box';
 
             % Create BoxSelectionDropDownLabel
             app.BoxSelectionDropDownLabel = uilabel(app.GelImagePanel);
             app.BoxSelectionDropDownLabel.HorizontalAlignment = 'center';
-            app.BoxSelectionDropDownLabel.Position = [231 515 98 22];
+            app.BoxSelectionDropDownLabel.Position = [354 507 98 22];
             app.BoxSelectionDropDownLabel.Text = 'Box Selection';
 
             % Create BoxSelectionDropDown
@@ -2127,7 +2224,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BoxSelectionDropDown.Items = {};
             app.BoxSelectionDropDown.ValueChangedFcn = createCallbackFcn(app, @BoxSelectionDropDownValueChanged, true);
             app.BoxSelectionDropDown.Placeholder = 'No data';
-            app.BoxSelectionDropDown.Position = [329 515 100 22];
+            app.BoxSelectionDropDown.Position = [451 507 100 22];
             app.BoxSelectionDropDown.Value = {};
 
             % Create FittingPanel
