@@ -124,9 +124,12 @@ classdef GelBox_exported < matlab.apps.AppBase
                     disp_end = n;
                 end
                 
+%                 app.d.box(selected_box).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
+
+                
                 for i = disp_start:disp_end
 
-                    app.d.box(i).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
+%                     app.d.box(i).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
                     num_of_bands = app.d.box(i).fitting_mode;
                     % Extract position
                     app.d.box(i).position = app.gel_data.box_handle(i).Position;
@@ -212,6 +215,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.summary(i).x_fit = x_fit;
                     app.gel_data.summary(i).x_back = x_back;
                     
+                    
 
                     if num_of_bands == 2
                         [~,peak_band_1] = max(x_bands(1,:));
@@ -223,11 +227,13 @@ classdef GelBox_exported < matlab.apps.AppBase
                             app.gel_data.summary(i).top = app.d.box(i).band_area(2);
                             app.gel_data.summary(i).band_1 = x_bands(1,:);
                             app.gel_data.summary(i).band_2 = x_bands(2,:);
+                            app.gel_data.summary(i).band_3 = NaN*ones(1,numel(x_bands(1,:)));
                         else
                             app.gel_data.summary(i).bottom = app.d.box(i).band_area(2);
                             app.gel_data.summary(i).top = app.d.box(i).band_area(1);
                             app.gel_data.summary(i).band_1 = x_bands(2,:);
                             app.gel_data.summary(i).band_2 = x_bands(1,:);
+                            app.gel_data.summary(i).band_3 = NaN*ones(1,numel(x_bands(1,:)));
                         end
                     elseif num_of_bands == 3
                         [~,peak_band_1] = max(x_bands(1,:));
@@ -252,6 +258,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                             sort_ix(3),:);
                     else
                         app.gel_data.summary(i).band_1 = x_bands(1,:);
+                        app.gel_data.summary(i).band_2 = NaN*ones(1,numel(x_bands(1,:)));
+                        app.gel_data.summary(i).band_3 = NaN*ones(1,numel(x_bands(1,:)));
                         app.gel_data.summary(i).bottom = app.d.box(i).band_area;
                     end
 
@@ -1429,6 +1437,9 @@ classdef GelBox_exported < matlab.apps.AppBase
                     band_no = 1;
                 end
                 
+                app.NumberofBandsDropDown.Value = num2str(band_no);
+
+                                    
                 % Check if this was a legacy gelbox gdf
                 if isfield(save_data,'par_est')
                     ext_par_names = fieldnames(save_data.par_est);
@@ -1507,8 +1518,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 app.gel_data.par_update = zeros(1,n);
                 
                 if isfield(save_data,'par_est') && app.gel_data.par_est(1).band_no(end) ~= 1
-                    val = app.gel_data.par_est(1).band_no(end);
-                    app.NumberofBandsDropDown.Value = num2str(val);
+                    val = band_no;
                     switch val
                         case 1
                             try
@@ -1672,6 +1682,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.SelectedBoxInformationMenu.Enable = 1;
             app.new_box = n;
             app.single_box_callback = 1;
+            app.d.box(n).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
             UpdateDisplay(app)
             app.single_box_callback = 0;
 
@@ -1758,7 +1769,11 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.BandAreaLabel_3.Enable = 1;
                     app.BandRelativeAreaLabel_3.Enable = 1;
             end
-            UpdateDisplay(app);
+            selected_box = str2num(app.BoxSelectionDropDown.Value);
+            app.d.box(selected_box).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
             app.mode_updated = 0;
 
         end
@@ -1775,8 +1790,17 @@ classdef GelBox_exported < matlab.apps.AppBase
             save_data.im_data = app.gel_data.im_data;
             save_data.imfinfo = app.gel_data.imfinfo;
             save_data.original_image = app.gel_data.original_image;
-            save_data.adjusted_image = app.gel_data.adjusted_image;
-            save_data.image_adjustments = app.gel_data.image_adjustments;
+            if isfield(app.gel_data,'adjusted_image')
+                save_data.adjusted_image = app.gel_data.adjusted_image;
+            else
+                save_data.adjusted_image = [];
+            end
+
+            if isfield(app.gel_data,'image_adjustments')
+                save_data.image_adjustments = app.gel_data.image_adjustments;
+            else
+                save_data.image_adjustments = [];
+            end
             
             number_of_boxes = size(save_data.box_position,1);
             names = {'band_no','peak_location','amplitude','width_parameter','skew_parameter'};
@@ -1810,6 +1834,55 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.box_handle(i).Color = [0 1 0];
                     app.gel_data.box_handle(i).InteractionsAllowed = 'all';
                 end
+            end
+            
+            value = app.d.box(selected_box).fitting_mode;
+            app.NumberofBandsDropDown.Value = num2str(value);
+            switch value
+                case 1
+                    try
+                        app.BandRelativeArea_1.Value = 0;
+                        app.BandRelativeAreaLabel_1.Enable = 0;
+                        app.BandArea_2.Value = 0;
+                        app.BandArea_2.Enable = 0;
+                        app.BandRelativeArea_2.Value = 0;
+                        app.BandRelativeArea_2.Enable = 0;
+                        app.BandAreaLabel_2.Enable = 0;
+                        app.BandRelativeAreaLabel_2.Enable = 0;
+                        app.BandArea_3.Value = 0;
+                        app.BandArea_3.Enable = 0;
+                        app.BandRelativeArea_3.Value = 0;
+                        app.BandRelativeArea_3.Enable = 0;
+                        app.BandAreaLabel_3.Enable = 0;
+                        app.BandRelativeAreaLabel_3.Enable = 0;
+                    end
+                case 2
+                    app.BandRelativeArea_1.Enable = 1;
+                    app.BandRelativeAreaLabel_1.Enable = 1;
+                    app.BandArea_2.Enable = 1;
+                    app.BandRelativeArea_2.Enable = 1;
+                    app.BandAreaLabel_2.Enable = 1;
+                    app.BandRelativeAreaLabel_2.Enable = 1;
+                    try
+                        app.BandArea_3.Value = 0;
+                        app.BandArea_3.Enable = 0;
+                        app.BandRelativeArea_3.Enable = 0;
+                        app.BandRelativeArea_3.Value = 0;
+                        app.BandAreaLabel_3.Enable = 0;
+                        app.BandRelativeAreaLabel_3.Enable = 0;
+                    end
+
+                case 3
+                    app.BandRelativeArea_1.Enable = 1;
+                    app.BandRelativeAreaLabel_1.Enable = 1;
+                    app.BandArea_2.Enable = 1;
+                    app.BandRelativeArea_2.Enable = 1;
+                    app.BandAreaLabel_2.Enable = 1;
+                    app.BandRelativeAreaLabel_2.Enable = 1;
+                    app.BandArea_3.Enable = 1;
+                    app.BandRelativeArea_3.Enable = 1;
+                    app.BandAreaLabel_3.Enable = 1;
+                    app.BandRelativeAreaLabel_3.Enable = 1;
             end
             app.single_box_callback = 1;
             UpdateDisplay(app)
@@ -1891,8 +1964,11 @@ classdef GelBox_exported < matlab.apps.AppBase
                 switch num_of_bands
                     case 1
                         o.band_area_bottom(i) = app.gel_data.summary(i).bottom;
+                        o.band_area_middle(i) = NaN;
+                        o.band_area_top(i) = NaN;
                     case 2
                         o.band_area_bottom(i) = app.gel_data.summary(i).bottom;
+                        o.band_area_middle(i) = NaN;
                         o.band_area_top(i) = app.gel_data.summary(i).top;
                     case 3
                         o.band_area_bottom(i) = app.gel_data.summary(i).bottom;
