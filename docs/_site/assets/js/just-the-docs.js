@@ -36,6 +36,8 @@ function initNav() {
   const siteNav = document.getElementById('site-nav');
   const mainHeader = document.getElementById('main-header');
   const menuButton = document.getElementById('menu-button');
+  
+  disableHeadStyleSheet();
 
   jtd.addEvent(menuButton, 'click', function(e){
     e.preventDefault();
@@ -50,6 +52,16 @@ function initNav() {
       menuButton.ariaPressed = false;
     }
   });
+}
+
+// The page-specific <style> in the <head> is needed only when JS is disabled.
+// Moreover, it incorrectly overrides dynamic stylesheets set by setTheme(theme). 
+// The page-specific stylesheet is assumed to have index 1 in the list of stylesheets.
+
+function disableHeadStyleSheet() {
+  if (document.styleSheets[1]) {
+    document.styleSheets[1].disabled = true;
+  }
 }
 // Site search
 
@@ -437,15 +449,43 @@ jtd.setTheme = function(theme) {
   cssFile.setAttribute('href', '/assets/css/just-the-docs-' + theme + '.css');
 }
 
+// Note: pathname can have a trailing slash on a local jekyll server
+// and not have the slash on GitHub Pages
+
+function navLink() {
+  var href = document.location.pathname;
+  if (href.endsWith('/') && href != '/') {
+    href = href.slice(0, -1);
+  }
+  return document.getElementById('site-nav').querySelector('a[href="' + href + '"], a[href="' + href + '/"]');
+}
+
 // Scroll site-nav to ensure the link to the current page is visible
 
 function scrollNav() {
-  const href = document.location.pathname;
-  const siteNav = document.getElementById('site-nav');
-  const targetLink = siteNav.querySelector('a[href="' + href + '"], a[href="' + href + '/"]');
-  if(targetLink){
+  const targetLink = navLink();
+  if (targetLink) {
     const rect = targetLink.getBoundingClientRect();
-    siteNav.scrollBy(0, rect.top - 3*rect.height);
+    document.getElementById('site-nav').scrollBy(0, rect.top - 3*rect.height);
+  }
+}
+
+// Find the nav-list-link that refers to the current page
+// then make it and all enclosing nav-list-item elements active.
+
+function activateNav() {
+  var target = navLink();
+  if (target) {
+    target.classList.toggle('active', true);
+  }
+  while (target) {
+    while (target && !(target.classList && target.classList.contains('nav-list-item'))) {
+      target = target.parentNode;
+    }
+    if (target) {
+      target.classList.toggle('active', true);
+      target = target.parentNode;
+    }
   }
 }
 
@@ -454,6 +494,7 @@ function scrollNav() {
 jtd.onReady(function(){
   initNav();
   initSearch();
+  activateNav();
   scrollNav();
 });
 

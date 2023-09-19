@@ -1,6 +1,6 @@
 ---
 title: Help
-nav_order: 3
+nav_order: 8
 has_childre: False
 ---
 
@@ -12,4 +12,4 @@ If you encounter problems, we recommend the following strategies:
 
 + If that doesn't work, [submit an issue](https://github.com/Campbell-Muscle-Lab/GelBox)
 
-+ If you don't hear back in 3 days, [email Ken Campbell, PhD](mailto:k.s.campbell@uky.edu)
++ If you don't hear back in 3 days, [email Utku Gulbulak, PhD](mailto:utku.gulbulak@uky.edu) or [email Ken Campbell, PhD](mailto:k.s.campbell@uky.edu)

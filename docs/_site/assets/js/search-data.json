@@ -1,74 +1,130 @@
 {"0": {
+    "doc": "Cloning GelBox",
+    "title": "Installation",
+    "content": " ",
+    "url": "/pages/installation/cloning_gelbox/cloning_gel_box.html#installation",
+    
+    "relUrl": "/pages/installation/cloning_gelbox/cloning_gel_box.html#installation"
+  },"1": {
+    "doc": "Cloning GelBox",
+    "title": "Cloning GelBox 3",
+    "content": "This page instructs you on how to clone the GelBox 3 repository. We recommend cloning the GelBox repository using the GitHub Desktop client. Clicking on any of the images on this page will open a larger version in a new browser window. Open GitHub Desktop and click the dropdown menu for repositories (shown in red rectangle in the below image). Click the “Add” dropdown menu (shown in red rectangle in the below image). Click the “Clone repository…” button (shown in red rectangle in below image). Type “GelBox” into the repository search bar (shown in red rectangle in the below image). Click the Campbell-Muscle-Lab/GelBox repository, and describe where you would like the repository to be located on your local machine (both shown in red rectangles in the below image). ",
+    "url": "/pages/installation/cloning_gelbox/cloning_gel_box.html#cloning-gelbox-3",
+    
+    "relUrl": "/pages/installation/cloning_gelbox/cloning_gel_box.html#cloning-gelbox-3"
+  },"2": {
+    "doc": "Cloning GelBox",
+    "title": "Cloning GelBox",
+    "content": " ",
+    "url": "/pages/installation/cloning_gelbox/cloning_gel_box.html",
+    
+    "relUrl": "/pages/installation/cloning_gelbox/cloning_gel_box.html"
+  },"3": {
+    "doc": "Examples",
+    "title": "Examples",
+    "content": "This page shows the GelBox screenshots of the demonstrated gel analysis in the manuscript. Clicking on any of the images on this page will open a larger version in a new browser window. ",
+    "url": "/pages/examples/examples.html",
+    
+    "relUrl": "/pages/examples/examples.html"
+  },"4": {
+    "doc": "Examples",
+    "title": "Titin Gel Example",
+    "content": "Titin Gel Box 1 . Titin Gel Box 2 . ",
+    "url": "/pages/examples/examples.html#titin-gel-example",
+    
+    "relUrl": "/pages/examples/examples.html#titin-gel-example"
+  },"5": {
+    "doc": "Examples",
+    "title": "RLC Phosphorylation Phos-Tag Gel Example",
+    "content": "RLC Phosphorylation Phos-Tag Gel Box 1 . RLC Phosphorylation Phos-Tag Gel Box 2 . ",
+    "url": "/pages/examples/examples.html#rlc-phosphorylation-phos-tag-gel-example",
+    
+    "relUrl": "/pages/examples/examples.html#rlc-phosphorylation-phos-tag-gel-example"
+  },"6": {
+    "doc": "Examples",
+    "title": "TnI Phosphorylation Phos-Tag Gel Example",
+    "content": "TnI Phosphorylation Phos-Tag Gel Box 1 . TnI Phosphorylation Phos-Tag Gel Box 2 . ",
+    "url": "/pages/examples/examples.html#tni-phosphorylation-phos-tag-gel-example",
+    
+    "relUrl": "/pages/examples/examples.html#tni-phosphorylation-phos-tag-gel-example"
+  },"7": {
     "doc": "Help",
     "title": "Help",
-    "content": "If you encounter problems, we recommend the following strategies: . | Take a step back, and make sure to thoroughly go over the tutorial . | If that doesn’t work, submit an issue . | If you don’t hear back in 3 days, email Ken Campbell, PhD . | . ",
+    "content": "If you encounter problems, we recommend the following strategies: . | Take a step back, and make sure to thoroughly go over the tutorial . | If that doesn’t work, submit an issue . | If you don’t hear back in 3 days, email Utku Gulbulak, PhD or email Ken Campbell, PhD . | . ",
     "url": "/pages/help/help.html",
     
     "relUrl": "/pages/help/help.html"
-  },"1": {
+  },"8": {
     "doc": "GelBox",
     "title": "GelBox",
-    "content": "A simple GUI written in MATLAB to help analyze gels and immunoblots. It uses a workflow that is similar to GelBandFitter. ",
+    "content": "A program written and developed in MATLAB App Designer to analyze gels and immunoblots with overlapping bands. It employs curve fitting techniques to represent the densitometry profiles using a mathematical function in the form of a summation of Gaussian functions. GelBox can analyze up to 3 bands simultaneously, providing users with an automated display. It also allows future users to create their custom workflows due to its modular architecture. ",
     "url": "/",
     
     "relUrl": "/"
-  },"2": {
+  },"9": {
     "doc": "Installation",
     "title": "Installation",
-    "content": " ",
+    "content": "Users can use GelBox 3 by either cloning the repository or installing the stand alone application. ",
     "url": "/pages/installation/installation.html",
     
     "relUrl": "/pages/installation/installation.html"
-  },"3": {
-    "doc": "Installation",
-    "title": "Cloning GelBox",
-    "content": "This page instructs you on how to clone the GelBox repository. For cloning the GelBox repository, we recommend using the GitHub Desktop client. Clicking on any of the images on this page will open a larger version in a new browswer window. Open GitHub Desktop and click the dropdown menu for repositories (shown in red rectangle in below image). Click the “Add” dropdown menu (shown in red rectangle in below image). Click the “Clone repository…” button (shown in red rectangle in below image). Type “GelBox” into the repository search bar (shown in red rectangle in below image). Click the Campbell-Muscle-Lab/GelBox repository, describe where you would like the repository to be located on your local machine (both shown in red rectangles in below image). ",
-    "url": "/pages/installation/installation.html#cloning-gelbox",
+  },"10": {
+    "doc": "Installing Stand Alone Application",
+    "title": "Installation",
+    "content": " ",
+    "url": "/pages/installation/installing_stand_alone_application/installing_stand_alone_application.html#installation",
     
-    "relUrl": "/pages/installation/installation.html#cloning-gelbox"
-  },"4": {
+    "relUrl": "/pages/installation/installing_stand_alone_application/installing_stand_alone_application.html#installation"
+  },"11": {
+    "doc": "Installing Stand Alone Application",
+    "title": "Installing Stand Alone Application",
+    "content": "This page instructs you on how to install GelBox as a stand alone application. … … . ",
+    "url": "/pages/installation/installing_stand_alone_application/installing_stand_alone_application.html",
+    
+    "relUrl": "/pages/installation/installing_stand_alone_application/installing_stand_alone_application.html"
+  },"12": {
     "doc": "Load analysis",
     "title": "Load analysis",
     "content": "This page provides simple instructions on how to load an existing analysis to GelBox. ",
     "url": "/pages/tutorial/load_analysis/load_analysis.html",
     
     "relUrl": "/pages/tutorial/load_analysis/load_analysis.html"
-  },"5": {
+  },"13": {
     "doc": "Load analysis",
     "title": "Instructions",
-    "content": " ",
+    "content": ". | Using the GelBox through the cloned repository . | Launch MATLAB and double click GelBox.mlapp. It is located under &lt;repo&gt;app folder. | The GelBox.mlapp file starts the MATLAB App Designer, then press F5 to start the application. | . | Using the GelBox as a stand alone application . | … | … | . | . After a few seconds, you should see a program window. This is the main GelBox program. (Clicking on any of the images on this page will open a larger version in a new browser window.) . Click the File button on the toolbar. The file button opens a dropdown menu, which is highlighted in the red rectangle in the image below. Click the Load Analysis button. This button brings up a Windows File Open Dialog. Locate and load the GelBox analysis file. To learn how to save a GelBox analysis, please follow the start new analysis tutorial. After a few seconds, the analysis is loaded to the interface. All the operations described in start new analysis tutorial are available upon loading. ",
     "url": "/pages/tutorial/load_analysis/load_analysis.html#instructions",
     
     "relUrl": "/pages/tutorial/load_analysis/load_analysis.html#instructions"
-  },"6": {
-    "doc": "Load analysis",
-    "title": "Instructions",
-    "content": ". | Launch MATLAB and open GelBox.m. It is located under &lt;repo&gt;code folder. | Press F5 to run the file. | . After a few seconds, you should see a program window. This is the main GelBox program. (Clicking on any of the images on this page will open a larger version in a new browswer window.) . First select the number of bands used in the GelBox analysis using the number of bands dropdown menu (red rectangle). Click the ‘File’ button. File button opens a dropdown menu, which is highlighted in red rectangle in the image below. click the ‘Load Analysis’ button in the dropdown menu. This button brings up a normal Windows File Open Dialog. Use this to load the GelBox analysis file. To how to save a GelBox analysis please follow the start new analysis tutorial. After few seconds, the analysis is loaded to GelBox. All the operations described in start new analysis tutorial are available upon loading. ",
-    "url": "/pages/tutorial/load_analysis/load_analysis.html#instructions-1",
+  },"14": {
+    "doc": "Methods",
+    "title": "Methods",
+    "content": "GelBox fits the summation of Gaussian functions to the densitometry profile using a workflow that is similar to GelBandFitter. Such mathematical function is defined as follows: . where x is the position along the height of the region of interest (ROI), n is the number of bands, Ai and xi are the peak amplitude, and its location, respectively, α determines the width, and ϕ is the skew parameter. Each parameter alters the shape of the function. While the peak amplitude sets the maximum value, its location shifts the curve along the x direction (Panels A and B in the below figure). As the α parameter increases, the curve’s width decreases (Panel C in the below figure). A non-zero skew parameter allows the function to be asymmetric (Panel D in the below figure). GelBox estimates the width and skew parameters for the first band, then they are shared through the bands with an offset term. GelBox sets offset terms 0 assuming the proteins run in similar shapes. This assumption can be overwritten through adjustable starting parameter estimates. GelBox adjusts the parameters for each Gaussian function until the minimum residual sum of squares of the density profile and fitted function is obtained. Such objective function is defined as follows: . where k is the number of pixels in the ROI, D(x) is the densitometry profile, S(x) is the fitted function at the end of each iteration, and P is the penalty. A penalty condition is applied to prevent the following occurrences: negative parameter value, negative area, negative function value, and peak location having a value beyond the ROI. Each Gaussian function is then numerically integrated to find the areas. Generalized relative band content expression is given as follows: . ",
+    "url": "/pages/methods/methods.html",
     
-    "relUrl": "/pages/tutorial/load_analysis/load_analysis.html#instructions-1"
-  },"7": {
+    "relUrl": "/pages/methods/methods.html"
+  },"15": {
     "doc": "Start new analysis",
     "title": "Start new analysis",
     "content": "This page provides simple instructions on how to perform a new analysis with GelBox. ",
     "url": "/pages/tutorial/start_new_analysis/start_new_analysis.html",
     
     "relUrl": "/pages/tutorial/start_new_analysis/start_new_analysis.html"
-  },"8": {
+  },"16": {
     "doc": "Start new analysis",
     "title": "Instructions",
-    "content": ". | Launch MATLAB and open GelBox.m. It is located under &lt;repo&gt;code folder. | Press F5 to run the file. | . After a few seconds, you should see a program window. This is the main GelBox program. (Clicking on any of the images on this page will open a larger version in a new browswer window.) . The first step in new analysis is to load an image file. You do this by clicking the ‘File’ button. File button opens a dropdown menu, which is highlighted in red rectangle in the image below. click the ‘Load Image’ button in the dropdown menu. This button brings up a normal Windows File Open Dialog. Use this to load an image file. GelBox can open a TIF and PNG files. Please note that the file format is selected as TIF in the red rectangle. This can be switched to PNG using the file extension dropdown. Press open to load the image. An image of your gel should now be displayed in the left panel (red rectangle). The top right panel consists the variety of information on the image file (blue rectangle). GelBox can work with both flourescent and non-flourescent images. In the case of a flourescent image, click the ‘Tools’ button in the toolbar to reveal the ‘Invert Image’ button (red rectangle). Clicking ‘Invert Image’ button transforms bright pixels to dark pixels and vice versa. The inverted image appears in the left panel. In this tutorial, we are interested in analyzing the top two bands. First, change the number of bands to 2 (red rectangle). GelBox can analyze relative quantities of 1, 2, or 3 bands using a summation of 1, 2, or 3 Gaussian functions, respectively. You can now zoom into the the lane of interest by using scroll wheel of the mouse or changing the mouse cursor mode to MATLAB’s zoom in feature. This feature appears on the top right corner of the image axes. It is hidden, but as you hover over the image it appears. The next step is to draw a box for analysis. Click the ‘Edit’ button in the toolbar, it opens the ‘New Box’ button (red rectangle). This operation can be also performed using the Ctrl+N shortcut. The newly generated box appears as light green. The GelBox automatically calculates the fit using the provided information by the user. The middle panel displays different portions of the analysis: . | An inset figure is diplayed in the middle panel (red rectangle). Please note that the inset image can be seem to be darker than the original. It is because of the “scaled image display” option by MATLAB, in which the pixel intensities are scaled with respect to maximum available pixel intensity. This is used for display purposes, it doesn’t impact the calculation. | In purple rectangle, the raw optical density (black line) is plotted. The fitted function, which is the summation of two Gaussian functions in this case, is shown in red dashed line. The Gaussian functions are highlighted in blue and red shaded areas. Magenta dashed line is the baseline. | The background corrected density (raw optical density - baseline) and fitted function traces are shown in solid black and dashed red lines, respectively. The blue and red circles show the individual Gaussian functions. The relative area under the Gaussian functions are given in the top right corner. The r2 value for each box is employed as a goodness of fit measure and shown at the title. | . The box can be resized and dragged along the image. The fitting process automatically follows the position of the box. You can explore a better fit by replacing or resizing the box. Usually, there are more than one lanes of interest in gels. Once you are completed with the current box, generate your next box as mentioned above. GelBox will automatically place a new box in the vicinity of the old box. All the boxes have the same dimensions. The new box becomes the selected box (light green) and the old box is shown in red. Drag the new box to desired position. Please note that the inset and density figures are updated as the box moves. You can change the selected box using the ‘Adjustable box’ dropdown menu. The second box can be also dragged around the image. However, when the selected box is resizing, all the existing boxes change their size as well. Please note that the fits may change as a result of resizing. Make sure to check all the existing boxes to verify fits. Once you are done with your analysis, click the ‘File’ button to save your analysis and export figures and summary excel files. ‘Save analysis’ button opens the following file dialog box, which allows you to save GelBox analysis files in a special .gdf format. This file format can be loaded to GelBox to revisit analysis. ‘Output results to Excel’ button opens a file dialog box for the summary excel file. Here is a snapshot of the excel file: . | image_file: file path of the image | band: the box number | total_area: area under the raw density trace | background_area: area under the baseline | band_area_bottom: area under the Gaussian function representing bottom band | band_area_top: area under the Gaussian function representing top band | band_left: position of the upper left corner on the x axis | band_top: position of the upper left corner on the y axis | band_width: width of the box | band_height: height of the box | fitting_mode: number of Gaussian functions | num_of_bands: number of bands | r_squared: r2 value of the fit | . Following the excel file export, an input dialog box appears to define the band labels for the output figures. | Box layout plot . | r2 - box plot: red dashed line indicates the r2 value of 0.9 . | . In addition to output figures two more excel files, one with the density trace and band fits for each box and one with the inset figures. Inset images are saved as an array, therefore reading this file as an image is essential for post processing. | gel_box_tutorial_fits . | x: raw density value | y: pixel index along height of the box | x_fit: fitted function value | x_back: background density value | band_1: 1st Gaussian function value | band_2: 2nd Gaussian function value | . | . | gel_box_tutorial_insets . | excel rows show the pixel index along height of the box | excel columns show the pixel index along width of the box | . | . ",
+    "content": ". | Using the GelBox through the cloned repository . | Launch MATLAB and double click GelBox.mlapp. It is located under &lt;repo&gt;app folder. | The GelBox.mlapp file starts the MATLAB App Designer, then press F5 to start the application. | . | Using the GelBox as a stand alone application . | … | … | . | . After a few seconds, you should see a program window. Here is the GelBox interface (Clicking on any of the images on this page will open a larger version in a new browser window.). The interface is divided into three different panels. Their functionality is summarized as follows: . | Gel Image: The image axes display the gel images. The main region of interest (ROI) box controls are located above the axes. Users can create and delete ROI boxes. | Optical Densities: It shows the ROI’s raw and background corrected densitometry profiles. Box Zoom axes show an enlarged version of the enclosed area for a closer review. | Fitting: It shows the results of the curve fitting process. The main fitting controls are located in this panel. | . The first step of the analysis with GelBox is to load an image file to the environment. The File button on the top menu opens a dropdown menu, shown in a rectangle. The first option of the dropdown is the Load Image. Upon clicking the Load Image button, it opens a normal Windows File Open Dialog. Locate the folder which has the gel images on your computer. GelBox can work with PNG (Portable Network Graphics) and TIFF or TIF (Tag Image File Format) files. In this tutorial, the file format is selected as TIF in the red rectangle. This can be switched to PNG using the file extension dropdown. Select your gel image and click Open. An image of your gel should now be displayed in the gel image panel (red rectangle). GelBox can work with both fluorescent and non-fluorescent images. In the case of a fluorescent image, click the File button in the toolbar and click the Invert Image button (red rectangle). Clicking the Invert Image button transforms bright pixels into dark pixels and vice versa. The inverted image appears in the Gel Image panel. GelBox stores various information in the loaded image file. To access the image file information click the Data Analysis button on the toolbar, shown in the red rectangle. Click the Gel Image File Information and open to open the below window. In this tutorial, the loaded gel image is a titin gel. We are interested in quantifying the relative quantities of cardiac N2B and N2BA titin isoforms. The first lane of the gel is loaded with a skeletal control sample. Zoom into the lane of interest by changing the mouse cursor mode to MATLAB’s zoom-in feature. This feature appears on the top right corner of the image axes. It is hidden, but it appears as you hover over the image (shown in red rectangle). Zoomed-in image shows the second, third, and fourth lane of the gel. You can now zoom into the lane of interest by using the mouse’s scroll wheel or changing the mouse cursor mode to MATLAB’s zoom-in feature. This feature appears on the top right corner of the image axes. It is hidden, but it appears as you hover over the image. The next step is to draw an ROI box for analysis. Box controls are placed above the image axes, shown in red rectangle. After clicking the New Box button, the mouse cursor changes into a crosshair. Click on the image and expand the ROI to a desired size. The newly generated box appears light green. The GelBox automatically processes the enclosed area in the ROI. Please note that all the empty axes and fields are populated now. | Optical Densities: In this panel, the contents of the ROI is displayed in the Box Zoom axes. Please note that the Boz Zoom image can be seem to be darker than the original. It is because of the “scaled image display” option by MATLAB, in which the pixel intensities are scaled with respect to the maximum available pixel intensity. This is used for display purposes and does not impact the calculation. The raw and background corrected optical densities are shown in solid black and dashed black lines, respectively. The baseline is shown in the dashed magenta line. Background corrected densitometry is obtained by subtracting the baseline from the raw density. Three different area values are automatically calculated. | Total Area: The area under the raw densitometry profile | Background Area: The area under the baseline | Background Corr. Area: The area under the background corrected densitometry profile | . | Fitting: The fitted function is displayed in a dashed green line in this panel. The red-shaded area in the Background Corrected Optical Density axes shows the area under the Gaussian function. The R-squared value is employed as a goodness of fit measure. Band Relative Area 1 is greyed out since the number of bands is selected as one. Since there are two bands in the ROI, click the Number of Bands dropdown, shown in the red rectangle, and change it to two. The fitting results are updated, and relative area values are calculated. | Band Area 1 (Red): The area under the Gaussian function highlighted in red | Band Area 2 (Blue): The area under the Gaussian function highlighted in blue | Band Relative Area 1 (Red): The relative area of Area 1, calculated as Rel. Area 1 = Area 1/(Area 1 + Area 2) | Band Relative Area 2 (Blue): The relative area of Area 2, calculated as Rel. Area 2 = Area 2/(Area 1 + Area 2) | . | . The box can be resized and dragged along the image. The fitting process automatically follows the position of the box. You can explore a better fit by replacing or resizing the box. The fitting parameters are initialized by GelBox and can be edited using the Fitting Parameters button (red rectangle) in the Fitting Panel. Click the Fitting Parameters button, and it opens a new window. The window shows the tabulated estimated (beginning of the fitting) and calculated (end of the fitting) parameter values. The Starting Parameter Estimates table is editable, except for the Band No column. Let’s change the width offset value of band two from 0 to -0.0004, shown in the red rectangle in the Fittin Parameters window, then click the Update Fitting button in the red rectangle. This button starts over the fitting process with new starting parameters. Please note that changing the width offset results in a slightly better fit, and the relative area values are changed by 0.02, highlighted in the red rectangle below. You can also constrain the parameter values using the checkboxes so that GelBox will not adjust the selected parameter. Usually, there is more than one lane of interest in gels. Once you are completed with the current box, generate your next box as mentioned above. GelBox will automatically place a new box near the old box. All the boxes have the same dimensions. The new box becomes the selected box (light green), and the old box is shown in red. Drag the new box to the desired position. Please note that the inset and density figures are updated as the box moves. You can change the selected box using the Box Selection dropdown, shown in a rectangle. The second box can also be dragged around the image. However, when the selected box is resized, all the existing boxes also change their size. Please note that the fits may change as a result of resizing. Make sure to check all the existing boxes to verify fits. The new box positions, sizes, and area values can be accessed through the Selected Box Information window. Click the Data Analysis button on the toolbar, shown in the red rectangle. Clicking the Selected Box Information button opens the following window. Once you finish your analysis, click the File button on the toolbar to save your analysis, shown in the red rectangle. The Save Analysis button opens the following file dialog box, which allows you to save GelBox analysis files in a unique .gdf format. This file format can be loaded to GelBox to revisit the analysis. Name your file and click Save. The Export Results button opens a file dialog box for the summary Excel file. Name your file and click Save. Summary Excel file has multiple sheets. The first sheet is the Summary sheet, and here are the brief descriptions of each column. | image_file: file path of the image | band: the box number | total_area: area under the raw density trace | background_area: area under the baseline | band_area_bottom: area under the Gaussian function representing the bottom band | band_area_top: area under the Gaussian function representing the top band | band_left: position of the upper left corner on the x-axis | band_top: position of the upper left corner on the y-axis | band_width: width of the box | band_height: height of the box | fitting_mode: number of Gaussian functions | num_of_bands: number of bands | r_squared: R-Squared value of the fit | . The following sheets are named after the boxes. There is a sheet for each box in the analysis. Here are the brief descriptions of each column. | x: raw optical density value | y: pixel index along the height of the box | x_fit: fitted function value | x_back: background density value | band_1: 1st Gaussian function value | band_2: 2nd Gaussian function value | . In addition, users can generate summary plots for their analysis. Click the Data Analysis button on the toolbar. The Summary Plot button is located at the bottom of the dropdown, shown in the red rectangle. It opens a dialog box. The dialog box asks users to select the output folder, name the figure file, and define the band labels. Fill the fields with information and then click the Generate Summary Plots button . After a couple of seconds, the following figure appears and is saved under the selected folder. ",
     "url": "/pages/tutorial/start_new_analysis/start_new_analysis.html#instructions",
     
     "relUrl": "/pages/tutorial/start_new_analysis/start_new_analysis.html#instructions"
-  },"9": {
-    "doc": "Tutorial",
-    "title": "Tutorial",
-    "content": " ",
-    "url": "/pages/tutorial/tutorial.html#tutorial",
+  },"17": {
+    "doc": "Troubleshooting",
+    "title": "Troubleshooting",
+    "content": "This page provides simple troubleshooting steps for analysis with GelBox. Clicking on any of the images on this page will open a larger version in a new browser window. Here’s an example of a situation you might encounter with your gels. Please note that the fitted function does not properly represent the density profile. The application only captures one peak, so there is only one non-zero Gaussian function. The problem is that the software has not found a good fit. There are two distinct possibilities. | There is not a good mathematical fit to the experimentally-measured profile, and | There is a good fit, and GelBox could not find it | . It is not always easy to identify the situation. One possible first step is visualizing the fitting process to observe how the function develops through iterations. Draw Fitting checkbox, shown in the red rectangle, lets users visualize fitting. As soon as the box is checked, the fitting starts over. This may take a little longer as each fitting iteration is plotted simultaneously. The first couple of iterations shows that the application does not accurately predict the peak locations. Click the Fitting Parameters in the Fitting panel for the starting parameter estimates. Although the peak locations are roughly around 37 and 70 for band 1 and band 2, only the peak location of band 1 is correctly estimated. Change the peak location of band 2 to 70 and click the Update Fitting button. Please note that GelBox successfully detected the two peaks after changing the peak locations. You can look for better fits by changing the size and position the region of interest (ROI) box. Change the peak estimate of the peak one and constrain it to capture the amplitude accurately. Use the constrain checkbox, shown in the red rectangle. After constraining the peak amplitude, the new fit accurately predicts the peak amplitude. Further improvement can be made by changing the width offset of the second band using the Fitting Parameters. These troubleshooting steps obtain an acceptable R-squared value for the fitted function. In addition, both bands are represented with non-zero Gaussian functions. ",
+    "url": "/pages/troubleshooting/troubleshooting.html",
     
-    "relUrl": "/pages/tutorial/tutorial.html#tutorial"
-  },"10": {
+    "relUrl": "/pages/troubleshooting/troubleshooting.html"
+  },"18": {
     "doc": "Tutorial",
     "title": "Tutorial",
     "content": "Users can start a new analysis and also revisit their old analyses by loading it. ",
