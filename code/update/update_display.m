@@ -62,13 +62,27 @@ if (isfield(gel_data,'box_handle'))
         x_back = linspace(x(1),x(end),numel(y));
 
         num_of_bands = str2double(gel_data.fitting_mode);
+        if gel_data.loaded_analysis || gel_data.parameters_updated || gel_data.par_update(i)
+        elseif gel_data.new_box || gel_data.mode_updated || gel_data.par_est_na
+            [par_est,par_con] = estimate_fitting_parameters(y,x, ...
+                x_back,num_of_bands);
+            fnames = fieldnames(par_est);
+            for k = 1:numel(fnames)
+                gel_data.par_est(i).(fnames{k}) = [];
+                gel_data.par_est(i).(fnames{k}) = ...
+                    par_est.(fnames{k});
+                gel_data.par_con(i).(fnames{k}) = [];
+                gel_data.par_con(i).(fnames{k}) = ...
+                    par_con.(fnames{k});
+            end
+        end
         switch num_of_bands
             case 2
                 [x_bands,x_fit,r_squared] = ...
-                fit_2gaussian(y,x,x_back,num_of_bands);
+                fit_2gaussian(y,x,x_back,i);
             case 3
                 [x_bands,x_fit,r_squared] = ...
-                fit_3gaussian(y,x,x_back,num_of_bands);
+                fit_3gaussian(gel_data,y,x,x_back,i);
         end
         d.box(i).total_area = sum(x);
         d.box(i).background_area = sum(x_back);

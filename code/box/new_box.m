@@ -39,8 +39,9 @@ end
 set(gui.zoom_control,'String',control_strings);
 set(gui.zoom_control,'Value',n);
 
-guidata(gui.Window,gel_data)
 
+gel_data.new_box = n;
+guidata(gui.Window,gel_data)
 update_display(gui,n);
 
 % Nested function

@@ -137,6 +137,9 @@ gui.tools_menu = uimenu(gui.Window,'Label','Tools');
 uimenu(gui.tools_menu, ...
     'Label','Invert image', ...
     'Callback',{@call_invert_image,gui});
+uimenu(gui.tools_menu, ...
+    'Label','Fitting parameters', ...
+    'Callback',{@call_fitting_parameters,gui});
 
 
 % Add in more callbacks - these have to come late to include entries
@@ -152,9 +155,11 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
         if (path_string~=0)
 
             gel_data = [];
-
+            gel_data.loaded_analysis = 0;
             gel_data.invert_status = 0;
-
+            gel_data.parameters_updated = 0;
+            gel_data.par_update = 0;
+            
             gel_data.image_file_string = fullfile(path_string,file_string);
             gel_data.im_data = imread(gel_data.image_file_string);
             if (ndims(gel_data.im_data)==3)
@@ -185,6 +190,11 @@ set(gui.zoom_control,'callback',{@zoom_control_update,gui});
             gui.gel_axes);
         gel_data.invert_status = 1;
         guidata(gui.Window,gel_data);
+    end
+    function gui = call_fitting_parameters(~,~,gui)
+        
+        fitting_parameters(gui)
+        
     end
 
     function gui = call_save_analysis(~,~,gui)
