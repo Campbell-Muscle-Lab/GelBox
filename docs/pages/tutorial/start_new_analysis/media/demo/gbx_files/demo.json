@@ -1,0 +1,22 @@
+{
+	"GelBox Settings": {
+		"image_adjustments": {
+			"crop_pos": [324.9267516,972.5992343,2124.492569,280.8016878],
+			"brightness": 0,
+			"contrast_lower": 0.2,
+			"contrast_upper": 1,
+			"max_contrast": 0
+		},
+		"filtering": {
+			"median": {
+				"size": 10
+			}
+		},
+		"background": {
+			"method": [
+				"Rolling Ball"
+			],
+			"size": 80
+		}
+	}
+}
