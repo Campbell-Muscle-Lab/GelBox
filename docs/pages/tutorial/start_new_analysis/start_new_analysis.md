@@ -71,7 +71,7 @@ The box is stationary, yet it can be dragged around or resized. The histogram an
 
 The visibility of the image can be adjusted by changing the brightness or adjusting the contrast by mapping the pixel intensities. During these operations, GelBox keeps track of the "over-saturated" pixels. If a pixel is "over-saturated," it would be highlighted as red in the adjusted image panel. Please note that this feature is only for visual quality control purposes and will not modify the image with red pixels.
 
-BRIGHTNESS VIDEO
+<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/a3f1254b-5ef8-48f0-a0b0-e8cb60241115" controls="controls" style="max-width: 730px;"></video>
 
 Once the image is adjusted and ready for quantification, click the Accept Changes button, shown in red rectangle, to transfer the adjusted image to the GelBox environment.
 
@@ -129,7 +129,7 @@ Relative Quantities = Area of the Band of Interest / The Total Area of the Bands
 
 The box can be resized and dragged along the image. The fitting process automatically follows the position of the box. You can explore a better fit by replacing or resizing the box.
 
-RESIZING VIDEO
+<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/70c0725e-e50c-491d-8a33-6679e17b11a0" controls="controls" style="max-width: 730px;"></video>
 
 GelBox does not have a limit for the number of bands for the fitting. The density profile has a small peak towards the bottom of the ROI; increase the number of bands to 3 using the spinner.
 
@@ -159,7 +159,7 @@ You can change the selected box using the Box Selection dropdown, shown in a rec
 
 The second box can also be dragged around the image. However, when the selected box is resized, all the existing boxes also change size. Please note that the fits may change because of resizing. Make sure to check all the existing boxes to verify fits.
 
-SECOND BOX VIDEO
+<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/824790a9-ae88-452c-b06e-d59907143ee7" controls="controls" style="max-width: 730px;"></video>
 
 The new box positions, sizes, and area values can be accessed through the Selected Box Information window. Click the Data Analysis button on the toolbar in the red rectangle. 
 
@@ -171,7 +171,7 @@ Users can also access the Gel Image Information window and review the stored ima
 
 The rest of the analysis is shown in the below video.
 
-ANALYSIS VIDEO
+<video src="https://github.com/Campbell-Muscle-Lab/GelBox/assets/98066302/b0acf20f-835f-43b2-a037-5994806d9821" controls="controls" style="max-width: 730px;"></video>
 
 Here is the snapshot of the completed analysis.
 
