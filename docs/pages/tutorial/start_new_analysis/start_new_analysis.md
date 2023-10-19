@@ -243,7 +243,7 @@ GelBox uses the "Box" as the key for joining the tables in the backend. Please m
 
 Here is the snapshot of the Analysis Summary Excel file.
 
-<a href="media/results_excel_file.png" target="_blank">![Results excel file](media/results_excel_file.png)</a>
+<a href="media/results_excel_file.PNG" target="_blank">![Results excel file](media/results_excel_file.PNG)</a>
 
 Summary Excel file has multiple sheets. The first sheet is the Summary sheet, and here are the brief descriptions of each column:
 + (Optional) SampleCode: Identifier for the host of the samples
