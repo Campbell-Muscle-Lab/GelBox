@@ -2,60 +2,57 @@ classdef GelBox_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        GelBoxUIFigure               matlab.ui.Figure
-        FileMenu                     matlab.ui.container.Menu
-        LoadImageMenu                matlab.ui.container.Menu
-        InvertImageMenu              matlab.ui.container.Menu
-        LoadAnalysisMenu             matlab.ui.container.Menu
-        SaveAnalysisMenu             matlab.ui.container.Menu
-        ExportResultsMenu            matlab.ui.container.Menu
-        DataAnalysisMenu             matlab.ui.container.Menu
-        GelImageFileInformationMenu  matlab.ui.container.Menu
-        SelectedBoxInformationMenu   matlab.ui.container.Menu
-        SummaryPlotMenu              matlab.ui.container.Menu
-        FittingPanel                 matlab.ui.container.Panel
-        FittingParametersButton      matlab.ui.control.Button
-        NumberofBandsDropDown        matlab.ui.control.DropDown
-        NumberofBandsDropDownLabel   matlab.ui.control.Label
-        BandRelativeArea_3           matlab.ui.control.NumericEditField
-        BandRelativeAreaLabel_3      matlab.ui.control.Label
-        BandArea_3                   matlab.ui.control.NumericEditField
-        BandAreaLabel_3              matlab.ui.control.Label
-        BandRelativeArea_2           matlab.ui.control.NumericEditField
-        BandRelativeAreaLabel_2      matlab.ui.control.Label
-        BandArea_2                   matlab.ui.control.NumericEditField
-        BandAreaLabel_2              matlab.ui.control.Label
-        BandRelativeArea_1           matlab.ui.control.NumericEditField
-        BandRelativeAreaLabel_1      matlab.ui.control.Label
-        BandArea_1                   matlab.ui.control.NumericEditField
-        BandAreaLabel_1              matlab.ui.control.Label
-        rsquaredField                matlab.ui.control.NumericEditField
-        RsquaredLabel                matlab.ui.control.Label
-        DrawFittingCheckBox          matlab.ui.control.CheckBox
+        GelBoxUIFigure                 matlab.ui.Figure
+        FileMenu                       matlab.ui.container.Menu
+        LoadImageMenu                  matlab.ui.container.Menu
+        LoadAnalysisMenu               matlab.ui.container.Menu
+        SaveAnalysisMenu               matlab.ui.container.Menu
+        ExportResultsMenu              matlab.ui.container.Menu
+        DataAnalysisMenu               matlab.ui.container.Menu
+        GelImageFileInformationMenu    matlab.ui.container.Menu
+        SelectedBoxInformationMenu     matlab.ui.container.Menu
+        SummaryPlotMenu                matlab.ui.container.Menu
+        FittingPanel                   matlab.ui.container.Panel
+        BandTable                      matlab.ui.control.Table
+        NumberofBandsSpinner           matlab.ui.control.Spinner
+        NumberofBandsSpinnerLabel      matlab.ui.control.Label
+        RsquaredLabel                  matlab.ui.control.Label
+        rsquaredField                  matlab.ui.control.NumericEditField
+        FittingParametersButton        matlab.ui.control.Button
+        DrawFittingCheckBox            matlab.ui.control.CheckBox
         BackgroundCorrectedOpticalDensityLabel  matlab.ui.control.Label
-        RawOpticalDensityLabel       matlab.ui.control.Label
-        raw_density_fit              matlab.ui.control.UIAxes
+        RawOpticalDensityLabel         matlab.ui.control.Label
+        raw_density_fit                matlab.ui.control.UIAxes
         background_corrected_raw_density_fit  matlab.ui.control.UIAxes
-        GelImagePanel                matlab.ui.container.Panel
-        BoxSelectionDropDown         matlab.ui.control.DropDown
-        BoxSelectionDropDownLabel    matlab.ui.control.Label
-        DeleteBoxButton              matlab.ui.control.Button
-        NewBoxButton                 matlab.ui.control.Button
-        AdjustImageButton            matlab.ui.control.Button
-        gel_image_axis               matlab.ui.control.UIAxes
-        OpticalDensitiesPanel        matlab.ui.container.Panel
-        BackgroundCorrAreaField      matlab.ui.control.NumericEditField
-        BackgroundCorrAreaLabel      matlab.ui.control.Label
-        BackgroundAreaField          matlab.ui.control.NumericEditField
-        BackgroundAreaLabel          matlab.ui.control.Label
-        TotalAreaField               matlab.ui.control.NumericEditField
-        TotalAreaEditFieldLabel      matlab.ui.control.Label
+        GelImagePanel                  matlab.ui.container.Panel
+        BoxSelectionDropDown           matlab.ui.control.DropDown
+        BoxSelectionDropDownLabel      matlab.ui.control.Label
+        DeleteBoxButton                matlab.ui.control.Button
+        NewBoxButton                   matlab.ui.control.Button
+        AdjustImageButton              matlab.ui.control.Button
+        gel_image_axis                 matlab.ui.control.UIAxes
+        OpticalDensitiesPanel          matlab.ui.container.Panel
+        MedianFilterSizeSpinner        matlab.ui.control.Spinner
+        MedianFilterSizeSpinnerLabel   matlab.ui.control.Label
+        ApplyFilterCheckBox            matlab.ui.control.CheckBox
+        BackgroundSubtractionDropDown  matlab.ui.control.DropDown
+        BackgroundSubtractionDropDownLabel  matlab.ui.control.Label
+        DensityValueEditField          matlab.ui.control.NumericEditField
+        DensityValueEditFieldLabel     matlab.ui.control.Label
+        BackgroundAreaField            matlab.ui.control.NumericEditField
+        BackgroundAreaLabel            matlab.ui.control.Label
+        BackgroundCorrAreaField        matlab.ui.control.NumericEditField
+        BackgroundCorrAreaLabel        matlab.ui.control.Label
+        RollingBallSizeSpinner         matlab.ui.control.Spinner
+        RollingBallSizeSpinnerLabel    matlab.ui.control.Label
+        TotalAreaField                 matlab.ui.control.NumericEditField
+        TotalAreaEditFieldLabel        matlab.ui.control.Label
         BackgroundCorrectedOpticalDensityLabel_2  matlab.ui.control.Label
-        RawOpticalDensityLabel_2     matlab.ui.control.Label
-        BoxZoomLabel                 matlab.ui.control.Label
-        box_inset                    matlab.ui.control.UIAxes
+        RawOpticalDensityLabel_2       matlab.ui.control.Label
+        BoxZoomLabel                   matlab.ui.control.Label
+        box_inset                      matlab.ui.control.UIAxes
         background_corrected_raw_density  matlab.ui.control.UIAxes
-        raw_density                  matlab.ui.control.UIAxes
+        raw_density                    matlab.ui.control.UIAxes
     end
 
 
@@ -73,6 +70,8 @@ classdef GelBox_exported < matlab.apps.AppBase
         d
         par_fit_na = 0 % Description
         moving_box = 0 % Description
+        background_token = 0 % Description
+        filtered_inset = [] % Description
     end
 
     properties (Access = private)
@@ -86,12 +85,12 @@ classdef GelBox_exported < matlab.apps.AppBase
     methods (Access = public)
 
         function UpdateDisplay(app)
-            if (isfield(app.gel_data,'box_handle'))
-                n = numel(app.gel_data.box_handle);
-                t = size(app.gel_data.par_update,2);
+            if (isfield(app.gel_data.boxes,'box_handle'))
+                n = numel(app.gel_data.boxes.box_handle);
+                t = size(app.gel_data.fitting.par_update,2);
                 if t ~= n
                     for l = t+1:n
-                        app.gel_data.par_update(l) = 0;
+                        app.gel_data.fitting.par_update(l) = 0;
                     end
                 end
                 % Get selected box in control
@@ -99,7 +98,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 selected_box = str2num(control_strings);
 
                 for i=1:n
-                    p(i,1:4) = app.gel_data.box_handle(i).Position;
+                    p(i,1:4) = app.gel_data.boxes.box_handle(i).Position;
                 end
                 w = p(selected_box,3);
                 h = p(selected_box,4);
@@ -107,13 +106,13 @@ classdef GelBox_exported < matlab.apps.AppBase
                     for i=1:n
                         p(i,3) = w;
                         p(i,4) = h;
-                        app.gel_data.box_handle(i).Position = p(i,:);
+                        app.gel_data.boxes.box_handle(i).Position = p(i,:);
                     end
                 end
 
                 % Store data in case we need to save it
                 for i=1:n
-                    app.gel_data.box_position(i,:) = app.gel_data.box_handle(i).Position;
+                    app.gel_data.boxes.box_position(i,:) = app.gel_data.boxes.box_handle(i).Position;
                 end
 
                 if app.single_box_callback
@@ -123,88 +122,117 @@ classdef GelBox_exported < matlab.apps.AppBase
                     disp_start = 1;
                     disp_end = n;
                 end
-                
-%                 app.d.box(selected_box).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
 
-                
+                %                 app.d.box(selected_box).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
+
+
                 for i = disp_start:disp_end
 
-%                     app.d.box(i).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
+                    %                     app.d.box(i).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
                     num_of_bands = app.d.box(i).fitting_mode;
                     % Extract position
-                    app.d.box(i).position = app.gel_data.box_handle(i).Position;
+                    app.d.box(i).position = app.gel_data.boxes.box_handle(i).Position;
 
                     % Label it
-                    set(app.gel_data.box_label(i),'String',sprintf('%.0f',i));
-                    set(app.gel_data.box_label(i), ...
+                    set(app.gel_data.boxes.box_label(i),'String',sprintf('%.0f',i));
+                    set(app.gel_data.boxes.box_label(i), ...
                         'Position',[app.d.box(i).position(1)+app.d.box(i).position(3)+10 ...
                         app.d.box(i).position(2)-50]);
 
                     % Calculate profile
-                    app.d.box(i).inset = imcrop(app.gel_data.im_data, ...
+                    app.d.box(i).inset = imcrop(app.gel_data.image.im_data, ...
                         app.d.box(i).position);
                     summary_position = [app.d.box(i).position(1)-10, app.d.box(i).position(2)-10, app.d.box(i).position(3)+20, app.d.box(i).position(4)+20];
-                    app.d.box(i).summary_inset = imcrop(app.gel_data.im_data, ...
+                    app.d.box(i).summary_inset = imcrop(app.gel_data.image.im_data, ...
                         summary_position);
                     
-                    m = imcomplement(app.d.box(i).inset);
+                    if app.ApplyFilterCheckBox.Value
+                        app.MedianFilterSizeSpinner.Enable = 'on';
+                        app.MedianFilterSizeSpinnerLabel.Enable = 'on';
+                        sz = app.MedianFilterSizeSpinner.Value;
+                        app.d.box(i).inset = medfilt2(app.d.box(i).inset,[sz sz],'symmetric');
+                        app.gel_data.settings.filtering.median.size(i) = sz;
+                        app.filtered_inset(i) = 1;
+                    else
+                        app.MedianFilterSizeSpinner.Enable = 'off';
+                        app.MedianFilterSizeSpinnerLabel.Enable = 'off';
+                        app.gel_data.settings.filtering.median.size(i) = 0;
+                        app.filtered_inset(i) = 0;
+                    end
 
-                    x = flipud(mean(m,2));
+                    method = app.BackgroundSubtractionDropDown.Value;
+%                     m = imcomplement(app.d.box(i).inset);
+                    m = (app.d.box(i).inset);
+
+                    x = flipud(mean(imcomplement(m),2));
                     y = 1:size(m,1);
-
-                    x_back = linspace(x(1),x(end),numel(y));
-                    box_no = str2num(app.BoxSelectionDropDown.Value);
+                    y = y';
                     
-                    if (app.loaded_analysis && (app.new_box <= length(app.gel_data.par_est))) ...
-                        || app.parameters_updated || app.gel_data.par_update(i) || app.moving_box
+                    
+                    if ~app.background_token(i)
+                    switch method
+                        case 'Rolling Ball'
+                            radius = app.RollingBallSizeSpinner.Value;
+                            se = strel('disk', radius, 0);
+                            app.gel_data.settings.background.method{i} = method;
+                            app.gel_data.settings.background.size(i) = radius;
+                            im_close = [];
+                            im_close = imclose(app.d.box(i).inset,se);
+                            im_close = imcomplement(im_close);
+                            mean_imclose = mean(im_close,2);
+                            mean_imclose = flipud(mean_imclose);
+                            app.gel_data.background(i).x_back = mean_imclose;
+                            app.background_token(i) = 1;
+                        case 'Linear'
+                            app.gel_data.background(i).x_back = linspace(x(1),x(end),numel(x));
+                            app.gel_data.background(i).x_back = app.gel_data.background(i).x_back';
+                            app.gel_data.settings.background.method{i} = method;
+                            app.background_token(i) = 1;
+                        case 'Constant Value'
+                            cst_val = app.DensityValueEditField.Value;
+                            app.gel_data.background(i).x_back = cst_val * ones(numel(x),1);
+                            app.gel_data.settings.background.method{i} = method;
+                            app.gel_data.settings.background.size(i) = cst_val;
+                            app.background_token(i) = 1;
+                    end
+                    end
+
+                    box_no = str2num(app.BoxSelectionDropDown.Value);
+                    if (app.loaded_analysis && (app.new_box <= length(app.gel_data.fitting.par_est))) ...
+                            || app.parameters_updated || app.gel_data.fitting.par_update(i) || app.moving_box
                     elseif app.new_box || app.mode_updated || app.par_est_na
                         [par_est,par_con] = EstimateFittingParameters(app,y,x, ...
-                            x_back,num_of_bands);
-                        fnames = fieldnames(par_est);
-                        for k = 1:numel(fnames)
-                            app.gel_data.par_est(i).(fnames{k}) = [];
-                            app.gel_data.par_est(i).(fnames{k}) = ...
-                                par_est.(fnames{k});
-                            app.gel_data.par_con(i).(fnames{k}) = [];
-                            app.gel_data.par_con(i).(fnames{k}) = ...
-                                par_con.(fnames{k});
+                            app.gel_data.background(i).x_back,num_of_bands);
+                        if isfield(app.gel_data.fitting,'par_est')
+                            try
+                                app.gel_data.fitting.par_est(i) = [];
+                            end
+                        end
+                        app.gel_data.fitting.par_est(i) = par_est;
+                        if isfield(app.gel_data.fitting,'par_con')
+                            try
+                            app.gel_data.fitting.par_con(i) = [];
+                            end
+                        end
+                        app.gel_data.fitting.par_con(i) = par_con;
+                    end
+                    [x_bands,x_fit,r_squared,par_fit] = ...
+                        FitGaussian(app,y,x,app.gel_data.background(i).x_back,i,num_of_bands);
+                    if isfield(app.gel_data.fitting,'par_fit')
+                        try
+                        app.gel_data.fitting.par_fit(i) = [];
                         end
                     end
-
-                    switch num_of_bands
-                        case 1
-                            app.BandRelativeArea_1.Enable = 0;
-                            [x_bands,x_fit,r_squared,par_fit] = ...
-                                FitGaussian(app,y,x,x_back,i);
-                        case 2
-                            if ~app.BandRelativeArea_1.Enable
-                                app.BandRelativeArea_1.Enable = 1;
-                            end
-                            [x_bands,x_fit,r_squared,par_fit] = ...
-                                Fit2Gaussian(app,y,x,x_back,i);
-                            
-                        case 3
-                            if ~app.BandRelativeArea_1.Enable
-                                app.BandRelativeArea_1.Enable = 1;
-                            end
-                            [x_bands,x_fit,r_squared,par_fit] = ...
-                                Fit3Gaussian(app,y,x,x_back,i);
-                    end
-                    
+                    app.gel_data.fitting.par_fit(i) = par_fit;
                     fnames = fieldnames(par_fit);
-                    for k = 1:numel(fnames)
-                        app.gel_data.par_fit(i).(fnames{k}) = ...
-                            [];
-                        app.gel_data.par_fit(i).(fnames{k}) = ...
-                            par_fit.(fnames{k});
-                    end
 
-                    app.d.box(i).total_area = trapz(y,x);
-                    app.d.box(i).background_area = trapz(y,x_back);
-                    app.d.box(i).background_corr_area = trapz(y,(x'-x_back));
-                    
+                    app.d.box(i).total_area = simps(y,x);
+                    app.d.box(i).background_area = simps(y,app.gel_data.background(i).x_back);
+                    app.d.box(i).background_corr_area = simps(y,(x-app.gel_data.background(i).x_back));
+
                     for j = 1 : num_of_bands
-                        app.d.box(i).band_area(j) = trapz(y,x_bands(j,:));
+                        app.d.box(i).band_area(j) = simps(y,x_bands(:,j));
+                        sum(x_bands(:,j));
                     end
 
                     % Store data for later
@@ -213,54 +241,16 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.summary(i).x = x;
                     app.gel_data.summary(i).y = y;
                     app.gel_data.summary(i).x_fit = x_fit;
-                    app.gel_data.summary(i).x_back = x_back;
-                    
-                    
+                    app.gel_data.summary(i).x_back = app.gel_data.background(i).x_back;
 
-                    if num_of_bands == 2
-                        [~,peak_band_1] = max(x_bands(1,:));
-                        [~,peak_band_2] = max(x_bands(2,:));
 
-                        if peak_band_2 > peak_band_1
+                    [~,ix_locs] = sort(app.gel_data.fitting.par_fit(i).peak_location);
 
-                            app.gel_data.summary(i).bottom = app.d.box(i).band_area(1);
-                            app.gel_data.summary(i).top = app.d.box(i).band_area(2);
-                            app.gel_data.summary(i).band_1 = x_bands(1,:);
-                            app.gel_data.summary(i).band_2 = x_bands(2,:);
-                            app.gel_data.summary(i).band_3 = NaN*ones(1,numel(x_bands(1,:)));
-                        else
-                            app.gel_data.summary(i).bottom = app.d.box(i).band_area(2);
-                            app.gel_data.summary(i).top = app.d.box(i).band_area(1);
-                            app.gel_data.summary(i).band_1 = x_bands(2,:);
-                            app.gel_data.summary(i).band_2 = x_bands(1,:);
-                            app.gel_data.summary(i).band_3 = NaN*ones(1,numel(x_bands(1,:)));
-                        end
-                    elseif num_of_bands == 3
-                        [~,peak_band_1] = max(x_bands(1,:));
-                        [~,peak_band_2] = max(x_bands(2,:));
-                        [~,peak_band_3] = max(x_bands(3,:));
-
-                        peak_band = [peak_band_1 peak_band_2 peak_band_3];
-
-                        %sort
-                        [~,sort_ix] = sort(peak_band);
-                        app.gel_data.summary(i).bottom = app.d.box(i).band_area( ...
-                            sort_ix(1));
-                        app.gel_data.summary(i).middle = app.d.box(i).band_area( ...
-                            sort_ix(2));
-                        app.gel_data.summary(i).top = app.d.box(i).band_area( ...
-                            sort_ix(3));
-                        app.gel_data.summary(i).band_1 = x_bands( ...
-                            sort_ix(1),:);
-                        app.gel_data.summary(i).band_2 = x_bands( ...
-                            sort_ix(2),:);
-                        app.gel_data.summary(i).band_3 = x_bands( ...
-                            sort_ix(3),:);
-                    else
-                        app.gel_data.summary(i).band_1 = x_bands(1,:);
-                        app.gel_data.summary(i).band_2 = NaN*ones(1,numel(x_bands(1,:)));
-                        app.gel_data.summary(i).band_3 = NaN*ones(1,numel(x_bands(1,:)));
-                        app.gel_data.summary(i).bottom = app.d.box(i).band_area;
+                    app.gel_data.summary(i).band = [];
+                    app.gel_data.summary(i).area = [];
+                    for u = 1 : num_of_bands
+                        app.gel_data.summary(i).band(:,u) = x_bands(:,ix_locs(u));
+                        app.gel_data.summary(i).area(u) = app.d.box(i).band_area(ix_locs(u));
                     end
 
                     app.gel_data.summary(i).inset = app.d.box(i).inset;
@@ -280,7 +270,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                         cla(app.raw_density)
                         plot(app.raw_density,x,y,"Color",'k',"LineWidth",2)
                         hold(app.raw_density,"on")
-                        plot(app.raw_density,x_back,y,'-.m',"LineWidth",2)
+                        plot(app.raw_density,app.gel_data.background(i).x_back,y,'-.m',"LineWidth",2)
                         x_pow = ceil(log10(max(x)));
                         x_tick_rounder = 10^(x_pow - 1);
                         x_t_end = ceil(max(x)/x_tick_rounder)*x_tick_rounder;
@@ -290,8 +280,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.raw_density.XAxis.Exponent = 0;
                         xlim(app.raw_density,[0 x_t_end]);
                         ylim(app.raw_density,[1 max(y)]);
-                        legend(app.raw_density,'','Baseline', ...
-                            'Location','northeast')
+%                         legend(app.raw_density,'','Baseline', ...
+%                             'Location','northeast')
 
 
                         xticks(app.raw_density_fit,x_ticks);
@@ -304,82 +294,45 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                         cla(app.background_corrected_raw_density)
                         plot(app.background_corrected_raw_density, ...
-                            x-x_back',y,'-.k',"LineWidth",2)
+                            x-app.gel_data.background(i).x_back,y,'-.k',"LineWidth",2)
                         hold(app.background_corrected_raw_density,"on")
                         plot(app.background_corrected_raw_density, ...
                             zeros(1,numel(y)),y,'-.m',"LineWidth",2)
-                        legend(app.background_corrected_raw_density,'','Baseline', ...
-                            'Location','northeast')
+%                         legend(app.background_corrected_raw_density,'','Baseline', ...
+%                             'Location','northeast')
                         ylim(app.background_corrected_raw_density, ...
                             [1 max(y)]);
 
-                        x_pow = ceil(log10(max(x-x_back')));
+                        x_pow = ceil(log10(max(x-app.gel_data.background(i).x_back)));
                         x_tick_rounder = 10^(x_pow - 1);
-                        x_t_end = ceil(max(x-x_back')/x_tick_rounder)*x_tick_rounder;
-                        if min(x-x_back') < 0
+                        x_t_end = ceil(max(x-app.gel_data.background(i).x_back)/x_tick_rounder)*x_tick_rounder;
+                        if min(x-app.gel_data.background(i).x_back') < 0
                             x_tick_rounder = -10^(x_pow - 2)*0.25;
                         else
                             x_tick_rounder = 10^(x_pow - 2)*0.25;
                         end
-                        x_t_beginning = ceil(min(x-x_back')/x_tick_rounder)*x_tick_rounder;
+                        x_t_beginning = ceil(min(x-app.gel_data.background(i).x_back)/x_tick_rounder)*x_tick_rounder;
                         x_t_mid = round(x_t_end/2);
-                        x_ticks = [x_t_beginning x_t_mid x_t_end];
-
                         app.background_corrected_raw_density.XAxis.Exponent = 0;
-                        xticks(app.background_corrected_raw_density,x_ticks)
-                        xlim(app.background_corrected_raw_density,[x_t_beginning x_t_end])
-                        ylim(app.background_corrected_raw_density,[1 max(y)]);
+                        background_method = app.BackgroundSubtractionDropDown.Value;
+                        if strcmp(background_method,'Rolling Ball')
+                            xlim(app.background_corrected_raw_density,[0 x_t_end])
+                            xlim(app.background_corrected_raw_density_fit,[0 x_t_end])
+                            x_ticks = [0 x_t_mid x_t_end];
 
+                        else
+                            xlim(app.background_corrected_raw_density,[x_t_beginning x_t_end])
+                            xlim(app.background_corrected_raw_density_fit,[x_t_beginning x_t_end])
+                            x_ticks = [x_t_beginning x_t_mid x_t_end];
+
+                        end
+                        xticks(app.background_corrected_raw_density,x_ticks)
+                        ylim(app.background_corrected_raw_density,[1 max(y)]);
                         xticks(app.background_corrected_raw_density_fit,x_ticks)
                         app.background_corrected_raw_density_fit.XAxis.Exponent = 0;
-                        xlim(app.background_corrected_raw_density_fit,[x_t_beginning x_t_end])
                         ylim(app.background_corrected_raw_density_fit,[1 max(y)]);
 
-                        switch num_of_bands
-                            case 1
-                                color = {'r'};
-                                app.BandArea_1.Value = ...
-                                    app.gel_data.summary(i).bottom;
-                            case 2
-                                color = {'r','b'};
-                                total_band = app.gel_data.summary(i).bottom ...
-                                    + app.gel_data.summary(i).top;
-                                app.BandArea_1.Value = ...
-                                    app.gel_data.summary(i).bottom;
-
-                                app.BandRelativeArea_1.Value = ...
-                                    app.gel_data.summary(i).bottom/total_band;
-
-                                app.BandArea_2.Value = ...
-                                    app.gel_data.summary(i).top;
-
-                                app.BandRelativeArea_2.Value = ...
-                                    app.gel_data.summary(i).top/total_band;
-                            case 3
-                                color = {'r','b','y'};
-                                total_band = app.gel_data.summary(i).bottom ...
-                                    + app.gel_data.summary(i).middle ...
-                                    + app.gel_data.summary(i).top;
-
-                                app.BandArea_1.Value = ...
-                                    app.gel_data.summary(i).bottom;
-
-                                app.BandRelativeArea_1.Value = ...
-                                    app.gel_data.summary(i).bottom/total_band;
-
-                                app.BandArea_2.Value = ...
-                                    app.gel_data.summary(i).middle;
-
-                                app.BandRelativeArea_2.Value = ...
-                                    app.gel_data.summary(i).middle/total_band;
-
-                                app.BandArea_3.Value = ...
-                                    app.gel_data.summary(i).top;
-
-                                app.BandRelativeArea_3.Value = ...
-                                    app.gel_data.summary(i).top/total_band;
-                        end
-
+                        color = parula(num_of_bands);
 
                         cla(app.raw_density_fit)
                         cla(app.background_corrected_raw_density_fit)
@@ -387,15 +340,10 @@ classdef GelBox_exported < matlab.apps.AppBase
 
 
                         for j = 1 : num_of_bands
-%                             patch(app.raw_density_fit, ...
-%                                 x_back+x_bands(j,:), ...
-%                                 y,color{j},'FaceAlpha',0.65, ...
-%                                 'EdgeColor',color{j},'EdgeAlpha',0.25, ...
-%                                 'LineWidth',2)
                             patch(app.background_corrected_raw_density_fit, ...
-                                x_bands(j,:), ...
-                                y,color{j},'FaceAlpha',0.65, ...
-                                'EdgeColor',color{j},'EdgeAlpha',0.25, ...
+                                x_bands(:,ix_locs(j)), ...
+                                y,color(j,:),'FaceAlpha',0.65, ...
+                                'EdgeColor',color(j,:),'EdgeAlpha',0.25, ...
                                 'LineWidth',2)
                         end
 
@@ -403,7 +351,7 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                         hold(app.background_corrected_raw_density_fit,"on")
                         plot(app.background_corrected_raw_density_fit, ...
-                            x-x_back',y,'-.k',"LineWidth",2)
+                            x-app.gel_data.background(i).x_back,y,'-.k',"LineWidth",2)
                         plot(app.background_corrected_raw_density_fit, ...
                             x_fit,y,':',"LineWidth",2,"Color",f_color)
 
@@ -412,891 +360,262 @@ classdef GelBox_exported < matlab.apps.AppBase
                         plot(app.raw_density_fit, ...
                             x,y,"Color",'k',"LineWidth",2)
                         plot(app.raw_density_fit, ...
-                            x_back+x_fit,y,':',"LineWidth",2,"Color",f_color)
+                            app.gel_data.background(i).x_back+x_fit,y,':',"LineWidth",2,"Color",f_color)
 
                         ylim(app.raw_density_fit, ...
                             [1 max(y)]);
                         ylim(app.background_corrected_raw_density_fit, ...
                             [1 max(y)]);
+
+                        for count = 1 : num_of_bands
+                            bt.band_no(count,:) = count;
+                            bt.color{count,:} = '';
+                            bt.area(count,:) = app.gel_data.summary(i).area(count);
+                            bt.relative_area(count,:) = app.gel_data.summary(i).area(count)/sum(app.gel_data.summary(i).area);
+                        end
+
+                        t = struct2table(bt);
+                        app.BandTable.Data = t;
+
+                        for count = 1 : num_of_bands
+                            s = uistyle("BackgroundColor",color(count,:));
+                            addStyle(app.BandTable,s,"cell",[count 2])
+                        end
                     end
                 end
                 app.gel_data.d_box = app.d;
             end
         end
 
-        function [y_bands, y_fit,r_squared,par_fit] = FitGaussian(app,x,y,y_back,box_no)
-            
-            par_est = struct();
-            par_con = struct();
-            
-            box_pars = struct();
-            box_pars = app.gel_data.par_est(box_no);
-            
-            box_cons = struct();
-            box_cons = app.gel_data.par_con(box_no);
-            
-            names = fieldnames(box_pars);
-            for m = 1 : numel(names)
-                par_est.(names{m}) = box_pars.(names{m});
-                par_con.(names{m}) = box_cons.(names{m});
-
-            end
-            
-            par = [par_est.peak_location(1) ...
-                par_est.amplitude(1) ...
-                par_est.width_parameter(1) ...
-                par_est.skew_parameter(1) ...
-                ];
-            
-            target = y';
-
-            target = target - y_back;
-
-            j = 1;
-            e = [];
-            
-            no_of_parameters = numel(par);
-            
-            A_constraints = zeros(1,no_of_parameters);
-            A_constraints(1) = 1;
-            B_constants = [0];
-            
-            lower_bounds=zeros(1,no_of_parameters);
-            upper_bounds=Inf*ones(1,no_of_parameters);
-            
-            for m = 2 : numel(names)        
-                if par_con.(names{m})
-                    lower_bounds(m-1) = par_est.(names{m});
-                    upper_bounds(m-1) = par_est.(names{m});
-                end             
-            end
-          
-            opts=optimset('fminsearch');
-            opts.Display='off';
-            opts.MaxIter=1000;
-            opts.MaxFunEvals=10000;
-            
-            [p_result,fval,exitflag,output]= ...
-                fminsearchcon(@profile_error_1gaussian,par, ...
-                lower_bounds,upper_bounds,[],[], ...
-                [],opts);
-                        
-            par_fit.band_no = [1];
-            par_fit.peak_location(1,1) = p_result(1);
-            par_fit.amplitude(1,1) = p_result(2);
-            par_fit.width_parameter(1,1) = p_result(3);
-            par_fit.skew_parameter(1,1) = p_result(4);
-            
-            r_squared = calculate_r_squared(y',y_fit+y_back);
-            
-            function trial_e = profile_error_1gaussian(par)
-
-                [y_bands,y_fit] = calculate_profile(x,par);
-
-                e(j) = 0;
-
-                for i  = 1 : numel(target)
-                    e(j) = e(j) + (y_fit(i) - target(i))^2;
-                end
-
-                trial_e = e(end);
-
-                for i = 1:1
-                    if any(y_bands(i,:)<0)
-                        trial_e = trial_e + 10^12;
-                    end
-                end
-
-                if any(par<0)
-                    trial_e = trial_e + 10^12;
-                end
-
-                for i = 1:1
-                    areas(i) = trapz(x,y_bands(i,:));
-                end
-
-                if any(areas<0)
-                    trial_e = trial_e + 10^12;
-                end
-
-               positions = [par(1)];
-
-                if any(positions>numel(x))
-                    trial_e = trial_e + 10^12;
-                end
-                
-                r_squared_iter = calculate_r_squared(target,y_fit);
-                j = j + 1;
-                if app.DrawFittingCheckBox.Value
-                    cla(app.background_corrected_raw_density_fit)
-                    plot(app.background_corrected_raw_density_fit,y_fit,x,'LineWidth',2)
-                    hold(app.background_corrected_raw_density_fit, 'on')
-                    plot(app.background_corrected_raw_density_fit,target,x,'LineWidth',2,'LineStyle','-.','Color','k')
-                    app.rsquaredField.Value = r_squared_iter;
-                    drawnow
-                end
-            end
-            function [y_bands,y_fit] = calculate_profile(x,par)
-
-                x1 = par(1);
-                amp1 = par(2);
-                width1 = par(3);
-                skew1 = par(4);
-
-                y_first = skewed_Gaussian(x,x1,width1,amp1,skew1);
-
-                y_fit = y_first;
-                y_bands(1,:) = y_first;
-
-            end
-            function y=skewed_Gaussian(x,x0,gamma,A,skew1)
-                offset = zeros(1,length(x));
-                offset((x-x0)>0) = skew1*(x((x-x0)>0)-x0);
-                y=  A*exp(-gamma*(((x-x0)+offset).^2));
-            end
-
-
-        end
-
-        function [y_bands, y_fit,r_squared,par_fit] = Fit2Gaussian(app,x,y,...
-                y_back,box_no)
-            par_est = struct();
-            par_con = struct();
-            
-            box_pars = struct();
-            box_pars = app.gel_data.par_est(box_no);
-            
-            box_cons = struct();
-            box_cons = app.gel_data.par_con(box_no);
-            
-            names = fieldnames(box_pars);
-            for m = 1 : numel(names)
-                par_est.(names{m}) = box_pars.(names{m});
-                par_con.(names{m}) = box_cons.(names{m});
-
-            end
-
-            par = [par_est.peak_location(1) ...
-                   par_est.amplitude(1) ...
-                   par_est.width_parameter(1)...
-                   par_est.skew_parameter(1) ...
-                   par_est.peak_location(2) ...
-                   par_est.amplitude(2) ...
-                  ];
-            
-            width_and_skew = 0;
-            width = 0;
-            skew = 0;
-            
-            if (any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (any(par_con.width_parameter)&& ...
-                    any(par_con.skew_parameter))
-                par(7) = par_est.width_parameter(2);
-                par(8) = par_est.skew_parameter(2);
-                width_and_skew = 1;
-            elseif (any(par_est.width_parameter(2:end)~=0) && ...
-                    ~any(par_est.skew_parameter(2:end)~=0))|| ...
-                    (any(par_con.width_parameter) && ...
-                    ~any(par_con.skew_parameter))
-                par(7) = par_est.width_parameter(2);
-                width = 1;
-            elseif (~any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (~any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                par(7) = par_est.skew_parameter(2);
-                skew = 1;
-            end
-
-
-            j = 1;
-            e = [];
-
-            target = y';
-
-            target = target - y_back;
-            
-            no_of_parameters = numel(par);
-            
-            A_constraints = zeros(1,no_of_parameters);
-            A_constraints(1) = 1;
-            B_constants = [0];
-            
-            lower_bounds=zeros(1,no_of_parameters);
-            upper_bounds=Inf*ones(1,no_of_parameters);
-            if no_of_parameters > 6
-                for t = 7:numel(par)
-                    lower_bounds(t)=-inf;
-                end
-            end
-            
-            no_of_bands = numel(par_con.(names{m}));
-          
-            l = 1;
-            for u = 1 : 1
-                for m = 2 : numel(names)
-                    if par_con.(names{m})(u)
-                        lower_bounds(l) = par_est.(names{m})(u);
-                        upper_bounds(l) = par_est.(names{m})(u);
-                    end
-                    l = l + 1;
-                end
-            end
-            
-            if par_con.peak_location(2)
-                lower_bounds(5) = par_est.peak_location(2);
-                upper_bounds(5) = par_est.peak_location(2);
-            end
-            
-            if par_con.amplitude(2)
-                lower_bounds(6) = par_est.amplitude(2);
-                upper_bounds(6) = par_est.amplitude(2);
-            end
-            
-            if width_and_skew
-                if par_con.width_parameter(2)
-                    lower_bounds(7) = par_est.width_parameter(2);
-                    upper_bounds(7) = par_est.width_parameter(2);
-                end
-                if par_con.skew_parameter(2)
-                    lower_bounds(8) = par_est.skew_parameter(2);
-                    upper_bounds(8) = par_est.skew_parameter(2);
-                end
-            end
-            
-            if width
-                if par_con.width_parameter(2)
-                    lower_bounds(7) = par_est.width_parameter(2);
-                    upper_bounds(7) = par_est.width_parameter(2);
-                end
-            end
-            
-            if skew
-                if par_con.skew_parameter(2)
-                    lower_bounds(7) = par_est.skew_parameter(2);
-                    upper_bounds(7) = par_est.skew_parameter(2);
-                end
-            end
-                        
-            opts=optimset('fminsearch');
-            opts.Display='off';
-            opts.MaxIter=1000;
-            opts.MaxFunEvals=10000;
-            
-            [p_result,fval,exitflag,output]= ...
-                fminsearchcon(@profile_error_2gaussian,par, ...
-                lower_bounds,upper_bounds,[],[], ...
-                [],opts);
-            
-            par_fit.band_no = [1;2];
-            par_fit.peak_location(1,1) = p_result(1);
-            par_fit.amplitude(1,1) = p_result(2);
-            par_fit.width_parameter(1,1) = p_result(3);
-            par_fit.skew_parameter(1,1) = p_result(4);
-            par_fit.peak_location(2,1) = p_result(5);
-            par_fit.amplitude(2,1) = p_result(6);
-            
-            if (any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                par_fit.width_parameter(2,1) = p_result(7);
-                par_fit.skew_parameter(2,1) = p_result(8);
-            elseif (any(par_est.width_parameter(2:end)~=0) && ...
-                    ~any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (any(par_con.width_parameter) && ...
-                    ~any(par_con.skew_parameter))
-                par_fit.width_parameter(2,1) = p_result(7);
-                par_fit.skew_parameter(2,1) = 0;
-            elseif (~any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (~any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                par_fit.width_parameter(2,1) = 0;
-                par_fit.skew_parameter(2,1) = p_result(7);
-            else
-                par_fit.width_parameter(2,1) = 0;
-                par_fit.skew_parameter(2,1) = 0;
-            end
-
-            r_squared = calculate_r_squared(y',y_fit+y_back);
-            function trial_e = profile_error_2gaussian(par)
-
-                [y_bands,y_fit] = calculate_2profile(x,par);
-
-                e(j) = 0;
-
-                for i  = 1 : numel(target)
-                    e(j) = e(j) + (y_fit(i) - target(i))^2;
-                end
-
-                trial_e = e(end);
-
-                for i = 1:2
-                    if any(y_bands(i,:)<0)
-                        trial_e = trial_e + 10^12;
-                    end
-                end
-
-                if any(par<0)
-                    trial_e = trial_e + 10^12;
-                end
-
-                for i = 1:2
-                    areas(i) = trapz(x,y_bands(i,:));
-                end
-
-                if any(areas<0)
-                    trial_e = trial_e + 10^12;
-                end
-
-               positions = [par(1) par(5)];
-
-                if any(positions>numel(x))
-                    trial_e = trial_e + 10^12;
-                end
-
-                r_squared_iter = calculate_r_squared(target,y_fit);
-                j = j + 1;
-                if app.DrawFittingCheckBox.Value
-                    cla(app.background_corrected_raw_density_fit)
-                    plot(app.background_corrected_raw_density_fit, ...
-                        y_fit,x,'LineWidth',2)
-                    hold(app.background_corrected_raw_density_fit, 'on')
-                    plot(app.background_corrected_raw_density_fit, ...
-                        target,x,'LineWidth',2,'LineStyle','-.','Color','k')
-                    app.rsquaredField.Value = r_squared_iter;
-                    drawnow
-                end
-            end
-            function [y_bands,y_fit] = calculate_2profile(x,par)
-
-                x1 = par(1);
-                amp1 = par(2);
-                width1 = par(3);
-                skew1 = par(4);
-                x2 = par(5);
-                amp2 = par(6);
-
-                if (any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                    width2 = width1 + par(7);
-                    skew2 = skew1 + par(8);
-                elseif (any(par_est.width_parameter(2:end)~=0) && ...
-                    ~any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (any(par_con.width_parameter) && ...
-                    ~any(par_con.skew_parameter))
-                    width2 = width1 + par(7);
-                    skew2 = skew1 + 0;
-                elseif (~any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (~any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                    width2 = width1 + 0;
-                    skew2 = skew1 + par(7);
-                else
-                    width2 = width1 + 0;
-                    skew2 = skew1 + 0;
-                end
-
-                y_first = skewed_Gaussian(x,x1,width1,amp1,skew1);
-                y_second = skewed_Gaussian(x,x2,width2,amp2,skew2);
-
-                y_fit = y_first + y_second;
-                y_bands(1,:) = y_first;
-                y_bands(2,:) = y_second;
-
-            end
-            function y=skewed_Gaussian(x,x0,gamma,A,skew1)
-                offset = zeros(1,length(x));
-                offset((x-x0)>0) = skew1*(x((x-x0)>0)-x0);
-                y=  A*exp(-gamma*(((x-x0)+offset).^2));
-            end
-        end
-
-        function [y_bands, y_fit,r_squared,par_fit] = Fit3Gaussian(app,x,y,y_back,box_no)
-            
-            par_est = struct();
-            par_con = struct();
-            
-            box_pars = struct();
-            box_pars = app.gel_data.par_est(box_no);
-            
-            box_cons = struct();
-            box_cons = app.gel_data.par_con(box_no);
-            
-            names = fieldnames(box_pars);
-            for m = 1 : numel(names)
-                par_est.(names{m}) = box_pars.(names{m});
-                par_con.(names{m}) = box_cons.(names{m});
-
-            end
-            
-            par = [par_est.peak_location(1) ...
-                par_est.amplitude(1) ...
-                par_est.width_parameter(1)...
-                par_est.skew_parameter(1) ...
-                par_est.peak_location(2) ...
-                par_est.amplitude(2) ...
-                par_est.peak_location(3) ...
-                par_est.amplitude(3) ...
-                ];
-            
-            width_and_skew = 0;
-            width = 0;
-            skew = 0;
-            
-            if (any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0))  || ...
-                    (any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                par(9) = par_est.width_parameter(2);
-                par(10) = par_est.skew_parameter(2);
-                par(11) = par_est.width_parameter(3);
-                par(12) = par_est.skew_parameter(3);
-                width_and_skew = 1;
-            elseif (any(par_est.width_parameter(2:end)~=0) && ...
-                    ~any(par_est.skew_parameter(2:end)~=0))  || ...
-                    (any(par_con.width_parameter) && ...
-                    ~any(par_con.skew_parameter))
-                par(9) = par_est.width_parameter(2);
-                par(10) = par_est.width_parameter(3);
-                width = 1;
-            elseif (~any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0))  || ...
-                    (~any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                par(9) = par_est.skew_parameter(2);
-                par(10) = par_est.skew_parameter(3);
-                skew = 1;
-            end
-
-            
-            j = 1;
-            e = [];
-            
-
-            target = y';
-
-            target = target - y_back;
-
-            no_of_parameters = numel(par);
-            
-            A_constraints = zeros(1,no_of_parameters);
-            A_constraints(1) = 1;
-            B_constants = [0];
-            
-            lower_bounds=zeros(1,no_of_parameters);
-            upper_bounds=Inf*ones(1,no_of_parameters);
-            if no_of_parameters > 6
-                for t = 7:numel(par)
-                    lower_bounds(t)=-inf;
-                end
-            end
-            no_of_bands = numel(par_con.(names{m}));
-            
-            l = 1;
-            for u = 1 : 1
-                for m = 2 : numel(names)
-                    if par_con.(names{m})(u)
-                        lower_bounds(l) = par_est.(names{m})(u);
-                        upper_bounds(l) = par_est.(names{m})(u);
-                    end
-                    l = l + 1;
-                end
-            end
-            
-            if par_con.peak_location(2)
-                lower_bounds(5) = par_est.peak_location(2);
-                upper_bounds(5) = par_est.peak_location(2);
-            end
-            
-            if par_con.amplitude(2)
-                lower_bounds(6) = par_est.amplitude(2);
-                upper_bounds(6) = par_est.amplitude(2);
-            end
-            
-            if par_con.peak_location(3)
-                lower_bounds(7) = par_est.peak_location(3);
-                upper_bounds(7) = par_est.peak_location(3);
-            end
-            
-            if par_con.amplitude(3)
-                lower_bounds(8) = par_est.amplitude(3);
-                upper_bounds(8) = par_est.amplitude(3);
-            end
-            
-            if width_and_skew
-                if par_con.width_parameter(2)
-                    lower_bounds(9) = par_est.width_parameter(2);
-                    upper_bounds(9) = par_est.width_parameter(2);
-                end
-                if par_con.skew_parameter(2)
-                    lower_bounds(10) = par_est.skew_parameter(2);
-                    upper_bounds(10) = par_est.skew_parameter(2);
-                end
-                if par_con.width_parameter(3)
-                    lower_bounds(11) = par_est.width_parameter(2);
-                    upper_bounds(11) = par_est.width_parameter(2);
-                end
-                if par_con.skew_parameter(3)
-                    lower_bounds(12) = par_est.skew_parameter(2);
-                    upper_bounds(11) = par_est.skew_parameter(2);
-                end
-            end
-            
-            if width
-                if par_con.width_parameter(2)
-                    lower_bounds(9) = par_est.width_parameter(2);
-                    upper_bounds(9) = par_est.width_parameter(2);
-                end
-                if par_con.width_parameter(3)
-                    lower_bounds(10) = par_est.width_parameter(3);
-                    upper_bounds(10) = par_est.width_parameter(3);
-                end
-            end
-
-            if skew
-                if par_con.skew_parameter(2)
-                    lower_bounds(9) = par_est.skew_parameter(2);
-                    upper_bounds(9) = par_est.skew_parameter(2);
-                end
-
-                if par_con.skew_parameter(3)
-                    lower_bounds(10) = par_est.skew_parameter(2);
-                    upper_bounds(10) = par_est.skew_parameter(2);
-                end
-            end
-            
-
-            opts=optimset('fminsearch');
-            opts.Display='off';
-            opts.MaxIter=1000;
-            opts.MaxFunEvals=10000;
-            
-            [p_result,fval,exitflag,output]= ...
-                fminsearchcon(@profile_error_3gaussian,par, ...
-                lower_bounds,upper_bounds,[],[], ...
-                [],opts);
-            
-            par_fit.band_no = [1;2;3];
-            par_fit.peak_location(1,1) = p_result(1);
-            par_fit.amplitude(1,1) = p_result(2);
-            par_fit.width_parameter(1,1) = p_result(3);
-            par_fit.skew_parameter(1,1) = p_result(4);
-            par_fit.peak_location(2,1) = p_result(5);
-            par_fit.amplitude(2,1) = p_result(6);
-            par_fit.peak_location(3,1) = p_result(7);
-            par_fit.amplitude(3,1) = p_result(8);
-            
-            if (any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0))  || ...
-                    (any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                par_fit.width_parameter(2,1) = p_result(9);
-                par_fit.skew_parameter(2,1) = p_result(10);
-                par_fit.width_parameter(3,1) = p_result(11);
-                par_fit.skew_parameter(3,1) = p_result(12);
-            elseif (any(par_est.width_parameter(2:end)~=0) && ...
-                    ~any(par_est.skew_parameter(2:end)~=0))  || ...
-                    (any(par_con.width_parameter) && ...
-                    ~any(par_con.skew_parameter))
-                par_fit.width_parameter(2,1) = p_result(9);
-                par_fit.skew_parameter(2,1) = 0;
-                par_fit.width_parameter(3,1) = p_result(10);
-                par_fit.skew_parameter(3,1) = 0;
-            elseif (~any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0))  || ...
-                    (~any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                par_fit.width_parameter(2,1) = 0;
-                par_fit.skew_parameter(2,1) = p_result(9);
-                par_fit.width_parameter(3,1) = 0;
-                par_fit.skew_parameter(3,1) = p_result(10);
-            else
-                par_fit.width_parameter(2,1) = 0;
-                par_fit.skew_parameter(2,1) = 0;
-                par_fit.width_parameter(3,1) = 0;
-                par_fit.skew_parameter(3,1) = 0;
-                
-            end
-
-            r_squared = calculate_r_squared(y',y_fit+y_back);
-            function trial_e = profile_error_3gaussian(par)
-                [y_bands,y_fit] = calculate_3profile(x,par);
-                
-                e(j) = 0;
-                for i  = 1 : numel(target)
-                    e(j) = e(j) + (y_fit(i) - target(i))^2;
-                end
-
-                trial_e = e(end);
-
-                for i = 1:3
-                    if any(y_bands(i,:)<0)
-                        trial_e = trial_e + 10^12;
-                    end
-                end
-
-                if any(par<0)
-                    trial_e = trial_e + 10^12;
-                end
-
-                for i = 1:3
-                    areas(i) = trapz(x,y_bands(i,:));
-                end
-
-                if any(areas<0)
-                    trial_e = trial_e + 10^12;
-                end
-
-                positions = [par(1) par(5) par(7)];
-
-                if any(positions>numel(x))
-                    trial_e = trial_e + 10^12;
-                end
-
-                r_squared_iter = calculate_r_squared(target,y_fit);
-                j = j + 1;
-                if app.DrawFittingCheckBox.Value
-                    cla(app.background_corrected_raw_density_fit)
-                    plot(app.background_corrected_raw_density_fit,y_fit,x,'LineWidth',2)
-                    hold(app.background_corrected_raw_density_fit, 'on')
-                    plot(app.background_corrected_raw_density_fit,target,x,'LineWidth',2,'LineStyle','-.','Color','k')
-                    app.rsquaredField.Value = r_squared_iter;
-                    drawnow
-                end
-            end
-            function [y_bands,y_fit] = calculate_3profile(x,par)
-
-                x1 = par(1);
-                amp1 = par(2);
-                width1 = par(3);
-                skew1 = par(4);
-                x2 = par(5);
-                amp2 = par(6);
-                x3 = par(7);
-                amp3 = par(8);
-
-                if (any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                    width2 = width1 + par(9);
-                    skew2 = skew1 + par(10);
-                    width3 = width1 + par(11);
-                    skew3 = skew1 + par(12);
-                elseif (any(par_est.width_parameter(2:end)~=0) && ...
-                    ~any(par_est.skew_parameter(2:end)~=0))|| ...
-                    (any(par_con.width_parameter) && ...
-                    ~any(par_con.skew_parameter))
-                    width2 = width1 + par(9);
-                    skew2 = skew1 + 0;
-                    width3 = width1 + par(10);
-                    skew3 = skew1 + 0;
-                elseif (~any(par_est.width_parameter(2:end)~=0) && ...
-                    any(par_est.skew_parameter(2:end)~=0)) || ...
-                    (~any(par_con.width_parameter) && ...
-                    any(par_con.skew_parameter))
-                    width2 = width1 + 0;
-                    skew2 = skew1 + par(9);
-                    width3 = width1 + 0;
-                    skew3 = skew1 + par(10);
-                else
-                    width2 = width1 + 0;
-                    skew2 = skew1 + 0;
-                    width3 = width1 + 0;
-                    skew3 = skew1 + 0;
-                end
-
-                y_first = skewed_Gaussian(x,x1,width1,amp1,skew1);
-                y_second = skewed_Gaussian(x,x2,width2,amp2,skew2);
-                y_third = skewed_Gaussian(x,x3,width3,amp3,skew3);
-
-
-                y_fit = y_first + y_second + y_third;
-                y_bands(1,:) = y_first;
-                y_bands(2,:) = y_second;
-                y_bands(3,:) = y_third;
-
-            end
-            function y=skewed_Gaussian(x,x0,gamma,A,skew1)
-                offset = zeros(1,length(x));
-                offset((x-x0)>0) = skew1*(x((x-x0)>0)-x0);
-                y=  A*exp(-gamma*(((x-x0)+offset).^2));
-            end
-        end
-
         function UpdateFittingOptions(app)
             app.parameters_updated = 1;
+            selected_box = str2num(app.BoxSelectionDropDown.Value);
+            app.gel_data.fitting.par_update(selected_box) = 1;
+            app.single_box_callback = 1;
             UpdateDisplay(app)
             app.parameters_updated = 0;
+            app.single_box_callback = 0;
+
         end
-        
+
         function [par_est,par_con] = EstimateFittingParameters(app,x,y,y_back, ...
                 no_of_bands)
 
-            switch no_of_bands
-                case 1 
+            peaks = find_peaks('x',x, ...
+                'y',y, ...
+                'min_rel_delta_y',0.05, ...
+                'min_x_index_spacing',2);
 
-                    peaks=find_peaks('x',x, ...
-                        'y',y, ...
-                        'min_rel_delta_y',0.05, ...
-                        'min_x_index_spacing',2);
+            % The order of the parameters is as follows:
+            %       1) peak_location
+            %       2) amplitude
+            %       3) width_parameter
+            %       4) skew_parameter
 
-                     if numel(peaks.max_indices) == no_of_bands
-                         first_curve_x_estimate=peaks.max_indices(1);
-                     else
-                         first_curve_x_estimate = 0.5*length(x);
-                     end
+            par_est.band_no = (1 : no_of_bands)';
+            par_con.band_no = (1 : no_of_bands)';
 
-                     target = y';
-
-                     target = target - y_back;
-                     [max_value,~]=max(target);
-
-                     half_distance=(0.1*length(x));
-                     alfa_estimate = -log(0.5)/(half_distance^2);
-
-                     first_curve_width_estimate = alfa_estimate;
-                     first_curve_amp_estimate = max_value;
-                     first_curve_skew_estimate = 1;
-
-
-                     par_est.band_no  = 1;
-                     par_est.peak_location = first_curve_x_estimate;
-                     par_est.amplitude = first_curve_amp_estimate;
-                     par_est.width_parameter = first_curve_width_estimate;
-                     par_est.skew_parameter = first_curve_skew_estimate;
-                     
-                     par_con.band_no  = 1;
-                     par_con.peak_location = false;
-                     par_con.amplitude = false;
-                     par_con.width_parameter = false;
-                     par_con.skew_parameter = false;
-
-                case 2
-
-                    peaks=find_peaks('x',x, ...
-                        'y',y, ...
-                        'min_rel_delta_y',0.05, ...
-                        'min_x_index_spacing',2);
-
-                    if numel(peaks.max_indices) == no_of_bands
-                        first_curve_x_estimate=peaks.max_indices(1);
-                        second_curve_x_estimate=peaks.max_indices(2);
-                    else
-                        first_curve_x_estimate = 0.3*length(x);
-                        second_curve_x_estimate = 0.6*length(x);
-                    end
-
-                    target = y';
-
-                    target = target - y_back;
-                    [max_value,~]=max(target);
-
-                    half_distance=(0.1*length(x));
-                    alfa_estimate = -log(0.5)/(half_distance^2);
-
-                    first_curve_width_estimate = alfa_estimate;
-                    first_curve_amp_estimate = max_value;
-                    first_curve_skew_estimate = 1;
-
-                    second_curve_amp_estimate = first_curve_amp_estimate;
-                    second_curve_width_offset = 0;
-                    second_curve_skew_offset = 0;
-
-                     par_est.band_no  = [1;2];
-                     par_est.peak_location = ...
-                     [first_curve_x_estimate;second_curve_x_estimate];
-                     par_est.amplitude = ...
-                         [first_curve_amp_estimate;second_curve_amp_estimate];
-                     par_est.width_parameter = ...
-                     [first_curve_width_estimate;second_curve_width_offset];
-                     par_est.skew_parameter = ...
-                     [first_curve_skew_estimate;second_curve_skew_offset];
-                     
-                     par_con.band_no  = [1;2];
-                     par_con.peak_location = [false;false];
-                     par_con.amplitude = [false;false];
-                     par_con.width_parameter = [false;false];
-                     par_con.skew_parameter = [false;false];
-
-                case 3
-                    peaks=find_peaks('x',x, ...
-                        'y',y, ...
-                        'min_rel_delta_y',0.05, ...
-                        'min_x_index_spacing',2);
-                    if numel(peaks.max_indices) == no_of_bands
-                        first_curve_x_estimate=peaks.max_indices(1);
-                        second_curve_x_estimate=peaks.max_indices(2);
-                        third_curve_x_estimate=peaks.max_indices(3);
-                    else
-                        first_curve_x_estimate = 0.2*length(x);
-                        second_curve_x_estimate = 0.3*length(x);
-                        third_curve_x_estimate = 0.6*length(x);
-                    end
-                    target = y';
-
-                    target = target - y_back;
-                    [max_value,~]=max(target);
-
-                    half_distance=(0.1*length(x));
-                    alfa_estimate = -log(0.5)/(half_distance^2);
-
-                    first_curve_width_estimate = alfa_estimate;
-                    first_curve_amp_estimate = max_value;
-                    first_curve_skew_estimate = 1;
-
-                    second_curve_amp_estimate = first_curve_amp_estimate;
-                    second_curve_width_estimate = 0;
-                    second_curve_skew_estimate = 0;
-
-                    third_curve_amp_estimate = first_curve_amp_estimate;
-                    third_curve_width_estimate = 0;
-                    third_curve_skew_estimate = 0;
-
-                    par_est.band_no  = [1;2;3];
-                    par_est.peak_location = ...
-                        [first_curve_x_estimate;...
-                        second_curve_x_estimate;...
-                        third_curve_x_estimate];
-                    par_est.amplitude = ...
-                        [first_curve_amp_estimate;...
-                        second_curve_amp_estimate;...
-                        third_curve_amp_estimate];
-                    par_est.width_parameter = ...
-                        [first_curve_width_estimate;...
-                        second_curve_width_estimate;...
-                        third_curve_width_estimate];
-                    par_est.skew_parameter = ...
-                        [first_curve_skew_estimate;...
-                        second_curve_skew_estimate;...
-                        third_curve_skew_estimate];
-                    
-                     par_con.band_no  = [1;2;3];
-                     par_con.peak_location = [false;false;false];
-                     par_con.amplitude = [false;false;false];
-                     par_con.width_parameter = [false;false;false];
-                     par_con.skew_parameter = [false;false;false];
+            if numel(peaks.max_indices) == no_of_bands
+                for i = 1 : no_of_bands
+                    par_est.peak_location(i,:) = peaks.max_indices(i);
+                end
+            else
+                for i = 1 : no_of_bands
+                    par_est.peak_location(i,:) = ...
+                        (i/(1+no_of_bands))*length(x);
+                end
             end
 
+            target = y;
+            target = target - y_back;
 
-            
-        end
-        
-        function ImageAdjusted(app)
-                if ~isempty(app.gel_data.adjusted_image)
-                    app.gel_data.im_data = app.gel_data.adjusted_image;
-                    app.image_adjusted = 1;
-                    center_image_with_preserved_aspect_ratio( ...
-                        app.gel_data.im_data, ...
-                        app.gel_image_axis,[]);
+            [max_value,~] = max(target);
+
+            half_distance = 0.1*length(x);
+            alfa_estimate = -log(0.5)/(half_distance^2);
+
+            for i = 1 : no_of_bands
+                par_est.amplitude(i,:) = max_value;
+            end
+
+            % The first width and skewness parameters are assigned,
+            % and the following are defined as an offset.
+
+            par_est.width_parameter(1,:) = alfa_estimate;
+            par_est.skew_parameter(1,:) = 1;
+
+            for i = 2 : no_of_bands
+                par_est.width_parameter(i,:) = 0;
+                par_est.skew_parameter(i,:) = 0;
+            end
+
+            for i = 1 : no_of_bands
+                par_con.peak_location(i,:) = false;
+                par_con.amplitude(i,:) = false;
+                if i > 1
+                    par_con.width_parameter(i,:) = true;
+                    par_con.skew_parameter(i,:) = true;
+                else
+                    par_con.width_parameter(i,:) = false;
+                    par_con.skew_parameter(i,:) = false;
                 end
-                UpdateDisplay(app)
+            end
+        end
+
+        function ImageAdjusted(app)
+            if ~isempty(app.gel_data.image.adjusted_image)
+                app.gel_data.image.im_data = app.gel_data.image.adjusted_image;
+                app.image_adjusted = 1;
+                center_image_with_preserved_aspect_ratio( ...
+                    app.gel_data.image.im_data, ...
+                    app.gel_image_axis,[]);
+            end
+            UpdateDisplay(app)
+        end
+
+        function [y_bands, y_fit,r_squared,par_fit] = FitGaussian(app, x, y, y_back, box_no,no_of_bands)
+            par_est = struct();
+            par_con = struct();
+
+            box_pars = struct();
+            box_pars = app.gel_data.fitting.par_est(box_no);
+
+            box_cons = struct();
+            box_cons = app.gel_data.fitting.par_con(box_no);
+
+            names = fieldnames(box_pars);
+            for m = 1 : numel(names)
+                par_est.(names{m}) = box_pars.(names{m});
+                par_con.(names{m}) = box_cons.(names{m});
+            end
+
+            m = 1;
+
+            no_of_parameters = (numel(names)-1) * numel(par_est.band_no);
+
+            A_constraints = zeros(1,no_of_parameters);
+            A_constraints(1) = 1;
+            B_constants = [0];
+
+            lower_bounds=zeros(1,no_of_parameters);
+            upper_bounds=Inf*ones(1,no_of_parameters);
+            var_per_band = 4;
+
+            upper_bounds(1:var_per_band:end) = numel(y);
+
+            % Unpack the parameter estimate structure;
+            for i = 1 : no_of_bands
+                for j = 2 : numel(names)
+                    par(m) = par_est.(names{j})(i);
+                    if par_con.(names{j})(i)
+                        lower_bounds(m) = par_est.(names{j})(i);
+                        upper_bounds(m) = par_est.(names{j})(i);
+                    end
+                    m = m + 1;
+                end
+            end
+
+            target = y;
+
+            target = target - y_back;
+
+            j = 1;
+            e = [];
+
+            if no_of_parameters > var_per_band
+                for p = 2 : no_of_bands
+                    if ~par_con.width_parameter(p)
+                        lower_bounds((p*var_per_band)-1) = -inf;
+                    end
+                    if ~par_con.skew_parameter(p)
+                        lower_bounds(p*var_per_band) = -inf;
+                    end
+                end
+            end
+
+            opts=optimset('fminsearch');
+            opts.Display='off';
+            opts.MaxIter=1000;
+            opts.MaxFunEvals=10000;
+
+            [p_result,fval,exitflag,output]= ...
+                fminsearchbnd(@profile_error_ngaussian,par, ...
+                lower_bounds,upper_bounds,opts);
+            r_squared = calculate_r_squared(y,y_fit+y_back);
+            error = (y - (y_fit+y_back)).^2;
+            error = sum(error);
+
+            par_fit.band_no = [1:no_of_bands]';
+
+            count = 1;
+            for n = 1 : no_of_bands
+                for m = 2 : numel(names)
+                    par_fit.(names{m})(n) = p_result(count);
+                    count = count + 1;
+                end
+            end
+
+            function trial_e = profile_error_ngaussian(par)
+
+                [y_bands, y_fit] = calculate_nprofile(x,par);
+
+                no_of_par = 4;
+                no_of_bands = numel(par)/no_of_par;
+
+                e(j) = 0;
+                for i  = 1 : numel(target)
+                    e(j) = e(j) + (y_fit(i) - target(i))^2;
+                end
+
+                trial_e = e(end);
+
+                r_squared_iter = calculate_r_squared(target,y_fit);
+                j = j + 1;
+                if app.DrawFittingCheckBox.Value
+                    cla(app.background_corrected_raw_density_fit)
+                    plot(app.background_corrected_raw_density_fit,y_fit,x,'LineWidth',2)
+                    hold(app.background_corrected_raw_density_fit, 'on')
+                    plot(app.background_corrected_raw_density_fit,target,x,'LineWidth',2,'LineStyle','-.','Color','k')
+                    app.rsquaredField.Value = r_squared_iter;
+                    drawnow
+                end
+            end
+            function [y_bands,y_fit] = calculate_nprofile(x,par)
+
+                no_of_par = 4;
+                no_of_bands = numel(par)/no_of_par;
+
+                par_map = 1:no_of_par;
+                par_map = repmat(par_map,no_of_bands,1);
+
+                for k = 2 : no_of_bands
+                    par_map(k,:) = par_map(k,:) + (k-1)*no_of_par;
+                end
+
+                for u = 1 : no_of_bands
+                    if u == 1
+                        y_bands(:,u) = skewed_Gaussian(x, ...
+                            par(par_map(u,1)),par(par_map(u,2)), ...
+                            par(par_map(u,3)),par(par_map(u,4)));
+                    else
+                        y_bands(:,u) = skewed_Gaussian(x, ...
+                            par(par_map(u,1)),par(par_map(u,2)), ...
+                            par(par_map(1,3)) + par(par_map(u,3)), ...
+                            par(par_map(1,4)) + par(par_map(u,4)));
+                    end
+                end
+
+                y_fit = 0;
+                for t = 1 : no_of_bands
+                    y_fit = y_fit + y_bands(:,t);
+                end
+
+            end
+            function y=skewed_Gaussian(x,x0,A,gamma,skew1)
+                offset = zeros(length(x),1);
+                offset((x-x0)>0) = skew1*(x((x-x0)>0)-x0);
+                y=  A*exp(-gamma*(((x-x0)+offset).^2));
+            end
         end
     end
 
@@ -1318,15 +637,10 @@ classdef GelBox_exported < matlab.apps.AppBase
             % Reset fitting fields
             app.DrawFittingCheckBox.Value = 0;
             app.rsquaredField.Value = 0;
-            app.BandArea_1.Value = 0;
-            app.BandArea_2.Value = 0;
-            app.BandArea_3.Value = 0;
-            app.BandRelativeArea_1.Value = 0;
-            app.BandRelativeArea_2.Value = 0;
-            app.BandRelativeArea_3.Value = 0;
+            app.BandTable.Data = [];
 
             % Reset number of bands
-            app.NumberofBandsDropDown.Value = '1';
+            app.NumberofBandsSpinner.Value = 1;
 
             % Reset box controls
             app.DeleteBoxButton.Enable = 0;
@@ -1344,11 +658,14 @@ classdef GelBox_exported < matlab.apps.AppBase
         % Code that executes after component creation
         function startupFcn(app)
 
-            addpath(genpath('../code/utilities'));
+            addpath(genpath('utilities'));
             movegui(app.GelBoxUIFigure,'center')
+            app.gel_data.boxes = [];
             
-            
-            
+            app.MedianFilterSizeSpinner.Enable = 'off';
+            app.MedianFilterSizeSpinnerLabel.Enable = 'off';
+
+
             colormap(app.GelBoxUIFigure, 'gray');
             app.fitting_options.shared_shape = true(1,1);
             app.fitting_options.shared_skewness = true(1,1);
@@ -1359,315 +676,234 @@ classdef GelBox_exported < matlab.apps.AppBase
         % Menu selected function: LoadImageMenu
         function LoadImageButtonPushed(app, event)
             [file_string,path_string]=uigetfile2( ...
-                {'*.png','PNG';'*.tif','TIF'}, ...
-                'Select image file');
+                {'*.tif','TIF';'*.png','PNG';'*.bmp','BMP';'*.gif','GIF';'*.jpeg','JPEG';'*.jpeg2000','JPEG2000';'*.pbm','PBM';'*.pgm','PGM'}, ...
+                'Select Image File');
             if (path_string~=0)
 
                 ResetDisplay(app)
                 app.DataAnalysisMenu.Enable = 1;
                 app.gel_data = [];
-                app.gel_data.par_update = 0;
-                app.d=[];
-
+                app.gel_data.fitting.par_update = 0;
+                app.gel_data.boxes = [];
+                app.d = [];
+                app.filtered_inset = [];
+                app.background_token = [];
 
                 app.gel_data.invert_status = 0;
-                app.gel_data.image_file_string = fullfile(path_string,file_string);
-                app.gel_data.im_data = imread(app.gel_data.image_file_string);
-                if (ndims(app.gel_data.im_data)==3)
-                    app.gel_data.im_data = rgb2gray(app.gel_data.im_data);
+                app.gel_data.image.image_file_string = fullfile(path_string,file_string);
+                app.gel_data.image.im_data = imread(app.gel_data.image.image_file_string);
+                if (ndims(app.gel_data.image.im_data)==3)
+                    app.gel_data.image.im_data = rgb2gray(app.gel_data.image.im_data);
                 end
-                app.gel_data.original_image = app.gel_data.im_data;
+                app.gel_data.image.original_image = app.gel_data.image.im_data;
                 center_image_with_preserved_aspect_ratio( ...
-                    app.gel_data.im_data, ...
+                    app.gel_data.image.im_data, ...
                     app.gel_image_axis,[]);
 
-                app.gel_data.imfinfo = imfinfo(app.gel_data.image_file_string);
+                app.gel_data.image.imfinfo = imfinfo(app.gel_data.image.image_file_string);
 
             end
 
-        end
-
-        % Menu selected function: InvertImageMenu
-        function InvertImageButtonPushed(app, event)
-            app.gel_data.im_data = imcomplement(app.gel_data.im_data);
-            app.gel_data.original_image = app.gel_data.im_data;
-            center_image_with_preserved_aspect_ratio( ...
-                app.gel_data.im_data, ...
-                app.gel_image_axis,[]);
-            app.gel_data.invert_status = 1;
         end
 
         % Menu selected function: LoadAnalysisMenu
         function LoadAnalysisButtonPushed(app, event)
 
             [file_string,path_string] = uigetfile2( ...
-                {'*.gdf','Gel data file'},'Select file to load prior analysis');
+                {'*.gbx','GelBox file';'*.gdf','Gel data file'},'Select GBX File To Load Analysis');
 
             if (path_string~=0)
-            % Delete any old boxes
-            if (isfield(app.gel_data,'box_handle'))
-                n = numel(app.gel_data.box_handle);
-                for i=1:n
-                    delete(app.gel_data.box_handle(i));
+                % Delete any old boxes
+                if (isfield(app.gel_data.boxes,'box_handle'))
+                    n = numel(app.gel_data.boxes.box_handle);
+                    for i=1:n
+                        delete(app.gel_data.boxes.box_handle(i));
+                    end
                 end
-            end
                 app.DeleteBoxButton.Enable = 1;
                 app.DataAnalysisMenu.Enable = 1;
-                
+
                 temp = load(fullfile(path_string,file_string),'-mat','save_data');
                 save_data = temp.save_data;
+                
+                if ~isfield(save_data,'settings')
+                    new_save_data.boxes.box_position = save_data.box_position;
+                    new_save_data.fitting.fitting_mode = save_data.fitting_mode;
+                    new_save_data.fitting.par_est = save_data.par_est;
+                    new_save_data.fitting.par_fit = save_data.par_fit;
+                    new_save_data.fitting.par_con = save_data.par_con;
+                    new_save_data.image.image_file_string = save_data.image_file_string;
+                    new_save_data.image.im_data = save_data.im_data;
+                    new_save_data.image.imfinfo = save_data.imfinfo;
+                    new_save_data.image.original_image = save_data.original_image;
+                    new_save_data.image.adjusted_image = save_data.adjusted_image;
+                    new_save_data.settings.image_adjustments = save_data.image_adjustments;
+                    new_save_data.settings.background.method = {};
+                    new_save_data.settings.background.size = [];
+                    for i = 1 : numel(new_save_data.fitting.par_fit)
+                        new_save_data.settings.background.method{i} = save_data.background_method;
+                        new_save_data.settings.background.size(i) = save_data.background_size;
+                    end
+                    save_data = [];
+                    save_data = new_save_data;
+                end
 
                 % Restore
                 app.gel_data = [];
+                app.gel_data.boxes = [];
+                app.filtered_inset = [];
+                app.background_token = [];
                 app.d=[];
-                app.gel_data.image_file_string = save_data.image_file_string;
-                app.gel_data.im_data = save_data.im_data;
-                app.gel_data.imfinfo = save_data.imfinfo;
+                save_fields = {'image','fitting','settings'};
+
+                for i = 1 : numel(save_fields)
+                    app.gel_data.(save_fields{i}) = save_data.(save_fields{i});
+                end
+
                 app.new_box = 0;
 
 
                 center_image_with_preserved_aspect_ratio( ...
-                    app.gel_data.im_data, ...
+                    app.gel_data.image.im_data, ...
                     app.gel_image_axis,[]);
-                if isfield(save_data,'par_fit')
-                    band_no = numel(save_data.par_fit(1).band_no);
-                elseif isfield(save_data,'par_est')
-                    band_no = numel(save_data.par_est(1).band_no);
-                else 
-                    band_no = 1;
-                end
-                
-                app.NumberofBandsDropDown.Value = num2str(band_no);
 
-                                    
-                % Check if this was a legacy gelbox gdf
-                if isfield(save_data,'par_est')
-                    ext_par_names = fieldnames(save_data.par_est);
-
-                    if any(strcmp(ext_par_names,'shape_parameter'))
-
-                        if isfield(save_data,'par_fit')
-                            for i = 1 : length(save_data.par_fit)
-                                save_data.par_fit(i).width_parameter = save_data.par_fit(i).shape_parameter;
-                            end
-                            save_data.par_fit = rmfield(save_data.par_fit,'shape_parameter');
-                        end
-
-                        if isfield(save_data,'par_est')
-                            for i = 1 : length(save_data.par_est)
-                                save_data.par_est(i).width_parameter = save_data.par_est(i).shape_parameter;
-                                if band_no > 1
-                                    save_data.par_est(i).width_parameter(2) = save_data.par_est(i).width_parameter(2) - save_data.par_est(i).width_parameter(1);
-                                    save_data.par_est(i).skew_parameter(2) = save_data.par_est(i).skew_parameter(2) - save_data.par_est(i).skew_parameter(1);
-                                end
-                            end
-                            save_data.par_est = rmfield(save_data.par_est,'shape_parameter');
-                        end
-
-                        if isfield(save_data,'par_con')
-                            for i = 1 : length(save_data.par_con)
-                                save_data.par_con(i).width_parameter = save_data.par_con(i).shape_parameter;
-                            end
-                            save_data.par_con = rmfield(save_data.par_con,'shape_parameter');
-                        end
-                    end
-                end
-                % Check if there were image adjustments
-                
-                if isfield(save_data, 'original_image')
-                    app.gel_data.original_image = save_data.original_image;
-                end
-                
-                if isfield(save_data, 'adjusted_image')
-                    app.gel_data.adjusted_image = save_data.adjusted_image;
-                end
-                
-                if isfield(save_data, 'image_adjustments')
-                    app.gel_data.image_adjustments = save_data.image_adjustments;
-                end
-                
-                n=size(save_data.box_position,1);
-                names = {'band_no','peak_location','amplitude','width_parameter','skew_parameter'};
-                for j = 1:n
-                    for i = 1:numel(names)
-                        for k = 1:band_no
-                            if isfield(save_data,'par_fit')
-                                app.gel_data.par_est(j).(names{i})(k) = save_data.par_fit(j).(names{i})(k);
-                                app.loaded_analysis = 1;
-                            else
-                                app.gel_data.par_est(j).(names{i})(k) = 0;
-                                app.gel_data.par_est(j).(names{i})(k) = [];
-                                app.par_fit_na = 1;
-                            end
-                            
-                            if isfield(save_data,'par_est') && ~isfield(save_data,'par_fit')
-                                app.gel_data.par_est(j).(names{i})(k) = save_data.par_est(j).(names{i})(k);
-                                app.loaded_analysis = 1;
-                            end
-
-                            if isfield(save_data,'par_con')
-                                app.gel_data.par_con(j).(names{i})(k) = save_data.par_con(j).(names{i})(k);
-                                app.loaded_analysis = 1;
-                            else
-                                app.gel_data.par_con(j).(names{i})(k) = false;
-                            end
-                        end
-                    end
+                n=size(save_data.boxes.box_position,1);
+                                
+                if ~isfield(app.gel_data.settings,'filtering')
+                    app.gel_data.settings.filtering.median.size = 3*ones(1,n);
                 end
                 control_strings = [];
-                app.gel_data.par_update = zeros(1,n);
-                
-                if isfield(save_data,'par_est') && app.gel_data.par_est(1).band_no(end) ~= 1
-                    val = band_no;
-                    switch val
-                        case 1
-                            try
-                                app.BandRelativeAreaLabel_1.Value = 0;
-                                app.BandRelativeAreaLabel_1.Enable = 0;
-                                app.BandArea_2.Value = 0;
-                                app.BandArea_2.Enable = 0;
-                                app.BandRelativeArea_2.Value = 0;
-                                app.BandRelativeArea_2.Enable = 0;
-                                app.BandAreaLabel_2.Enable = 0;
-                                app.BandRelativeAreaLabel_2.Enable = 0;
-                                app.BandArea_3.Value = 0;
-                                app.BandArea_3.Enable = 0;
-                                app.BandRelativeArea_3.Value = 0;
-                                app.BandRelativeArea_3.Enable = 0;
-                                app.BandAreaLabel_3.Enable = 0;
-                                app.BandRelativeAreaLabel_3.Enable = 0;
-                            end
-                        case 2
-                            app.BandRelativeArea_1.Enable = 1;
-                            app.BandRelativeAreaLabel_1.Enable = 1;
-                            app.BandArea_2.Enable = 1;
-                            app.BandRelativeArea_2.Enable = 1;
-                            app.BandAreaLabel_2.Enable = 1;
-                            app.BandRelativeAreaLabel_2.Enable = 1;
-                            try
-                                app.BandArea_3.Value = 0;
-                                app.BandArea_3.Enable = 0;
-                                app.BandRelativeArea_3.Enable = 0;
-                                app.BandRelativeArea_3.Value = 0;
-                                app.BandAreaLabel_3.Enable = 0;
-                                app.BandRelativeAreaLabel_3.Enable = 0;
-                            end
-
-                        case 3
-                            app.BandRelativeArea_1.Enable = 1;
-                            app.BandRelativeAreaLabel_1.Enable = 1;
-                            app.BandArea_2.Enable = 1;
-                            app.BandRelativeArea_2.Enable = 1;
-                            app.BandAreaLabel_2.Enable = 1;
-                            app.BandRelativeAreaLabel_2.Enable = 1;
-                            app.BandArea_3.Enable = 1;
-                            app.BandRelativeArea_3.Enable = 1;
-                            app.BandAreaLabel_3.Enable = 1;
-                            app.BandRelativeAreaLabel_3.Enable = 1;
-                    end
-                end
+                app.gel_data.fitting.par_update = zeros(1,n);
 
                 for i=1:n
-                    app.gel_data.box_handle(i) = images.roi.Rectangle(app.gel_image_axis, ...
-                        'Position',save_data.box_position(i,:));
+                    app.gel_data.boxes.box_handle(i) = images.roi.Rectangle(app.gel_image_axis, ...
+                        'Position',save_data.boxes.box_position(i,:));
                     control_strings{i} = sprintf('%.0f',i);
+                    app.filtered_inset(i) = 0;
+                    app.background_token(i) = 0;
+                    if isfield(save_data.fitting,'fitting_mode')
+                        app.d.box(i).fitting_mode = save_data.fitting.fitting_mode(i);
+                    else
+                        app.d.box(i).fitting_mode = band_no;
+                    end
                 end
 
                 app.BoxSelectionDropDown.Items = control_strings;
                 app.BoxSelectionDropDown.Value = control_strings{1};
 
                 for i=1:n
-                    app.gel_data.box_handle(i).FaceAlpha = 0;
+                    app.gel_data.boxes.box_handle(i).FaceAlpha = 0;
                     if (i~=1)
-                        app.gel_data.box_handle(i).Color = [1 0 0];
-                        app.gel_data.box_handle(i).InteractionsAllowed = 'none';
+                        app.gel_data.boxes.box_handle(i).Color = [1 0 0];
+                        app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'none';
                     else
-                        app.gel_data.box_handle(i).Color = [0 1 0];
-                        app.gel_data.box_handle(i).InteractionsAllowed = 'all';
+                        app.gel_data.boxes.box_handle(i).Color = [0 1 0];
+                        app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'all';
 
                     end
 
-                    p = app.gel_data.box_handle(i).Position;
-                    app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
+                    p = app.gel_data.boxes.box_handle(i).Position;
+                    app.gel_data.boxes.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
                         'Parent',app.gel_image_axis,'FontWeight',"bold","FontSize",18);
 
                     app.gel_data.old_width = p(3);
                     app.gel_data.old_height = p(4);
 
                     i=i;
-                    addlistener(app.gel_data.box_handle(i),"MovingROI",@(src,evt) new_box_position2(evt));
+                    addlistener(app.gel_data.boxes.box_handle(i),"MovingROI",@(src,evt) new_box_position2(evt));
                 end
-
-                % Need this to make labels
+                app.BackgroundSubtractionDropDown.Value = save_data.settings.background.method(1);
+                app.RollingBallSizeSpinner.Value = save_data.settings.background.size(1);
+                app.NumberofBandsSpinner.Value = save_data.fitting.fitting_mode(1);
+                if app.gel_data.settings.filtering.median.size(1)
+                    app.ApplyFilterCheckBox.Value = 1;
+                    app.MedianFilterSizeSpinner.Enable = ' on';
+                    app.MedianFilterSizeSpinnerLabel.Enable = 'on';
+                    app.MedianFilterSizeSpinner.Value = app.gel_data.settings.filtering.median.size(1);
+                else
+                    app.ApplyFilterCheckBox.Value = 0;
+                    app.MedianFilterSizeSpinner.Enable = ' off';
+                    app.MedianFilterSizeSpinnerLabel.Enable = 'off';    
+                end
+                app.gel_data.settings = save_data.settings;
                 drawnow;
+                UpdateDisplay(app)
+                app.par_est_na = 0;
             end
 
-            UpdateDisplay(app)
-%             app.loaded_analysis = 0;
-            app.par_est_na = 0;
+
 
             % Nested function
             function new_box_position2(evt);
-                if (isfield(app.gel_data,'box_position'))
-                    box_position = app.gel_data.box_position;
+                if (isfield(app.gel_data.boxes,'box_position'))
+                    box_position = app.gel_data.boxes.box_position;
                     [r,c]=size(box_position);
                     if (r>=n)&(~isequal(box_position(n,:),evt.CurrentPosition))
                         app.new_box = n;
                         old_size = box_position(n,3:4);
                         current_size = evt.CurrentPosition(3:4);
                         if isequal(old_size,current_size)
-                            app.single_box_callback = 1;                            
+                            app.single_box_callback = 1;
+                            app.background_token(n) = 0;
+                            app.filtered_inset(n) = 0;
+                        else
+                            app.background_token(1:numel(app.gel_data.boxes.box_handle)) = 0;
+                            app.filtered_inset(1:numel(app.gel_data.boxes.box_handle)) = 0;
                         end
                         app.moving_box = 1;
-                        UpdateDisplay(app)
-                        app.moving_box = 0;
+                        UpdateDisplay(app);
                         app.single_box_callback = 0;
+                        app.moving_box = 0;
+
                     end
                 else
                     app.new_box = n;
                     app.single_box_callback = 1;
                     app.moving_box = 1;
-                    UpdateDisplay(app)
+                    app.background_token(n) = 0;
+                    app.filtered_inset(n) = 0;
+                    UpdateDisplay(app);
                     app.single_box_callback = 0;
                     app.moving_box = 0;
+
                 end
             end
         end
 
         % Button pushed function: NewBoxButton
         function NewBoxButtonPushed(app, event)
-            if (~isfield(app.gel_data,'box_handle'))
+            if (~isfield(app.gel_data.boxes,'box_handle'))
                 app.DeleteBoxButton.Enable = 1;
                 n=1;
-                app.gel_data.box_handle(n) = drawrectangle(app.gel_image_axis);
-                p = app.gel_data.box_handle(n).Position;
+                app.gel_data.boxes.box_handle(n) = drawrectangle(app.gel_image_axis);
+                p = app.gel_data.boxes.box_handle(n).Position;
                 app.gel_data.old_width = p(3);
                 app.gel_data.old_height = p(4);
             else
-                n = 1 + numel(app.gel_data.box_handle);
-                p = app.gel_data.box_handle(n-1).Position;
+                n = 1 + numel(app.gel_data.boxes.box_handle);
+                p = app.gel_data.boxes.box_handle(n-1).Position;
 
-                app.gel_data.box_handle(n) = images.roi.Rectangle(app.gel_image_axis, ...
+                app.gel_data.boxes.box_handle(n) = images.roi.Rectangle(app.gel_image_axis, ...
                     'Position',p + [150,0,0,0]);
                 for i=1:(n-1)
-                    app.gel_data.box_handle(i).InteractionsAllowed = 'none';
+                    app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'none';
                 end
-                
+
             end
 
-            addlistener(app.gel_data.box_handle(n),"MovingROI", ...
+            addlistener(app.gel_data.boxes.box_handle(n),"MovingROI", ...
                 @(src,evt) new_box_position(evt));
 
             % Set color to last box
-            app.gel_data.box_handle(n).Color = [0 1 0];
-            app.gel_data.box_handle(n).FaceAlpha = 0;
+            app.gel_data.boxes.box_handle(n).Color = [0 1 0];
+            app.gel_data.boxes.box_handle(n).FaceAlpha = 0;
             for i=1:(n-1)
-                app.gel_data.box_handle(i).Color = [1 0 0];
+                app.gel_data.boxes.box_handle(i).Color = [1 0 0];
             end
 
             % Add in a label
-            p = app.gel_data.box_handle(n).Position;
-            app.gel_data.box_label(n) = text(app.gel_image_axis, ...
+            p = app.gel_data.boxes.box_handle(n).Position;
+            app.gel_data.boxes.box_label(n) = text(app.gel_image_axis, ...
                 p(1)+p(3),p(2)-50,sprintf('%.0f',n),'FontWeight',"bold","FontSize",18);
 
             % Update zoom control
@@ -1682,20 +918,31 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.SelectedBoxInformationMenu.Enable = 1;
             app.new_box = n;
             app.single_box_callback = 1;
-            app.d.box(n).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
+            app.d.box(n).fitting_mode = app.NumberofBandsSpinner.Value;
+            app.filtered_inset(n) = 0;
+            app.background_token(n) = 0;
+            app.ApplyFilterCheckBox.Value = 0;
+            app.MedianFilterSizeSpinner.Value = 3;
+            app.MedianFilterSizeSpinner.Enable = 'off';
+            app.MedianFilterSizeSpinnerLabel.Enable = 'off';
             UpdateDisplay(app)
             app.single_box_callback = 0;
 
             function new_box_position(evt);
-                if (isfield(app.gel_data,'box_position'))
-                    box_position = app.gel_data.box_position;
+                if (isfield(app.gel_data.boxes,'box_position'))
+                    box_position = app.gel_data.boxes.box_position;
                     [r,c]=size(box_position);
                     if (r>=n)&(~isequal(box_position(n,:),evt.CurrentPosition))
                         app.new_box = n;
                         old_size = box_position(n,3:4);
                         current_size = evt.CurrentPosition(3:4);
                         if isequal(old_size,current_size)
-                            app.single_box_callback = 1;                            
+                            app.single_box_callback = 1;
+                            app.background_token(n) = 0;
+                            app.filtered_inset(n) = 0;
+                        else
+                            app.background_token(1:numel(app.gel_data.boxes.box_handle)) = 0;
+                            app.filtered_inset(1:numel(app.gel_data.boxes.box_handle)) = 0;
                         end
                         app.moving_box = 1;
                         UpdateDisplay(app);
@@ -1707,6 +954,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.new_box = n;
                     app.single_box_callback = 1;
                     app.moving_box = 1;
+                    app.background_token(n) = 0;
+                    app.filtered_inset(n) = 0;
                     UpdateDisplay(app);
                     app.single_box_callback = 0;
                     app.moving_box = 0;
@@ -1716,62 +965,20 @@ classdef GelBox_exported < matlab.apps.AppBase
 
         end
 
-        % Value changed function: NumberofBandsDropDown
-        function NumberofBandsDropDownValueChanged(app, event)
-            value = app.NumberofBandsDropDown.Value;
+        % Value changed function: NumberofBandsSpinner
+        function NumberofBandsSpinnerValueChanged(app, event)
+            value = app.NumberofBandsSpinner.Value;
             app.mode_updated = 1;
-            for u = 1:numel(app.gel_data.par_update)
-            app.gel_data.par_update(u) = 0;
+            for u = 1:numel(app.gel_data.fitting.par_update)
+                app.gel_data.fitting.par_update(u) = 0;
             end
 
-            switch value
-                case '1'
-                    try
-                        app.BandRelativeAreaLabel_1.Enable = 0;
-                        app.BandArea_2.Value = 0;
-                        app.BandArea_2.Enable = 0;
-                        app.BandRelativeArea_2.Value = 0;
-                        app.BandRelativeArea_2.Enable = 0;
-                        app.BandAreaLabel_2.Enable = 0;
-                        app.BandRelativeAreaLabel_2.Enable = 0;
-                        app.BandArea_3.Value = 0;
-                        app.BandArea_3.Enable = 0;
-                        app.BandRelativeArea_3.Value = 0;
-                        app.BandRelativeArea_3.Enable = 0;
-                        app.BandAreaLabel_3.Enable = 0;
-                        app.BandRelativeAreaLabel_3.Enable = 0;
-                    end
-                case '2'
-                    app.BandRelativeArea_1.Enable = 1;
-                    app.BandRelativeAreaLabel_1.Enable = 1;
-                    app.BandArea_2.Enable = 1;
-                    app.BandRelativeArea_2.Enable = 1;
-                    app.BandAreaLabel_2.Enable = 1;
-                    app.BandRelativeAreaLabel_2.Enable = 1;
-                    try
-                        app.BandArea_3.Value = 0;
-                        app.BandArea_3.Enable = 0;
-                        app.BandRelativeArea_3.Enable = 0;
-                        app.BandRelativeArea_3.Value = 0;
-                        app.BandAreaLabel_3.Enable = 0;
-                        app.BandRelativeAreaLabel_3.Enable = 0;
-                    end
-
-                case '3'
-                    app.BandRelativeArea_1.Enable = 1;
-                    app.BandRelativeAreaLabel_1.Enable = 1;
-                    app.BandArea_2.Enable = 1;
-                    app.BandRelativeArea_2.Enable = 1;
-                    app.BandAreaLabel_2.Enable = 1;
-                    app.BandRelativeAreaLabel_2.Enable = 1;
-                    app.BandArea_3.Enable = 1;
-                    app.BandRelativeArea_3.Enable = 1;
-                    app.BandAreaLabel_3.Enable = 1;
-                    app.BandRelativeAreaLabel_3.Enable = 1;
-            end
             selected_box = str2num(app.BoxSelectionDropDown.Value);
-            app.d.box(selected_box).fitting_mode = str2num(app.NumberofBandsDropDown.Value);
+            app.d.box(selected_box).fitting_mode = app.NumberofBandsSpinner.Value;
             app.single_box_callback = 1;
+            if app.loaded_analysis
+                app.loaded_analysis = 0;
+            end
             UpdateDisplay(app)
             app.single_box_callback = 0;
             app.mode_updated = 0;
@@ -1780,43 +987,32 @@ classdef GelBox_exported < matlab.apps.AppBase
 
         % Menu selected function: SaveAnalysisMenu
         function SaveAnalysisButtonPushed(app, event)
-            save_data.image_file_string = app.gel_data.image_file_string;
+            save_data.image.image_file_string = app.gel_data.image.image_file_string;
             try
-                save_data.box_position = app.gel_data.box_position;
+                save_data.boxes.box_position = app.gel_data.boxes.box_position;
             catch
                 warndlg('The analysis boxes are not available.')
                 return
             end
-            save_data.im_data = app.gel_data.im_data;
-            save_data.imfinfo = app.gel_data.imfinfo;
-            save_data.original_image = app.gel_data.original_image;
-            if isfield(app.gel_data,'adjusted_image')
-                save_data.adjusted_image = app.gel_data.adjusted_image;
-            else
-                save_data.adjusted_image = [];
+            save_fields = {'image','fitting','settings'};
+            
+            for i = 1 : numel(save_fields)
+            save_data.(save_fields{i}) = app.gel_data.(save_fields{i});
             end
 
-            if isfield(app.gel_data,'image_adjustments')
-                save_data.image_adjustments = app.gel_data.image_adjustments;
-            else
-                save_data.image_adjustments = [];
+            number_of_boxes = size(save_data.boxes.box_position,1);
+
+            for i = 1:number_of_boxes
+                save_data.fitting.fitting_mode(i) = app.d.box(i).fitting_mode;
             end
             
-            number_of_boxes = size(save_data.box_position,1);
-            names = {'band_no','peak_location','amplitude','width_parameter','skew_parameter'};
-            for j = 1:number_of_boxes
-                for i = 1:numel(names)
-                    save_data.par_est(j).(names{i}) = app.gel_data.par_est(j).(names{i});
-                    save_data.par_fit(j).(names{i}) = app.gel_data.par_fit(j).(names{i});
-                    save_data.par_con(j).(names{i}) = app.gel_data.par_con(j).(names{i});
-                end
-            end
-
             [file_string,path_string] = uiputfile2( ...
-                {'*.gdf','Gel data file'},'Select file to save analysis');
+                {'*.gbx','GelBox file';'*.gdf','Gel data file'},'Select File Name To Save Analysis');
 
             if (path_string~=0)
                 save(fullfile(path_string,file_string),'save_data');
+                json_file_name = strrep(fullfile(path_string,file_string),'.gbx','.json');
+                savejson('GelBox Settings',app.gel_data.settings,json_file_name);
             end
         end
 
@@ -1828,61 +1024,47 @@ classdef GelBox_exported < matlab.apps.AppBase
             n = numel(control_strings);
             for i=1:n
                 if (i~=selected_box)
-                    app.gel_data.box_handle(i).Color = [1 0 0];
-                    app.gel_data.box_handle(i).InteractionsAllowed = 'none';
+                    app.gel_data.boxes.box_handle(i).Color = [1 0 0];
+                    app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'none';
                 else
-                    app.gel_data.box_handle(i).Color = [0 1 0];
-                    app.gel_data.box_handle(i).InteractionsAllowed = 'all';
+                    app.gel_data.boxes.box_handle(i).Color = [0 1 0];
+                    app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'all';
                 end
             end
-            
-            value = app.d.box(selected_box).fitting_mode;
-            app.NumberofBandsDropDown.Value = num2str(value);
-            switch value
-                case 1
-                    try
-                        app.BandRelativeArea_1.Value = 0;
-                        app.BandRelativeAreaLabel_1.Enable = 0;
-                        app.BandArea_2.Value = 0;
-                        app.BandArea_2.Enable = 0;
-                        app.BandRelativeArea_2.Value = 0;
-                        app.BandRelativeArea_2.Enable = 0;
-                        app.BandAreaLabel_2.Enable = 0;
-                        app.BandRelativeAreaLabel_2.Enable = 0;
-                        app.BandArea_3.Value = 0;
-                        app.BandArea_3.Enable = 0;
-                        app.BandRelativeArea_3.Value = 0;
-                        app.BandRelativeArea_3.Enable = 0;
-                        app.BandAreaLabel_3.Enable = 0;
-                        app.BandRelativeAreaLabel_3.Enable = 0;
-                    end
-                case 2
-                    app.BandRelativeArea_1.Enable = 1;
-                    app.BandRelativeAreaLabel_1.Enable = 1;
-                    app.BandArea_2.Enable = 1;
-                    app.BandRelativeArea_2.Enable = 1;
-                    app.BandAreaLabel_2.Enable = 1;
-                    app.BandRelativeAreaLabel_2.Enable = 1;
-                    try
-                        app.BandArea_3.Value = 0;
-                        app.BandArea_3.Enable = 0;
-                        app.BandRelativeArea_3.Enable = 0;
-                        app.BandRelativeArea_3.Value = 0;
-                        app.BandAreaLabel_3.Enable = 0;
-                        app.BandRelativeAreaLabel_3.Enable = 0;
-                    end
 
-                case 3
-                    app.BandRelativeArea_1.Enable = 1;
-                    app.BandRelativeAreaLabel_1.Enable = 1;
-                    app.BandArea_2.Enable = 1;
-                    app.BandRelativeArea_2.Enable = 1;
-                    app.BandAreaLabel_2.Enable = 1;
-                    app.BandRelativeAreaLabel_2.Enable = 1;
-                    app.BandArea_3.Enable = 1;
-                    app.BandRelativeArea_3.Enable = 1;
-                    app.BandAreaLabel_3.Enable = 1;
-                    app.BandRelativeAreaLabel_3.Enable = 1;
+            value = app.d.box(selected_box).fitting_mode;
+            app.NumberofBandsSpinner.Value = value;
+            if app.gel_data.settings.filtering.median.size(selected_box)
+                app.ApplyFilterCheckBox.Value = 1;
+                app.MedianFilterSizeSpinner.Enable = 'on';
+                app.MedianFilterSizeSpinnerLabel.Enable = 'on';
+                app.MedianFilterSizeSpinner.Value = app.gel_data.settings.filtering.median.size(selected_box);
+            else
+                app.ApplyFilterCheckBox.Value = 0;
+                app.MedianFilterSizeSpinner.Enable = 'off';
+                app.MedianFilterSizeSpinnerLabel.Enable = 'off';
+            end
+            app.BackgroundSubtractionDropDown.Value = app.gel_data.settings.background.method(selected_box);
+            background_method = app.BackgroundSubtractionDropDown.Value;
+            
+            switch background_method
+                case 'Rolling Ball'
+                    app.RollingBallSizeSpinner.Visible = 1;
+                    app.RollingBallSizeSpinnerLabel.Visible = 1;
+                    app.DensityValueEditField.Visible = 0;
+                    app.DensityValueEditFieldLabel.Visible = 0;
+                    app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.size(selected_box);
+                case 'Linear'
+                    app.RollingBallSizeSpinner.Visible = 0;
+                    app.RollingBallSizeSpinnerLabel.Visible = 0;
+                    app.DensityValueEditField.Visible = 0;
+                    app.DensityValueEditFieldLabel.Visible = 0;
+                case 'Constant Value'
+                    app.DensityValueEditField.Visible = 1;
+                    app.DensityValueEditFieldLabel.Visible = 1;
+                    app.RollingBallSizeSpinner.Visible = 0;
+                    app.RollingBallSizeSpinnerLabel.Visible = 0;
+                    app.DensityValueEditField.Value = app.gel_data.settings.background.size(selected_box);
             end
             app.single_box_callback = 1;
             UpdateDisplay(app)
@@ -1893,18 +1075,25 @@ classdef GelBox_exported < matlab.apps.AppBase
         function DeleteBoxButtonPushed(app, event)
             selected_box = str2num(app.BoxSelectionDropDown.Value);
             control_strings = app.BoxSelectionDropDown.Items;
+            if numel(app.gel_data.boxes) == 1
+                delete(app.gel_data.boxes.box_handle(selected_box))
+                rm = {'box_handle','box_label','box_position'};
+                app.gel_data.boxes = rmfield(app.gel_data,'box_handle');
+                app.BoxSelectionDropDown.Items = {};
+                app.BoxSelectionDropDown.Value = {};
+                app.BoxSelectionDropDown.Placeholder = 'No Data';
+            else
+            delete(app.gel_data.boxes.box_handle(selected_box))
+            delete(app.gel_data.boxes.box_label(selected_box))
+            field_names = fieldnames(app.gel_data.fitting.par_est);
 
-            delete(app.gel_data.box_handle(selected_box))
-            delete(app.gel_data.box_label(selected_box))
-            field_names = fieldnames(app.gel_data.par_est);
-            
             for u = 1 : numel(field_names)
-                app.gel_data.par_est(selected_box).(field_names{u}) = [];
+                app.gel_data.fitting.par_est(selected_box).(field_names{u}) = [];
             end
-            
-            app.gel_data.box_handle(selected_box) = [];
-            app.gel_data.box_label(selected_box) = [];
-            app.gel_data.box_position(selected_box) = [];
+
+            app.gel_data.boxes.box_handle(selected_box) = [];
+            app.gel_data.boxes.box_label(selected_box) = [];
+            app.gel_data.boxes.box_position(selected_box) = [];
 
             n = numel(control_strings) - 1;
             control_strings = {};
@@ -1922,59 +1111,53 @@ classdef GelBox_exported < matlab.apps.AppBase
             new_selected_box = str2num(app.BoxSelectionDropDown.Value);
 
             for i=1:n
-                delete(app.gel_data.box_label(i));
+                delete(app.gel_data.boxes.box_label(i));
                 if (i~=new_selected_box)
-                    app.gel_data.box_handle(i).Color = [1 0 0];
-                    app.gel_data.box_handle(i).InteractionsAllowed = 'none';
+                    app.gel_data.boxes.box_handle(i).Color = [1 0 0];
+                    app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'none';
                 else
-                    app.gel_data.box_handle(i).Color = [0 1 0];
-                    app.gel_data.box_handle(i).InteractionsAllowed = 'all';
+                    app.gel_data.boxes.box_handle(i).Color = [0 1 0];
+                    app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'all';
                 end
             end
 
-            app.gel_data.box_label = [];
+            app.gel_data.boxes.box_label = [];
             for i = 1:n
-                p = app.gel_data.box_handle(i).Position;
-                app.gel_data.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
+                p = app.gel_data.boxes.box_handle(i).Position;
+                app.gel_data.boxes.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
                     'Parent',app.gel_image_axis,'FontWeight',"bold",'FontSize',18);
 
                 app.gel_data.old_width = p(3);
                 app.gel_data.old_height = p(4);
             end
-            
+
             app.single_box_callback = 1;
             UpdateDisplay(app)
             app.single_box_callback = 0;
-            
+            end
         end
 
         % Menu selected function: ExportResultsMenu
         function OutputButtonPushed(app, event)
             o = [];
-            o.image_file{1} = app.gel_data.image_file_string;
-            n = numel(app.gel_data.box_handle);
-            for i = 2 : n
-            o.image_file{i,1} = '';
+            n = numel(app.gel_data.boxes.box_handle);
+            for i = 1 : n
+                fit_mode(i) = app.gel_data.box_data(i).fitting_mode;
             end
+            max_num_bands = max(fit_mode);
             for i=1:n
                 o.box(i) = i;
+                o.image_file{i} = app.gel_data.image.image_file_string;
                 o.total_area(i) = app.gel_data.box_data(i).total_area;
+                o.background_method{i} = app.gel_data.settings.background.method{i};
+                if strcmp(o.background_method{i},'Rolling Ball')
+                    o.background_size(i) = app.gel_data.settings.background.size(i);
+                elseif strcmp(o.background_method{i}, 'Constant Value')
+                    o.background_size(i) = app.gel_data.settings.background.size(i);
+                end
+                o.median_filter_size(i) = app.gel_data.settings.filtering.median.size(i);
                 o.background_area(i) = app.gel_data.box_data(i).background_area;
                 num_of_bands = numel(app.gel_data.box_data(i).band_area);
-                switch num_of_bands
-                    case 1
-                        o.band_area_bottom(i) = app.gel_data.summary(i).bottom;
-                        o.band_area_middle(i) = NaN;
-                        o.band_area_top(i) = NaN;
-                    case 2
-                        o.band_area_bottom(i) = app.gel_data.summary(i).bottom;
-                        o.band_area_middle(i) = NaN;
-                        o.band_area_top(i) = app.gel_data.summary(i).top;
-                    case 3
-                        o.band_area_bottom(i) = app.gel_data.summary(i).bottom;
-                        o.band_area_middle(i) = app.gel_data.summary(i).middle;
-                        o.band_area_top(i) = app.gel_data.summary(i).top;
-                end
 
                 o.band_left(i) = app.gel_data.box_data(i).position(1);
                 o.band_top(i) = app.gel_data.box_data(i).position(2);
@@ -1983,13 +1166,60 @@ classdef GelBox_exported < matlab.apps.AppBase
                 o.fitting_mode{i} = app.gel_data.box_data(i).fitting_mode;
                 o.num_of_bands(i) = num_of_bands;
                 o.r_squared(i) = app.gel_data.summary(i).r_squared;
+
+                for c = 1 : num_of_bands
+
+                    name = sprintf('band_area_%i',c);
+                    o.(name)(i) = app.gel_data.summary(i).area(c);
+                    
+                    
+%                     l = length(o.(name)(c));
+                end
+                
+                if num_of_bands < max_num_bands
+                    for count = num_of_bands + 1 : max_num_bands
+                        name = sprintf('band_area_%i',count);
+                        o.(name)(i) = 0;
+                    end
+                end
+                
+                
             end
 
             [file_string,path_string] = uiputfile2( ...
-                {'*.xlsx','Excel file'},'Select file for results');
-            
+                {'*.xlsx','Excel file'},'Enter Excel File Name For Analysis Results');
+            layout_table = [];
+            if (path_string~=0)
             d_out = o;
             names = fieldnames(d_out);
+            [file_string_layout,path_string_layout] = uigetfile2( ...
+                {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
+            
+            if (path_string_layout~=0)
+                
+                layout_file = fullfile(path_string_layout,file_string_layout);
+                layout_table = readtable(layout_file);
+                layout_names = layout_table.Properties.VariableNames;
+                
+                while ~any(strcmpi(names,'box'))
+                    message = ["Gel layout does not have ""Box"" as one of the columns.","Please make sure to add ""Box"" to Excel file."];
+                    selection = uiconfirm(app.GelBoxUIFigure,message,"Reload Gel Layout",...
+                        "Options",["Reload Gel Layout","Skip"],"DefaultOption",1,"CancelOption",2,'Icon','error');
+                    
+                    if ~strcmp(selection,'Skip')
+                        [file_string_layout,path_string_layout] = uigetfile2( ...
+                            {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
+                        
+                        layout_file = fullfile(path_string_layout,file_string_layout);
+                        layout_table = readtable(layout_file);
+                    else
+                        
+                        layout_table = [];
+                        return
+                    end
+                    
+                end
+            end
             
             for j = 1 : length(d_out)
                 for i = 1 : numel(names)
@@ -2000,48 +1230,47 @@ classdef GelBox_exported < matlab.apps.AppBase
                         d_out(j).(names{i}) = (d_out(j).(names{i}))';
                     end
                 end
-                
+
             end
-            
+
             output_file = fullfile(path_string,file_string);
-            
+
             try
                 delete(output_file);
             end
             
-            writetable(struct2table(d_out),output_file,'Sheet','Summary')
-             
+            if ~isempty(layout_table)
+                for i = 1 : numel(layout_names)
+                    if strcmpi(layout_names{i},'box')
+                        layout_table = renamevars(layout_table,layout_names{i},'box');
+                    end
+                end
+                T = innerjoin(layout_table,struct2table(d_out));
+                writetable(T,output_file,'Sheet','Summary')
+            else
+                writetable(struct2table(d_out),output_file,'Sheet','Summary')
+            end
+
             summary = app.gel_data.summary;
 
             for i = 1:n
                 i_name = sprintf('box_%i',i);
             end
+            remf = {'area','r_squared','inset','summary_inset','box_position'};
+            summary = rmfield(summary,remf);
 
-            switch num_of_bands
-                case 1
-                    summary = rmfield(summary,'bottom');
-                    try
-                    summary = rmfield(summary,'middle');
-                    summary = rmfield(summary,'top');
+            for box = 1 : size(summary,2)
+                for i = 1 : max(o.num_of_bands)
+                    name = sprintf('band_%i',i);
+                    if size(summary(box).band,2) < i
+                        summary(box).(name) = NaN * ones(1,size(summary(box).band(:,1),1));
+                    else
+                        summary(box).(name) = summary(box).band(:,i);
                     end
-                case 2
-                    summary = rmfield(summary,'bottom');
-                    summary = rmfield(summary,'top');
-                    try
-                    summary = rmfield(summary,'middle');
-                    end
-
-                case 3
-                    summary = rmfield(summary,'bottom');
-                    summary = rmfield(summary,'middle');
-                    summary = rmfield(summary,'top');
-
+                end
             end
-            summary = rmfield(summary,'r_squared');
-            summary = rmfield(summary,'inset');
-            summary = rmfield(summary,'summary_inset');
-            summary = rmfield(summary,'box_position');
 
+            summary = rmfield(summary,'band');
             names = fieldnames(summary);
             for j = 1 : length(summary)
                 for i = 1 : numel(names)
@@ -2055,7 +1284,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 sheet = sprintf('box_%i',j);
                 writetable(struct2table(summary(j)),output_file,'Sheet',sheet)
             end
-
+            end
 
         end
 
@@ -2093,15 +1322,86 @@ classdef GelBox_exported < matlab.apps.AppBase
         function DrawFittingCheckBoxValueChanged(app, event)
             value = app.DrawFittingCheckBox.Value;
             if value
-            app.single_box_callback = 1;
-            UpdateDisplay(app)
-            app.single_box_callback = 0;
+                app.single_box_callback = 1;
+                UpdateDisplay(app)
+                app.single_box_callback = 0;
             end
         end
 
         % Button pushed function: AdjustImageButton
         function AdjustImageButtonPushed(app, event)
             app.AdjustImage = AdjustImageWindow(app);
+        end
+
+        % Value changed function: RollingBallSizeSpinner
+        function RollingBallSizeSpinnerValueChanged(app, event)
+            value = app.RollingBallSizeSpinner.Value;
+            box = str2num(app.BoxSelectionDropDown.Value);
+            app.background_token(box) = 0;
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+        end
+
+        % Value changed function: BackgroundSubtractionDropDown
+        function BackgroundSubtractionDropDownValueChanged(app, event)
+            value = app.BackgroundSubtractionDropDown.Value;
+            switch value
+                case 'Rolling Ball'
+                    app.RollingBallSizeSpinner.Visible = 1;
+                    app.RollingBallSizeSpinnerLabel.Visible = 1;
+                    app.DensityValueEditField.Visible = 0;
+                    app.DensityValueEditFieldLabel.Visible = 0;
+                case 'Linear'
+                    app.RollingBallSizeSpinner.Visible = 0;
+                    app.RollingBallSizeSpinnerLabel.Visible = 0;
+                    app.DensityValueEditField.Visible = 0;
+                    app.DensityValueEditFieldLabel.Visible = 0;
+                case 'Constant Value'
+                    app.DensityValueEditField.Visible = 1;
+                    app.DensityValueEditFieldLabel.Visible = 1;
+                    app.RollingBallSizeSpinner.Visible = 0;
+                    app.RollingBallSizeSpinnerLabel.Visible = 0;
+            end
+            box = str2num(app.BoxSelectionDropDown.Value);
+            app.background_token(box) = 0;
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+        end
+
+        % Value changed function: DensityValueEditField
+        function DensityValueEditFieldValueChanged(app, event)
+            value = app.DensityValueEditField.Value;
+            app.background_token = 0;
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+        end
+
+        % Value changed function: MedianFilterSizeSpinner
+        function MedianFilterSizeSpinnerValueChanged(app, event)
+            value = app.MedianFilterSizeSpinner.Value;
+            box = str2num(app.BoxSelectionDropDown.Value);
+            app.filtered_inset(box) = 0;
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+        end
+
+        % Value changed function: ApplyFilterCheckBox
+        function ApplyFilterCheckBoxValueChanged(app, event)
+            value = app.ApplyFilterCheckBox.Value;
+            if value
+                app.MedianFilterSizeSpinner.Enable = 'on';
+                app.MedianFilterSizeSpinnerLabel.Enable = 'on';
+            else
+                app.MedianFilterSizeSpinner.Enable = 'off';
+                app.MedianFilterSizeSpinnerLabel.Enable = 'off';
+            end
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
         end
     end
 
@@ -2114,7 +1414,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             % Create GelBoxUIFigure and hide until all components are created
             app.GelBoxUIFigure = uifigure('Visible', 'off');
             app.GelBoxUIFigure.Colormap = [0.2431 0.149 0.6588;0.2431 0.1529 0.6745;0.2471 0.1569 0.6863;0.2471 0.1608 0.698;0.251 0.1647 0.7059;0.251 0.1686 0.7176;0.2549 0.1725 0.7294;0.2549 0.1765 0.7412;0.2588 0.1804 0.749;0.2588 0.1804 0.7608;0.2627 0.1882 0.7725;0.2588 0.1882 0.7804;0.2627 0.1961 0.7922;0.2667 0.2 0.8039;0.2667 0.2039 0.8157;0.2706 0.2078 0.8235;0.2706 0.2157 0.8353;0.2706 0.2196 0.8431;0.2745 0.2235 0.851;0.2745 0.2275 0.8627;0.2745 0.2314 0.8706;0.2745 0.2392 0.8784;0.2784 0.2431 0.8824;0.2784 0.2471 0.8902;0.2784 0.2549 0.898;0.2784 0.2588 0.902;0.2784 0.2667 0.9098;0.2784 0.2706 0.9137;0.2784 0.2745 0.9216;0.2824 0.2824 0.9255;0.2824 0.2863 0.9294;0.2824 0.2941 0.9333;0.2824 0.298 0.9412;0.2824 0.3059 0.9451;0.2824 0.3098 0.949;0.2824 0.3137 0.9529;0.2824 0.3216 0.9569;0.2824 0.3255 0.9608;0.2824 0.3294 0.9647;0.2784 0.3373 0.9686;0.2784 0.3412 0.9686;0.2784 0.349 0.9725;0.2784 0.3529 0.9765;0.2784 0.3569 0.9804;0.2784 0.3647 0.9804;0.2745 0.3686 0.9843;0.2745 0.3765 0.9843;0.2745 0.3804 0.9882;0.2706 0.3843 0.9882;0.2706 0.3922 0.9922;0.2667 0.3961 0.9922;0.2627 0.4039 0.9922;0.2627 0.4078 0.9961;0.2588 0.4157 0.9961;0.2549 0.4196 0.9961;0.251 0.4275 0.9961;0.2471 0.4314 1;0.2431 0.4392 1;0.2353 0.4431 1;0.2314 0.451 1;0.2235 0.4549 1;0.2196 0.4627 0.9961;0.2118 0.4667 0.9961;0.2078 0.4745 0.9922;0.2 0.4784 0.9922;0.1961 0.4863 0.9882;0.1922 0.4902 0.9882;0.1882 0.498 0.9843;0.1843 0.502 0.9804;0.1843 0.5098 0.9804;0.1804 0.5137 0.9765;0.1804 0.5176 0.9725;0.1804 0.5255 0.9725;0.1804 0.5294 0.9686;0.1765 0.5333 0.9647;0.1765 0.5412 0.9608;0.1765 0.5451 0.9569;0.1765 0.549 0.9529;0.1765 0.5569 0.949;0.1725 0.5608 0.9451;0.1725 0.5647 0.9412;0.1686 0.5686 0.9373;0.1647 0.5765 0.9333;0.1608 0.5804 0.9294;0.1569 0.5843 0.9255;0.1529 0.5922 0.9216;0.1529 0.5961 0.9176;0.149 0.6 0.9137;0.149 0.6039 0.9098;0.1451 0.6078 0.9098;0.1451 0.6118 0.9059;0.1412 0.6196 0.902;0.1412 0.6235 0.898;0.1373 0.6275 0.898;0.1373 0.6314 0.8941;0.1333 0.6353 0.8941;0.1294 0.6392 0.8902;0.1255 0.6471 0.8902;0.1216 0.651 0.8863;0.1176 0.6549 0.8824;0.1137 0.6588 0.8824;0.1137 0.6627 0.8784;0.1098 0.6667 0.8745;0.1059 0.6706 0.8706;0.102 0.6745 0.8667;0.098 0.6784 0.8627;0.0902 0.6824 0.8549;0.0863 0.6863 0.851;0.0784 0.6902 0.8471;0.0706 0.6941 0.8392;0.0627 0.698 0.8353;0.0549 0.702 0.8314;0.0431 0.702 0.8235;0.0314 0.7059 0.8196;0.0235 0.7098 0.8118;0.0157 0.7137 0.8078;0.0078 0.7176 0.8;0.0039 0.7176 0.7922;0 0.7216 0.7882;0 0.7255 0.7804;0 0.7294 0.7765;0.0039 0.7294 0.7686;0.0078 0.7333 0.7608;0.0157 0.7333 0.7569;0.0235 0.7373 0.749;0.0353 0.7412 0.7412;0.051 0.7412 0.7373;0.0627 0.7451 0.7294;0.0784 0.7451 0.7216;0.0902 0.749 0.7137;0.102 0.7529 0.7098;0.1137 0.7529 0.702;0.1255 0.7569 0.6941;0.1373 0.7569 0.6863;0.1451 0.7608 0.6824;0.1529 0.7608 0.6745;0.1608 0.7647 0.6667;0.1686 0.7647 0.6588;0.1725 0.7686 0.651;0.1804 0.7686 0.6471;0.1843 0.7725 0.6392;0.1922 0.7725 0.6314;0.1961 0.7765 0.6235;0.2 0.7804 0.6157;0.2078 0.7804 0.6078;0.2118 0.7843 0.6;0.2196 0.7843 0.5882;0.2235 0.7882 0.5804;0.2314 0.7882 0.5725;0.2392 0.7922 0.5647;0.251 0.7922 0.5529;0.2588 0.7922 0.5451;0.2706 0.7961 0.5373;0.2824 0.7961 0.5255;0.2941 0.7961 0.5176;0.3059 0.8 0.5059;0.3176 0.8 0.498;0.3294 0.8 0.4863;0.3412 0.8 0.4784;0.3529 0.8 0.4667;0.3686 0.8039 0.4549;0.3804 0.8039 0.4471;0.3922 0.8039 0.4353;0.4039 0.8039 0.4235;0.4196 0.8039 0.4118;0.4314 0.8039 0.4;0.4471 0.8039 0.3922;0.4627 0.8 0.3804;0.4745 0.8 0.3686;0.4902 0.8 0.3569;0.5059 0.8 0.349;0.5176 0.8 0.3373;0.5333 0.7961 0.3255;0.5451 0.7961 0.3176;0.5608 0.7961 0.3059;0.5765 0.7922 0.2941;0.5882 0.7922 0.2824;0.6039 0.7882 0.2745;0.6157 0.7882 0.2627;0.6314 0.7843 0.251;0.6431 0.7843 0.2431;0.6549 0.7804 0.2314;0.6706 0.7804 0.2235;0.6824 0.7765 0.2157;0.698 0.7765 0.2078;0.7098 0.7725 0.2;0.7216 0.7686 0.1922;0.7333 0.7686 0.1843;0.7451 0.7647 0.1765;0.7608 0.7647 0.1725;0.7725 0.7608 0.1647;0.7843 0.7569 0.1608;0.7961 0.7569 0.1569;0.8078 0.7529 0.1529;0.8157 0.749 0.1529;0.8275 0.749 0.1529;0.8392 0.7451 0.1529;0.851 0.7451 0.1569;0.8588 0.7412 0.1569;0.8706 0.7373 0.1608;0.8824 0.7373 0.1647;0.8902 0.7373 0.1686;0.902 0.7333 0.1765;0.9098 0.7333 0.1804;0.9176 0.7294 0.1882;0.9255 0.7294 0.1961;0.9373 0.7294 0.2078;0.9451 0.7294 0.2157;0.9529 0.7294 0.2235;0.9608 0.7294 0.2314;0.9686 0.7294 0.2392;0.9765 0.7294 0.2431;0.9843 0.7333 0.2431;0.9882 0.7373 0.2431;0.9961 0.7412 0.2392;0.9961 0.7451 0.2353;0.9961 0.7529 0.2314;0.9961 0.7569 0.2275;0.9961 0.7608 0.2235;0.9961 0.7686 0.2196;0.9961 0.7725 0.2157;0.9961 0.7804 0.2078;0.9961 0.7843 0.2039;0.9961 0.7922 0.2;0.9922 0.7961 0.1961;0.9922 0.8039 0.1922;0.9922 0.8078 0.1922;0.9882 0.8157 0.1882;0.9843 0.8235 0.1843;0.9843 0.8275 0.1804;0.9804 0.8353 0.1804;0.9765 0.8392 0.1765;0.9765 0.8471 0.1725;0.9725 0.851 0.1686;0.9686 0.8588 0.1647;0.9686 0.8667 0.1647;0.9647 0.8706 0.1608;0.9647 0.8784 0.1569;0.9608 0.8824 0.1569;0.9608 0.8902 0.1529;0.9608 0.898 0.149;0.9608 0.902 0.149;0.9608 0.9098 0.1451;0.9608 0.9137 0.1412;0.9608 0.9216 0.1373;0.9608 0.9255 0.1333;0.9608 0.9333 0.1294;0.9647 0.9373 0.1255;0.9647 0.9451 0.1216;0.9647 0.949 0.1176;0.9686 0.9569 0.1098;0.9686 0.9608 0.1059;0.9725 0.9686 0.102;0.9725 0.9725 0.0941;0.9765 0.9765 0.0863;0.9765 0.9843 0.0824];
-            app.GelBoxUIFigure.Position = [100 100 1722 585];
+            app.GelBoxUIFigure.Position = [100 100 1702 611];
             app.GelBoxUIFigure.Name = 'GelBox';
             app.GelBoxUIFigure.CloseRequestFcn = createCallbackFcn(app, @GelBoxUIFigureCloseRequest, true);
 
@@ -2126,12 +1426,6 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.LoadImageMenu = uimenu(app.FileMenu);
             app.LoadImageMenu.MenuSelectedFcn = createCallbackFcn(app, @LoadImageButtonPushed, true);
             app.LoadImageMenu.Text = 'Load Image';
-
-            % Create InvertImageMenu
-            app.InvertImageMenu = uimenu(app.FileMenu);
-            app.InvertImageMenu.MenuSelectedFcn = createCallbackFcn(app, @InvertImageButtonPushed, true);
-            app.InvertImageMenu.Separator = 'on';
-            app.InvertImageMenu.Text = 'Invert Image';
 
             % Create LoadAnalysisMenu
             app.LoadAnalysisMenu = uimenu(app.FileMenu);
@@ -2176,20 +1470,20 @@ classdef GelBox_exported < matlab.apps.AppBase
             % Create OpticalDensitiesPanel
             app.OpticalDensitiesPanel = uipanel(app.GelBoxUIFigure);
             app.OpticalDensitiesPanel.Title = 'Optical Densities';
-            app.OpticalDensitiesPanel.Position = [875 299 836 278];
+            app.OpticalDensitiesPanel.Position = [848 289 848 314];
 
             % Create raw_density
             app.raw_density = uiaxes(app.OpticalDensitiesPanel);
             xlabel(app.raw_density, 'Optical Density (A.U.)')
             ylabel(app.raw_density, 'Pixel')
-            app.raw_density.Position = [163 11 254 209];
+            app.raw_density.Position = [163 47 254 209];
 
             % Create background_corrected_raw_density
             app.background_corrected_raw_density = uiaxes(app.OpticalDensitiesPanel);
             xlabel(app.background_corrected_raw_density, 'Optical Density (A.U.)')
             ylabel(app.background_corrected_raw_density, 'Pixel')
             app.background_corrected_raw_density.YColor = [0.9412 0.9412 0.9412];
-            app.background_corrected_raw_density.Position = [401 11 254 209];
+            app.background_corrected_raw_density.Position = [401 47 254 209];
 
             % Create box_inset
             app.box_inset = uiaxes(app.OpticalDensitiesPanel);
@@ -2197,32 +1491,32 @@ classdef GelBox_exported < matlab.apps.AppBase
             ylabel(app.box_inset, 'Pixel')
             app.box_inset.XColor = [0.9412 0.9412 0.9412];
             app.box_inset.YColor = [0.9412 0.9412 0.9412];
-            app.box_inset.Position = [4 11 150 209];
+            app.box_inset.Position = [4 47 150 209];
 
             % Create BoxZoomLabel
             app.BoxZoomLabel = uilabel(app.OpticalDensitiesPanel);
             app.BoxZoomLabel.HorizontalAlignment = 'center';
             app.BoxZoomLabel.WordWrap = 'on';
-            app.BoxZoomLabel.Position = [34 224 126 22];
+            app.BoxZoomLabel.Position = [34 260 126 22];
             app.BoxZoomLabel.Text = 'Box Zoom';
 
             % Create RawOpticalDensityLabel_2
             app.RawOpticalDensityLabel_2 = uilabel(app.OpticalDensitiesPanel);
             app.RawOpticalDensityLabel_2.HorizontalAlignment = 'center';
             app.RawOpticalDensityLabel_2.WordWrap = 'on';
-            app.RawOpticalDensityLabel_2.Position = [238 224 126 22];
+            app.RawOpticalDensityLabel_2.Position = [238 260 126 22];
             app.RawOpticalDensityLabel_2.Text = 'Raw Optical Density';
 
             % Create BackgroundCorrectedOpticalDensityLabel_2
             app.BackgroundCorrectedOpticalDensityLabel_2 = uilabel(app.OpticalDensitiesPanel);
             app.BackgroundCorrectedOpticalDensityLabel_2.HorizontalAlignment = 'center';
             app.BackgroundCorrectedOpticalDensityLabel_2.WordWrap = 'on';
-            app.BackgroundCorrectedOpticalDensityLabel_2.Position = [477 221 126 28];
+            app.BackgroundCorrectedOpticalDensityLabel_2.Position = [477 257 126 28];
             app.BackgroundCorrectedOpticalDensityLabel_2.Text = 'Background Corrected Optical Density';
 
             % Create TotalAreaEditFieldLabel
             app.TotalAreaEditFieldLabel = uilabel(app.OpticalDensitiesPanel);
-            app.TotalAreaEditFieldLabel.Position = [661 146 59 22];
+            app.TotalAreaEditFieldLabel.Position = [665 241 59 22];
             app.TotalAreaEditFieldLabel.Text = 'Total Area';
 
             % Create TotalAreaField
@@ -2230,25 +1524,25 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.TotalAreaField.ValueDisplayFormat = '%.2f';
             app.TotalAreaField.Editable = 'off';
             app.TotalAreaField.HorizontalAlignment = 'center';
-            app.TotalAreaField.Position = [732 146 85 22];
+            app.TotalAreaField.Position = [743 241 100 22];
 
-            % Create BackgroundAreaLabel
-            app.BackgroundAreaLabel = uilabel(app.OpticalDensitiesPanel);
-            app.BackgroundAreaLabel.WordWrap = 'on';
-            app.BackgroundAreaLabel.Position = [661 106 81 30];
-            app.BackgroundAreaLabel.Text = 'Background Area';
+            % Create RollingBallSizeSpinnerLabel
+            app.RollingBallSizeSpinnerLabel = uilabel(app.OpticalDensitiesPanel);
+            app.RollingBallSizeSpinnerLabel.WordWrap = 'on';
+            app.RollingBallSizeSpinnerLabel.Position = [665 153 52 33];
+            app.RollingBallSizeSpinnerLabel.Text = 'Rolling Ball Size';
 
-            % Create BackgroundAreaField
-            app.BackgroundAreaField = uieditfield(app.OpticalDensitiesPanel, 'numeric');
-            app.BackgroundAreaField.ValueDisplayFormat = '%.2f';
-            app.BackgroundAreaField.Editable = 'off';
-            app.BackgroundAreaField.HorizontalAlignment = 'center';
-            app.BackgroundAreaField.Position = [732 110 85 22];
+            % Create RollingBallSizeSpinner
+            app.RollingBallSizeSpinner = uispinner(app.OpticalDensitiesPanel);
+            app.RollingBallSizeSpinner.Limits = [1 Inf];
+            app.RollingBallSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @RollingBallSizeSpinnerValueChanged, true);
+            app.RollingBallSizeSpinner.Position = [743 157 100 22];
+            app.RollingBallSizeSpinner.Value = 80;
 
             % Create BackgroundCorrAreaLabel
             app.BackgroundCorrAreaLabel = uilabel(app.OpticalDensitiesPanel);
             app.BackgroundCorrAreaLabel.WordWrap = 'on';
-            app.BackgroundCorrAreaLabel.Position = [661 67 81 30];
+            app.BackgroundCorrAreaLabel.Position = [665 65 81 30];
             app.BackgroundCorrAreaLabel.Text = 'Background Corr. Area';
 
             % Create BackgroundCorrAreaField
@@ -2256,212 +1550,190 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BackgroundCorrAreaField.ValueDisplayFormat = '%.2f';
             app.BackgroundCorrAreaField.Editable = 'off';
             app.BackgroundCorrAreaField.HorizontalAlignment = 'center';
-            app.BackgroundCorrAreaField.Position = [732 71 85 22];
+            app.BackgroundCorrAreaField.Position = [743 69 100 22];
+
+            % Create BackgroundAreaLabel
+            app.BackgroundAreaLabel = uilabel(app.OpticalDensitiesPanel);
+            app.BackgroundAreaLabel.WordWrap = 'on';
+            app.BackgroundAreaLabel.Position = [665 104 81 30];
+            app.BackgroundAreaLabel.Text = 'Background Area';
+
+            % Create BackgroundAreaField
+            app.BackgroundAreaField = uieditfield(app.OpticalDensitiesPanel, 'numeric');
+            app.BackgroundAreaField.ValueDisplayFormat = '%.2f';
+            app.BackgroundAreaField.Editable = 'off';
+            app.BackgroundAreaField.HorizontalAlignment = 'center';
+            app.BackgroundAreaField.Position = [743 108 100 22];
+
+            % Create DensityValueEditFieldLabel
+            app.DensityValueEditFieldLabel = uilabel(app.OpticalDensitiesPanel);
+            app.DensityValueEditFieldLabel.WordWrap = 'on';
+            app.DensityValueEditFieldLabel.Visible = 'off';
+            app.DensityValueEditFieldLabel.Position = [665 153 62 30];
+            app.DensityValueEditFieldLabel.Text = 'Density Value';
+
+            % Create DensityValueEditField
+            app.DensityValueEditField = uieditfield(app.OpticalDensitiesPanel, 'numeric');
+            app.DensityValueEditField.Limits = [0 Inf];
+            app.DensityValueEditField.ValueDisplayFormat = '%.2f';
+            app.DensityValueEditField.ValueChangedFcn = createCallbackFcn(app, @DensityValueEditFieldValueChanged, true);
+            app.DensityValueEditField.HorizontalAlignment = 'center';
+            app.DensityValueEditField.Visible = 'off';
+            app.DensityValueEditField.Position = [743 156 100 22];
+            app.DensityValueEditField.Value = 10;
+
+            % Create BackgroundSubtractionDropDownLabel
+            app.BackgroundSubtractionDropDownLabel = uilabel(app.OpticalDensitiesPanel);
+            app.BackgroundSubtractionDropDownLabel.WordWrap = 'on';
+            app.BackgroundSubtractionDropDownLabel.Position = [665 193 114 37];
+            app.BackgroundSubtractionDropDownLabel.Text = 'Background Subtraction';
+
+            % Create BackgroundSubtractionDropDown
+            app.BackgroundSubtractionDropDown = uidropdown(app.OpticalDensitiesPanel);
+            app.BackgroundSubtractionDropDown.Items = {'Rolling Ball', 'Linear', 'Constant Value'};
+            app.BackgroundSubtractionDropDown.ValueChangedFcn = createCallbackFcn(app, @BackgroundSubtractionDropDownValueChanged, true);
+            app.BackgroundSubtractionDropDown.Position = [743 201 100 22];
+            app.BackgroundSubtractionDropDown.Value = 'Rolling Ball';
+
+            % Create ApplyFilterCheckBox
+            app.ApplyFilterCheckBox = uicheckbox(app.OpticalDensitiesPanel);
+            app.ApplyFilterCheckBox.ValueChangedFcn = createCallbackFcn(app, @ApplyFilterCheckBoxValueChanged, true);
+            app.ApplyFilterCheckBox.Text = 'Apply Filter';
+            app.ApplyFilterCheckBox.Position = [56 48 82 22];
+
+            % Create MedianFilterSizeSpinnerLabel
+            app.MedianFilterSizeSpinnerLabel = uilabel(app.OpticalDensitiesPanel);
+            app.MedianFilterSizeSpinnerLabel.HorizontalAlignment = 'right';
+            app.MedianFilterSizeSpinnerLabel.Position = [15 17 102 22];
+            app.MedianFilterSizeSpinnerLabel.Text = 'Median Filter Size';
+
+            % Create MedianFilterSizeSpinner
+            app.MedianFilterSizeSpinner = uispinner(app.OpticalDensitiesPanel);
+            app.MedianFilterSizeSpinner.Limits = [3 Inf];
+            app.MedianFilterSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @MedianFilterSizeSpinnerValueChanged, true);
+            app.MedianFilterSizeSpinner.Position = [124 17 55 22];
+            app.MedianFilterSizeSpinner.Value = 3;
 
             % Create GelImagePanel
             app.GelImagePanel = uipanel(app.GelBoxUIFigure);
             app.GelImagePanel.Title = 'Gel Image';
-            app.GelImagePanel.Position = [6 10 860 567];
+            app.GelImagePanel.Position = [6 6 833 597];
 
             % Create gel_image_axis
             app.gel_image_axis = uiaxes(app.GelImagePanel);
             app.gel_image_axis.XTick = [];
             app.gel_image_axis.YTick = [];
             app.gel_image_axis.Box = 'on';
-            app.gel_image_axis.Position = [12 13 837 487];
+            app.gel_image_axis.Position = [12 14 810 516];
 
             % Create AdjustImageButton
             app.AdjustImageButton = uibutton(app.GelImagePanel, 'push');
             app.AdjustImageButton.ButtonPushedFcn = createCallbackFcn(app, @AdjustImageButtonPushed, true);
-            app.AdjustImageButton.Position = [16 507 100 22];
+            app.AdjustImageButton.Position = [16 537 100 22];
             app.AdjustImageButton.Text = 'Adjust Image';
 
             % Create NewBoxButton
             app.NewBoxButton = uibutton(app.GelImagePanel, 'push');
             app.NewBoxButton.ButtonPushedFcn = createCallbackFcn(app, @NewBoxButtonPushed, true);
-            app.NewBoxButton.Position = [130 507 100 22];
+            app.NewBoxButton.Position = [130 537 100 22];
             app.NewBoxButton.Text = 'New Box';
 
             % Create DeleteBoxButton
             app.DeleteBoxButton = uibutton(app.GelImagePanel, 'push');
             app.DeleteBoxButton.ButtonPushedFcn = createCallbackFcn(app, @DeleteBoxButtonPushed, true);
             app.DeleteBoxButton.Enable = 'off';
-            app.DeleteBoxButton.Position = [247 507 101 22];
+            app.DeleteBoxButton.Position = [247 537 101 22];
             app.DeleteBoxButton.Text = 'Delete Box';
 
             % Create BoxSelectionDropDownLabel
             app.BoxSelectionDropDownLabel = uilabel(app.GelImagePanel);
             app.BoxSelectionDropDownLabel.HorizontalAlignment = 'center';
-            app.BoxSelectionDropDownLabel.Position = [354 507 98 22];
+            app.BoxSelectionDropDownLabel.Position = [354 537 98 22];
             app.BoxSelectionDropDownLabel.Text = 'Box Selection';
 
             % Create BoxSelectionDropDown
             app.BoxSelectionDropDown = uidropdown(app.GelImagePanel);
             app.BoxSelectionDropDown.Items = {};
             app.BoxSelectionDropDown.ValueChangedFcn = createCallbackFcn(app, @BoxSelectionDropDownValueChanged, true);
-            app.BoxSelectionDropDown.Placeholder = 'No data';
-            app.BoxSelectionDropDown.Position = [451 507 100 22];
+            app.BoxSelectionDropDown.Placeholder = 'No Data';
+            app.BoxSelectionDropDown.Position = [451 537 100 22];
             app.BoxSelectionDropDown.Value = {};
 
             % Create FittingPanel
             app.FittingPanel = uipanel(app.GelBoxUIFigure);
             app.FittingPanel.Title = 'Fitting';
-            app.FittingPanel.Position = [875 10 836 277];
+            app.FittingPanel.Position = [848 6 848 284];
 
             % Create background_corrected_raw_density_fit
             app.background_corrected_raw_density_fit = uiaxes(app.FittingPanel);
             xlabel(app.background_corrected_raw_density_fit, 'Optical Density (A.U.)')
             ylabel(app.background_corrected_raw_density_fit, 'Pixel')
             app.background_corrected_raw_density_fit.YColor = [0.9412 0.9412 0.9412];
-            app.background_corrected_raw_density_fit.Position = [251 7 254 209];
+            app.background_corrected_raw_density_fit.Position = [255 13 254 209];
 
             % Create raw_density_fit
             app.raw_density_fit = uiaxes(app.FittingPanel);
             xlabel(app.raw_density_fit, 'Optical Density (A.U.)')
             ylabel(app.raw_density_fit, 'Pixel')
-            app.raw_density_fit.Position = [17 7 254 209];
+            app.raw_density_fit.Position = [11 13 254 209];
 
             % Create RawOpticalDensityLabel
             app.RawOpticalDensityLabel = uilabel(app.FittingPanel);
             app.RawOpticalDensityLabel.HorizontalAlignment = 'center';
             app.RawOpticalDensityLabel.WordWrap = 'on';
-            app.RawOpticalDensityLabel.Position = [82 224 126 22];
+            app.RawOpticalDensityLabel.Position = [88 221 126 22];
             app.RawOpticalDensityLabel.Text = 'Raw Optical Density';
 
             % Create BackgroundCorrectedOpticalDensityLabel
             app.BackgroundCorrectedOpticalDensityLabel = uilabel(app.FittingPanel);
             app.BackgroundCorrectedOpticalDensityLabel.HorizontalAlignment = 'center';
             app.BackgroundCorrectedOpticalDensityLabel.WordWrap = 'on';
-            app.BackgroundCorrectedOpticalDensityLabel.Position = [331 221 126 28];
+            app.BackgroundCorrectedOpticalDensityLabel.Position = [338 218 126 28];
             app.BackgroundCorrectedOpticalDensityLabel.Text = 'Background Corrected Optical Density';
 
             % Create DrawFittingCheckBox
             app.DrawFittingCheckBox = uicheckbox(app.FittingPanel);
             app.DrawFittingCheckBox.ValueChangedFcn = createCallbackFcn(app, @DrawFittingCheckBoxValueChanged, true);
             app.DrawFittingCheckBox.Text = 'Draw Fitting';
-            app.DrawFittingCheckBox.Position = [672 154 86 22];
+            app.DrawFittingCheckBox.Position = [710 181 86 22];
 
-            % Create RsquaredLabel
-            app.RsquaredLabel = uilabel(app.FittingPanel);
-            app.RsquaredLabel.WordWrap = 'on';
-            app.RsquaredLabel.Position = [512 154 72 22];
-            app.RsquaredLabel.Text = 'R - squared';
+            % Create FittingParametersButton
+            app.FittingParametersButton = uibutton(app.FittingPanel, 'push');
+            app.FittingParametersButton.ButtonPushedFcn = createCallbackFcn(app, @FittingParametersButtonPushed, true);
+            app.FittingParametersButton.Position = [699 223 113 23];
+            app.FittingParametersButton.Text = 'Fitting Parameters';
 
             % Create rsquaredField
             app.rsquaredField = uieditfield(app.FittingPanel, 'numeric');
             app.rsquaredField.ValueDisplayFormat = '%.3f';
             app.rsquaredField.Editable = 'off';
             app.rsquaredField.HorizontalAlignment = 'center';
-            app.rsquaredField.Position = [588 154 70 22];
+            app.rsquaredField.Position = [626 181 70 22];
 
-            % Create BandAreaLabel_1
-            app.BandAreaLabel_1 = uilabel(app.FittingPanel);
-            app.BandAreaLabel_1.HorizontalAlignment = 'center';
-            app.BandAreaLabel_1.WordWrap = 'on';
-            app.BandAreaLabel_1.Position = [512 112 72 28];
-            app.BandAreaLabel_1.Text = 'Band Area 1 (Red)';
+            % Create RsquaredLabel
+            app.RsquaredLabel = uilabel(app.FittingPanel);
+            app.RsquaredLabel.WordWrap = 'on';
+            app.RsquaredLabel.Position = [550 181 72 22];
+            app.RsquaredLabel.Text = 'R - squared';
 
-            % Create BandArea_1
-            app.BandArea_1 = uieditfield(app.FittingPanel, 'numeric');
-            app.BandArea_1.ValueDisplayFormat = '%.2f';
-            app.BandArea_1.Editable = 'off';
-            app.BandArea_1.HorizontalAlignment = 'center';
-            app.BandArea_1.Position = [587 116 70 22];
+            % Create NumberofBandsSpinnerLabel
+            app.NumberofBandsSpinnerLabel = uilabel(app.FittingPanel);
+            app.NumberofBandsSpinnerLabel.HorizontalAlignment = 'right';
+            app.NumberofBandsSpinnerLabel.Position = [540 222 99 22];
+            app.NumberofBandsSpinnerLabel.Text = 'Number of Bands';
 
-            % Create BandRelativeAreaLabel_1
-            app.BandRelativeAreaLabel_1 = uilabel(app.FittingPanel);
-            app.BandRelativeAreaLabel_1.WordWrap = 'on';
-            app.BandRelativeAreaLabel_1.Enable = 'off';
-            app.BandRelativeAreaLabel_1.Position = [671 105 81 42];
-            app.BandRelativeAreaLabel_1.Text = 'Band Relative Area 1 (Red)';
+            % Create NumberofBandsSpinner
+            app.NumberofBandsSpinner = uispinner(app.FittingPanel);
+            app.NumberofBandsSpinner.Limits = [1 Inf];
+            app.NumberofBandsSpinner.ValueChangedFcn = createCallbackFcn(app, @NumberofBandsSpinnerValueChanged, true);
+            app.NumberofBandsSpinner.Position = [647 222 46 24];
+            app.NumberofBandsSpinner.Value = 1;
 
-            % Create BandRelativeArea_1
-            app.BandRelativeArea_1 = uieditfield(app.FittingPanel, 'numeric');
-            app.BandRelativeArea_1.ValueDisplayFormat = '%.2f';
-            app.BandRelativeArea_1.Editable = 'off';
-            app.BandRelativeArea_1.HorizontalAlignment = 'center';
-            app.BandRelativeArea_1.Enable = 'off';
-            app.BandRelativeArea_1.Position = [756 115 70 22];
-
-            % Create BandAreaLabel_2
-            app.BandAreaLabel_2 = uilabel(app.FittingPanel);
-            app.BandAreaLabel_2.HorizontalAlignment = 'center';
-            app.BandAreaLabel_2.WordWrap = 'on';
-            app.BandAreaLabel_2.Enable = 'off';
-            app.BandAreaLabel_2.Position = [511 73 72 28];
-            app.BandAreaLabel_2.Text = 'Band Area 2 (Blue)';
-
-            % Create BandArea_2
-            app.BandArea_2 = uieditfield(app.FittingPanel, 'numeric');
-            app.BandArea_2.ValueDisplayFormat = '%.2f';
-            app.BandArea_2.Editable = 'off';
-            app.BandArea_2.HorizontalAlignment = 'center';
-            app.BandArea_2.Enable = 'off';
-            app.BandArea_2.Position = [587 76 70 22];
-
-            % Create BandRelativeAreaLabel_2
-            app.BandRelativeAreaLabel_2 = uilabel(app.FittingPanel);
-            app.BandRelativeAreaLabel_2.WordWrap = 'on';
-            app.BandRelativeAreaLabel_2.Enable = 'off';
-            app.BandRelativeAreaLabel_2.Position = [670 66 81 42];
-            app.BandRelativeAreaLabel_2.Text = 'Band Relative Area 2 (Blue)';
-
-            % Create BandRelativeArea_2
-            app.BandRelativeArea_2 = uieditfield(app.FittingPanel, 'numeric');
-            app.BandRelativeArea_2.ValueDisplayFormat = '%.2f';
-            app.BandRelativeArea_2.Editable = 'off';
-            app.BandRelativeArea_2.HorizontalAlignment = 'center';
-            app.BandRelativeArea_2.Enable = 'off';
-            app.BandRelativeArea_2.Position = [756 76 70 22];
-
-            % Create BandAreaLabel_3
-            app.BandAreaLabel_3 = uilabel(app.FittingPanel);
-            app.BandAreaLabel_3.HorizontalAlignment = 'center';
-            app.BandAreaLabel_3.WordWrap = 'on';
-            app.BandAreaLabel_3.Enable = 'off';
-            app.BandAreaLabel_3.Position = [511 35 72 30];
-            app.BandAreaLabel_3.Text = 'Band Area 3 (Yellow)';
-
-            % Create BandArea_3
-            app.BandArea_3 = uieditfield(app.FittingPanel, 'numeric');
-            app.BandArea_3.ValueDisplayFormat = '%.2f';
-            app.BandArea_3.Editable = 'off';
-            app.BandArea_3.HorizontalAlignment = 'center';
-            app.BandArea_3.Enable = 'off';
-            app.BandArea_3.Position = [587 40 70 22];
-
-            % Create BandRelativeAreaLabel_3
-            app.BandRelativeAreaLabel_3 = uilabel(app.FittingPanel);
-            app.BandRelativeAreaLabel_3.WordWrap = 'on';
-            app.BandRelativeAreaLabel_3.Enable = 'off';
-            app.BandRelativeAreaLabel_3.Position = [668 29 81 42];
-            app.BandRelativeAreaLabel_3.Text = 'Band Relative Area 3 (Yellow)';
-
-            % Create BandRelativeArea_3
-            app.BandRelativeArea_3 = uieditfield(app.FittingPanel, 'numeric');
-            app.BandRelativeArea_3.ValueDisplayFormat = '%.2f';
-            app.BandRelativeArea_3.Editable = 'off';
-            app.BandRelativeArea_3.HorizontalAlignment = 'center';
-            app.BandRelativeArea_3.Enable = 'off';
-            app.BandRelativeArea_3.Position = [756 39 70 22];
-
-            % Create NumberofBandsDropDownLabel
-            app.NumberofBandsDropDownLabel = uilabel(app.FittingPanel);
-            app.NumberofBandsDropDownLabel.Position = [512 194 99 22];
-            app.NumberofBandsDropDownLabel.Text = 'Number of Bands';
-
-            % Create NumberofBandsDropDown
-            app.NumberofBandsDropDown = uidropdown(app.FittingPanel);
-            app.NumberofBandsDropDown.Items = {'1', '2', '3'};
-            app.NumberofBandsDropDown.ValueChangedFcn = createCallbackFcn(app, @NumberofBandsDropDownValueChanged, true);
-            app.NumberofBandsDropDown.Position = [614 194 42 22];
-            app.NumberofBandsDropDown.Value = '1';
-
-            % Create FittingParametersButton
-            app.FittingParametersButton = uibutton(app.FittingPanel, 'push');
-            app.FittingParametersButton.ButtonPushedFcn = createCallbackFcn(app, @FittingParametersButtonPushed, true);
-            app.FittingParametersButton.Position = [666 193 113 23];
-            app.FittingParametersButton.Text = 'Fitting Parameters';
+            % Create BandTable
+            app.BandTable = uitable(app.FittingPanel);
+            app.BandTable.ColumnName = {'Band No'; 'Color'; 'Area'; 'Relative Area'};
+            app.BandTable.RowName = {};
+            app.BandTable.Position = [518 20 321 148];
 
             % Show the figure after all components are created
             app.GelBoxUIFigure.Visible = 'on';
