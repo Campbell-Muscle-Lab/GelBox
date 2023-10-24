@@ -194,11 +194,44 @@ classdef GelBox_exported < matlab.apps.AppBase
                             app.gel_data.settings.background.method{i} = method;
                             app.gel_data.settings.background.size(i) = cst_val;
                             app.background_token(i) = 1;
-                        case 'Polyline'
-                            cst_val = app.DensityValueEditField.Value;
-                            app.gel_data.background(i).x_back = cst_val * ones(numel(x),1);
+                        case 'Cubic Spline'
+                            number_of_elements = numel(x);
+                            fraction = 0.1;
+                            fraction_number = ceil(fraction*numel(x))
+                            
+                            ix_1 = 1:fraction_number;
+                            ix_2 = number_of_elements:-1:(number_of_elements - fraction_number + 1);
+                            
+                            c_x = [ix_1 ix_2]
+                            c_y = x(c_x)
+                            
+                            app.gel_data.background(i).x_back = csapi(c_x,c_y,1:numel(x))';
+                            
                             app.gel_data.settings.background.method{i} = method;
-                            app.gel_data.settings.background.size(i) = cst_val;
+                            app.background_token(i) = 1;
+                        case 'Polyline'
+                            
+                            diff_x = diff(x);
+                            
+                            [xout_diff,yout_diff] = intersections(1:numel(diff_x),diff_x,...
+                                1:numel(diff_x),zeros(1,numel(diff_x)),1);
+                            
+                            p1 = ceil(xout_diff(1)) - 1;
+                            ix = ceil(xout_diff) - 1;
+                            
+                            k = 3;
+                            [idx,C] = kmeans(xout_diff,k);
+
+                            [~,c_ix] = max(C);
+                            
+                            p2_cluster = xout_diff(idx == c_ix);
+                            p2 = ceil(p2_cluster(1)) - 1;
+                            app.gel_data.background(i).x_back = [(x(1:p1-1))'...
+                                linspace(x(p1),x(p2),(p2-p1+1))...
+                                (x(p2+1:end))']';
+
+                            
+                            app.gel_data.settings.background.method{i} = method;
                             app.background_token(i) = 1;
                     end
                     end
@@ -1582,7 +1615,7 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             % Create BackgroundSubtractionDropDown
             app.BackgroundSubtractionDropDown = uidropdown(app.OpticalDensitiesPanel);
-            app.BackgroundSubtractionDropDown.Items = {'Rolling Ball', 'Linear', 'Constant Value'};
+            app.BackgroundSubtractionDropDown.Items = {'Rolling Ball', 'Linear', 'Constant Value', 'Cubic Spline', 'Polynomial', 'Polyline'};
             app.BackgroundSubtractionDropDown.ValueChangedFcn = createCallbackFcn(app, @BackgroundSubtractionDropDownValueChanged, true);
             app.BackgroundSubtractionDropDown.Position = [743 201 100 22];
             app.BackgroundSubtractionDropDown.Value = 'Rolling Ball';
