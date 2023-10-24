@@ -194,6 +194,12 @@ classdef GelBox_exported < matlab.apps.AppBase
                             app.gel_data.settings.background.method{i} = method;
                             app.gel_data.settings.background.size(i) = cst_val;
                             app.background_token(i) = 1;
+                        case 'Polyline'
+                            cst_val = app.DensityValueEditField.Value;
+                            app.gel_data.background(i).x_back = cst_val * ones(numel(x),1);
+                            app.gel_data.settings.background.method{i} = method;
+                            app.gel_data.settings.background.size(i) = cst_val;
+                            app.background_token(i) = 1;
                     end
                     end
 
@@ -203,27 +209,13 @@ classdef GelBox_exported < matlab.apps.AppBase
                     elseif app.new_box || app.mode_updated || app.par_est_na
                         [par_est,par_con] = EstimateFittingParameters(app,y,x, ...
                             app.gel_data.background(i).x_back,num_of_bands);
-                        if isfield(app.gel_data.fitting,'par_est')
-                            try
-                                app.gel_data.fitting.par_est(i) = [];
-                            end
-                        end
-                        app.gel_data.fitting.par_est(i) = par_est;
-                        if isfield(app.gel_data.fitting,'par_con')
-                            try
-                            app.gel_data.fitting.par_con(i) = [];
-                            end
-                        end
-                        app.gel_data.fitting.par_con(i) = par_con;
+                        app.gel_data.fitting.par_est(i) = deal(par_est);
+                        app.gel_data.fitting.par_con(i) = deal(par_con);
                     end
                     [x_bands,x_fit,r_squared,par_fit] = ...
                         FitGaussian(app,y,x,app.gel_data.background(i).x_back,i,num_of_bands);
-                    if isfield(app.gel_data.fitting,'par_fit')
-                        try
-                        app.gel_data.fitting.par_fit(i) = [];
-                        end
-                    end
-                    app.gel_data.fitting.par_fit(i) = par_fit;
+                    
+                    app.gel_data.fitting.par_fit(i) = deal(par_fit);
                     fnames = fieldnames(par_fit);
 
                     app.d.box(i).total_area = simps(y,x);
