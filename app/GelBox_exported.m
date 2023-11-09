@@ -12,6 +12,10 @@ classdef GelBox_exported < matlab.apps.AppBase
         GelImageFileInformationMenu    matlab.ui.container.Menu
         SelectedBoxInformationMenu     matlab.ui.container.Menu
         SummaryPlotMenu                matlab.ui.container.Menu
+        BackgroundSubtractionDropDown  matlab.ui.control.DropDown
+        BackgroundSubtractionDropDownLabel  matlab.ui.control.Label
+        OrderSpinner                   matlab.ui.control.Spinner
+        OrderLabel                     matlab.ui.control.Label
         FittingPanel                   matlab.ui.container.Panel
         BandTable                      matlab.ui.control.Table
         NumberofBandsSpinner           matlab.ui.control.Spinner
@@ -27,32 +31,37 @@ classdef GelBox_exported < matlab.apps.AppBase
         GelImagePanel                  matlab.ui.container.Panel
         BoxSelectionDropDown           matlab.ui.control.DropDown
         BoxSelectionDropDownLabel      matlab.ui.control.Label
-        DeleteBoxButton                matlab.ui.control.Button
         NewBoxButton                   matlab.ui.control.Button
         AdjustImageButton              matlab.ui.control.Button
         gel_image_axis                 matlab.ui.control.UIAxes
         OpticalDensitiesPanel          matlab.ui.container.Panel
-        MedianFilterSizeSpinner        matlab.ui.control.Spinner
-        MedianFilterSizeSpinnerLabel   matlab.ui.control.Label
-        ApplyFilterCheckBox            matlab.ui.control.CheckBox
-        BackgroundSubtractionDropDown  matlab.ui.control.DropDown
-        BackgroundSubtractionDropDownLabel  matlab.ui.control.Label
-        DensityValueEditField          matlab.ui.control.NumericEditField
-        DensityValueEditFieldLabel     matlab.ui.control.Label
-        BackgroundAreaField            matlab.ui.control.NumericEditField
-        BackgroundAreaLabel            matlab.ui.control.Label
-        BackgroundCorrAreaField        matlab.ui.control.NumericEditField
-        BackgroundCorrAreaLabel        matlab.ui.control.Label
-        RollingBallSizeSpinner         matlab.ui.control.Spinner
-        RollingBallSizeSpinnerLabel    matlab.ui.control.Label
-        TotalAreaField                 matlab.ui.control.NumericEditField
-        TotalAreaEditFieldLabel        matlab.ui.control.Label
+        BackgroundSubtractionLabel     matlab.ui.control.Label
         BackgroundCorrectedOpticalDensityLabel_2  matlab.ui.control.Label
         RawOpticalDensityLabel_2       matlab.ui.control.Label
+        BackgroundTabGroup             matlab.ui.container.TabGroup
+        CSSTab                         matlab.ui.container.Tab
+        SmoothingEditField             matlab.ui.control.NumericEditField
+        SmoothingEditFieldLabel        matlab.ui.control.Label
+        FractionSpinner                matlab.ui.control.Spinner
+        FractionSpinnerLabel           matlab.ui.control.Label
+        LINTab                         matlab.ui.container.Tab
+        NoAdditionalOptionsforLinearMethodLabel  matlab.ui.control.Label
+        RBTab                          matlab.ui.container.Tab
+        RollingBallSizeSpinner         matlab.ui.control.Spinner
+        RollingBallSizeSpinnerLabel    matlab.ui.control.Label
+        BackgroundAreaField            matlab.ui.control.NumericEditField
+        BackgroundAreaLabel            matlab.ui.control.Label
+        TotalAreaField                 matlab.ui.control.NumericEditField
+        TotalAreaEditFieldLabel        matlab.ui.control.Label
+        BackgroundCorrAreaField        matlab.ui.control.NumericEditField
+        BackgroundCorrAreaLabel        matlab.ui.control.Label
+        MedianFilterSizeSpinner        matlab.ui.control.Spinner
+        MedianFilterSizeSpinnerLabel   matlab.ui.control.Label
         BoxZoomLabel                   matlab.ui.control.Label
-        box_inset                      matlab.ui.control.UIAxes
+        ApplyFilterCheckBox            matlab.ui.control.CheckBox
         background_corrected_raw_density  matlab.ui.control.UIAxes
         raw_density                    matlab.ui.control.UIAxes
+        box_inset                      matlab.ui.control.UIAxes
     end
 
 
@@ -68,10 +77,14 @@ classdef GelBox_exported < matlab.apps.AppBase
         image_adjusted = 0
         single_box_callback
         d
-        par_fit_na = 0 % Description
-        moving_box = 0 % Description
-        background_token = 0 % Description
-        filtered_inset = [] % Description
+        par_fit_na = 0
+        moving_box = 0
+        background_token = 0
+        filtered_inset = []
+        poly_pars = []
+        c_x = []
+        c_y = []
+        load_filters = 0
     end
 
     properties (Access = private)
@@ -145,7 +158,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     summary_position = [app.d.box(i).position(1)-10, app.d.box(i).position(2)-10, app.d.box(i).position(3)+20, app.d.box(i).position(4)+20];
                     app.d.box(i).summary_inset = imcrop(app.gel_data.image.im_data, ...
                         summary_position);
-                    
+
                     if app.ApplyFilterCheckBox.Value
                         app.MedianFilterSizeSpinner.Enable = 'on';
                         app.MedianFilterSizeSpinnerLabel.Enable = 'on';
@@ -153,93 +166,47 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.d.box(i).inset = medfilt2(app.d.box(i).inset,[sz sz],'symmetric');
                         app.gel_data.settings.filtering.median.size(i) = sz;
                         app.filtered_inset(i) = 1;
+                    elseif app.load_filters
+                        if app.gel_data.settings.filtering.median.size(i)
+                            app.MedianFilterSizeSpinner.Enable = 'on';
+                            app.MedianFilterSizeSpinnerLabel.Enable = 'on';
+                            app.MedianFilterSizeSpinner.Value = app.gel_data.settings.filtering.median.size(i);
+                            sz = app.MedianFilterSizeSpinner.Value;
+                            app.d.box(i).inset = medfilt2(app.d.box(i).inset,[sz sz],'symmetric');
+                            app.filtered_inset(i) = 1;
+                        end
                     else
                         app.MedianFilterSizeSpinner.Enable = 'off';
                         app.MedianFilterSizeSpinnerLabel.Enable = 'off';
                         app.gel_data.settings.filtering.median.size(i) = 0;
                         app.filtered_inset(i) = 0;
                     end
-
-                    method = app.BackgroundSubtractionDropDown.Value;
-%                     m = imcomplement(app.d.box(i).inset);
+                    
+                    method = app.BackgroundTabGroup.SelectedTab.Tooltip;
+                    %                     m = imcomplement(app.d.box(i).inset);
                     m = (app.d.box(i).inset);
 
                     x = flipud(mean(imcomplement(m),2));
                     y = 1:size(m,1);
                     y = y';
-                    
-                    
+
                     if ~app.background_token(i)
-                    switch method
-                        case 'Rolling Ball'
-                            radius = app.RollingBallSizeSpinner.Value;
-                            se = strel('disk', radius, 0);
-                            app.gel_data.settings.background.method{i} = method;
-                            app.gel_data.settings.background.size(i) = radius;
-                            im_close = [];
-                            im_close = imclose(app.d.box(i).inset,se);
-                            im_close = imcomplement(im_close);
-                            mean_imclose = mean(im_close,2);
-                            mean_imclose = flipud(mean_imclose);
-                            app.gel_data.background(i).x_back = mean_imclose;
-                            app.background_token(i) = 1;
-                        case 'Linear'
-                            app.gel_data.background(i).x_back = linspace(x(1),x(end),numel(x));
-                            app.gel_data.background(i).x_back = app.gel_data.background(i).x_back';
-                            app.gel_data.settings.background.method{i} = method;
-                            app.background_token(i) = 1;
-                        case 'Constant Value'
-                            cst_val = app.DensityValueEditField.Value;
-                            app.gel_data.background(i).x_back = cst_val * ones(numel(x),1);
-                            app.gel_data.settings.background.method{i} = method;
-                            app.gel_data.settings.background.size(i) = cst_val;
-                            app.background_token(i) = 1;
-                        case 'Cubic Spline'
-                            number_of_elements = numel(x);
-                            fraction = 0.1;
-                            fraction_number = ceil(fraction*numel(x))
-                            
-                            ix_1 = 1:fraction_number;
-                            ix_2 = number_of_elements:-1:(number_of_elements - fraction_number + 1);
-                            
-                            c_x = [ix_1 ix_2]
-                            c_y = x(c_x)
-                            
-                            app.gel_data.background(i).x_back = csapi(c_x,c_y,1:numel(x))';
-                            
-                            app.gel_data.settings.background.method{i} = method;
-                            app.background_token(i) = 1;
-                        case 'Polyline'
-                            
-                            diff_x = diff(x);
-                            
-                            [xout_diff,yout_diff] = intersections(1:numel(diff_x),diff_x,...
-                                1:numel(diff_x),zeros(1,numel(diff_x)),1);
-                            
-                            p1 = ceil(xout_diff(1)) - 1;
-                            ix = ceil(xout_diff) - 1;
-                            
-                            k = 3;
-                            [idx,C] = kmeans(xout_diff,k);
-
-                            [~,c_ix] = max(C);
-                            
-                            p2_cluster = xout_diff(idx == c_ix);
-                            p2 = ceil(p2_cluster(1)) - 1;
-                            app.gel_data.background(i).x_back = [(x(1:p1-1))'...
-                                linspace(x(p1),x(p2),(p2-p1+1))...
-                                (x(p2+1:end))']';
-
-                            
-                            app.gel_data.settings.background.method{i} = method;
-                            app.background_token(i) = 1;
+                        BackgroundCorrection(app,x,method,i)
                     end
+
+                    if strcmp(method,'Polynomial Fitting')
+                        poly_var_num = app.OrderSpinner.Value + 1;
+                        app.poly_pars = ones(1,poly_var_num);
+                        app.poly_pars(end) = x(1);
+                        app.gel_data.background(i).x_back = zeros(numel(x),1);
+                        app.gel_data.settings.background.method{i} = method;
+                        app.background_token(i) = 1;
                     end
 
                     box_no = str2num(app.BoxSelectionDropDown.Value);
                     if (app.loaded_analysis && (app.new_box <= length(app.gel_data.fitting.par_est))) ...
-                            || app.parameters_updated || app.gel_data.fitting.par_update(i) || app.moving_box
-                    elseif app.new_box || app.mode_updated || app.par_est_na
+                            || app.parameters_updated || app.gel_data.fitting.par_update(i) 
+                    elseif app.new_box || app.mode_updated || app.par_est_na || app.moving_box
                         [par_est,par_con] = EstimateFittingParameters(app,y,x, ...
                             app.gel_data.background(i).x_back,num_of_bands);
                         app.gel_data.fitting.par_est(i) = deal(par_est);
@@ -247,14 +214,20 @@ classdef GelBox_exported < matlab.apps.AppBase
                     end
                     [x_bands,x_fit,r_squared,par_fit] = ...
                         FitGaussian(app,y,x,app.gel_data.background(i).x_back,i,num_of_bands);
-                    
+
+
                     app.gel_data.fitting.par_fit(i) = deal(par_fit);
                     fnames = fieldnames(par_fit);
-
+                    if strcmp(method,'Polynomial Fitting')
+                        app.gel_data.background(i).x_back = [];
+                        app.gel_data.background(i).x_back = x_fit - sum(x_bands,2);
+                        x_fit = sum(x_bands,2);
+                        app.poly_pars = zeros(1,6);
+                    end
                     app.d.box(i).total_area = simps(y,x);
                     app.d.box(i).background_area = simps(y,app.gel_data.background(i).x_back);
                     app.d.box(i).background_corr_area = simps(y,(x-app.gel_data.background(i).x_back));
-
+                    app.d.box(i).band_area = [];
                     for j = 1 : num_of_bands
                         app.d.box(i).band_area(j) = simps(y,x_bands(:,j));
                         sum(x_bands(:,j));
@@ -295,6 +268,17 @@ classdef GelBox_exported < matlab.apps.AppBase
                         cla(app.raw_density)
                         plot(app.raw_density,x,y,"Color",'k',"LineWidth",2)
                         hold(app.raw_density,"on")
+                        if strcmp(app.gel_data.settings.background.method{i},'Cubic Smoothing Spline (CSS)')
+                            fraction = app.gel_data.settings.background.css_fraction(box_no);
+                            fraction_ix = ceil(fraction*numel(x));
+                            ix_1 = 1:fraction_ix;
+                            ix_2 = numel(x):-1:(numel(x) - fraction_ix + 1);
+                            app.c_x = [];
+                            app.c_y = [];
+                            app.c_x = [ix_1 ix_2];
+                            app.c_y = x(app.c_x);
+                            plot(app.raw_density,app.c_y,app.c_x,'go')
+                        end
                         plot(app.raw_density,app.gel_data.background(i).x_back,y,'-.m',"LineWidth",2)
                         x_pow = ceil(log10(max(x)));
                         x_tick_rounder = 10^(x_pow - 1);
@@ -305,8 +289,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.raw_density.XAxis.Exponent = 0;
                         xlim(app.raw_density,[0 x_t_end]);
                         ylim(app.raw_density,[1 max(y)]);
-%                         legend(app.raw_density,'','Baseline', ...
-%                             'Location','northeast')
+                        %                         legend(app.raw_density,'','Baseline', ...
+                        %                             'Location','northeast')
 
 
                         xticks(app.raw_density_fit,x_ticks);
@@ -323,8 +307,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                         hold(app.background_corrected_raw_density,"on")
                         plot(app.background_corrected_raw_density, ...
                             zeros(1,numel(y)),y,'-.m',"LineWidth",2)
-%                         legend(app.background_corrected_raw_density,'','Baseline', ...
-%                             'Location','northeast')
+                        %                         legend(app.background_corrected_raw_density,'','Baseline', ...
+                        %                             'Location','northeast')
                         ylim(app.background_corrected_raw_density, ...
                             [1 max(y)]);
 
@@ -431,6 +415,14 @@ classdef GelBox_exported < matlab.apps.AppBase
                 'min_rel_delta_y',0.05, ...
                 'min_x_index_spacing',2);
 
+            %             figure(99)
+            %             [pks,locs] = findpeaks(y);
+            %
+            %             [pks,ix] = sort(pks,'descend');
+            %
+            %             locs = locs()
+
+
             % The order of the parameters is as follows:
             %       1) peak_location
             %       2) amplitude
@@ -499,6 +491,7 @@ classdef GelBox_exported < matlab.apps.AppBase
         end
 
         function [y_bands, y_fit,r_squared,par_fit] = FitGaussian(app, x, y, y_back, box_no,no_of_bands)
+
             par_est = struct();
             par_con = struct();
 
@@ -540,9 +533,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 end
             end
 
-            target = y;
 
-            target = target - y_back;
 
             j = 1;
             e = [];
@@ -562,6 +553,21 @@ classdef GelBox_exported < matlab.apps.AppBase
             opts.Display='off';
             opts.MaxIter=1000;
             opts.MaxFunEvals=10000;
+
+            target = y;
+            %             if strcmp(app.BackgroundSubtractionDropDown.Value,'Polynomial Fitting')
+            %                 y_back = zeros(numel(y),1);
+            %
+            %                 num = numel(par);
+            %                 par = [par app.poly_pars];
+            %                 upper_bounds = [upper_bounds inf*ones(1,numel(app.poly_pars))];
+            %                 lower_bounds = [lower_bounds -inf*ones(1,numel(app.poly_pars))];
+            %                 upper_bounds(end) = par(end);
+            %                 lower_bounds(end) = par(end);
+            %             end
+            target = target - y_back;
+
+
 
             [p_result,fval,exitflag,output]= ...
                 fminsearchbnd(@profile_error_ngaussian,par, ...
@@ -584,18 +590,20 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                 [y_bands, y_fit] = calculate_nprofile(x,par);
 
-                no_of_par = 4;
-                no_of_bands = numel(par)/no_of_par;
-
                 e(j) = 0;
                 for i  = 1 : numel(target)
                     e(j) = e(j) + (y_fit(i) - target(i))^2;
                 end
 
                 trial_e = e(end);
-
+                %                 if strcmp(app.BackgroundSubtractionDropDown.Value,'Polynomial Fitting')
+                %                     if abs(y_fit(end)-target(end)) < 10^-6
+                %                         trial_e = trial_e;
+                %                     end
+                %                 end
                 r_squared_iter = calculate_r_squared(target,y_fit);
                 j = j + 1;
+                utku = 0;
                 if app.DrawFittingCheckBox.Value
                     cla(app.background_corrected_raw_density_fit)
                     plot(app.background_corrected_raw_density_fit,y_fit,x,'LineWidth',2)
@@ -604,14 +612,30 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.rsquaredField.Value = r_squared_iter;
                     drawnow
                 end
+                if utku
+                    figure(9)
+                    cla
+                    plot(y_fit-sum(y_bands,2),x,'LineWidth',2)
+                    hold('on')
+                    plot(target,x,'LineWidth',2,'LineStyle','-.','Color','k')
+                    drawnow
+                end
             end
             function [y_bands,y_fit] = calculate_nprofile(x,par)
 
                 no_of_par = 4;
-                no_of_bands = numel(par)/no_of_par;
+
+                %                 if strcmp(app.BackgroundSubtractionDropDown.Value,'Polynomial Fitting')
+                %                     no_of_bands = (numel(par)-numel(app.poly_pars))/no_of_par;
+                %
+                %                 else
+                no_of_bands = (numel(par))/no_of_par;
+
 
                 par_map = 1:no_of_par;
                 par_map = repmat(par_map,no_of_bands,1);
+
+                par_poly = par(no_of_bands*no_of_par+1:end);
 
                 for k = 2 : no_of_bands
                     par_map(k,:) = par_map(k,:) + (k-1)*no_of_par;
@@ -634,6 +658,11 @@ classdef GelBox_exported < matlab.apps.AppBase
                 for t = 1 : no_of_bands
                     y_fit = y_fit + y_bands(:,t);
                 end
+
+                %                 if strcmp(app.BackgroundSubtractionDropDown.Value,'Polynomial Fitting')
+                %                     y_fit = y_fit + polyval(par_poly,(0:numel(x)-1)');
+                %                 end
+
 
             end
             function y=skewed_Gaussian(x,x0,A,gamma,skew1)
@@ -668,11 +697,58 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.NumberofBandsSpinner.Value = 1;
 
             % Reset box controls
-            app.DeleteBoxButton.Enable = 0;
             control_strings = {'1'};
             app.BoxSelectionDropDown.Items = control_strings;
             app.BoxSelectionDropDown.Value = control_strings{1};
 
+        end
+
+        function BackgroundCorrection(app,x,method,box_no)
+            switch char(method)
+                case 'Cubic Smoothing Spline (CSS)'
+                    number_of_elements = numel(x);
+                    fraction = app.FractionSpinner.Value/100;
+                    fraction_ix = ceil(fraction*number_of_elements);
+                    ix_1 = 1:fraction_ix;
+                    ix_2 = number_of_elements:-1:(number_of_elements - fraction_ix + 1);
+                    app.c_x = [];
+                    app.c_y = [];
+                    app.c_x = [ix_1 ix_2];
+                    app.c_y = x(app.c_x);
+                    s = app.SmoothingEditField.Value;
+                    app.gel_data.background(box_no).x_back = csaps(app.c_x,app.c_y,s,0:numel(x)-1)';
+                    app.gel_data.settings.background.method{box_no} = char(method);
+                    app.gel_data.settings.background.css_fraction(box_no) = fraction;
+                    app.gel_data.settings.background.css_smoothing(box_no) = s;
+                    app.gel_data.settings.background.rb_size(box_no) = 0;
+                    app.background_token(box_no) = 1;
+                case 'Linear (LIN)'
+                    app.c_x = [];
+                    app.c_y = [];
+                    app.gel_data.background(box_no).x_back = linspace(x(1),x(end),numel(x));
+                    app.gel_data.background(box_no).x_back = app.gel_data.background(box_no).x_back';
+                    app.gel_data.settings.background.method{box_no} = char(method);
+                    app.gel_data.settings.background.css_fraction(box_no) = 0;
+                    app.gel_data.settings.background.css_smoothing(box_no) = 0;
+                    app.gel_data.settings.background.rb_size(box_no) = 0;
+                    app.background_token(box_no) = 1;
+                case 'Rolling Ball (RB)'
+                    app.c_x = [];
+                    app.c_y = [];
+                    radius = app.RollingBallSizeSpinner.Value;
+                    se = strel('disk', radius, 0);
+                    im_close = [];
+                    im_close = imclose(app.d.box(box_no).inset,se);
+                    im_close = imcomplement(im_close);
+                    mean_imclose = mean(im_close,2);
+                    mean_imclose = flipud(mean_imclose);
+                    app.gel_data.background(box_no).x_back = mean_imclose;
+                    app.gel_data.settings.background.method{box_no} = char(method);
+                    app.gel_data.settings.background.rb_size(box_no) = radius;
+                    app.gel_data.settings.background.css_fraction(box_no) = 0;
+                    app.gel_data.settings.background.css_smoothing(box_no) = 0;
+                    app.background_token(box_no) = 1;
+            end
         end
     end
 
@@ -686,10 +762,9 @@ classdef GelBox_exported < matlab.apps.AppBase
             addpath(genpath('utilities'));
             movegui(app.GelBoxUIFigure,'center')
             app.gel_data.boxes = [];
-            
+
             app.MedianFilterSizeSpinner.Enable = 'off';
             app.MedianFilterSizeSpinnerLabel.Enable = 'off';
-
 
             colormap(app.GelBoxUIFigure, 'gray');
             app.fitting_options.shared_shape = true(1,1);
@@ -745,32 +820,18 @@ classdef GelBox_exported < matlab.apps.AppBase
                         delete(app.gel_data.boxes.box_handle(i));
                     end
                 end
-                app.DeleteBoxButton.Enable = 1;
                 app.DataAnalysisMenu.Enable = 1;
 
                 temp = load(fullfile(path_string,file_string),'-mat','save_data');
                 save_data = temp.save_data;
-                
-                if ~isfield(save_data,'settings')
-                    new_save_data.boxes.box_position = save_data.box_position;
-                    new_save_data.fitting.fitting_mode = save_data.fitting_mode;
-                    new_save_data.fitting.par_est = save_data.par_est;
-                    new_save_data.fitting.par_fit = save_data.par_fit;
-                    new_save_data.fitting.par_con = save_data.par_con;
-                    new_save_data.image.image_file_string = save_data.image_file_string;
-                    new_save_data.image.im_data = save_data.im_data;
-                    new_save_data.image.imfinfo = save_data.imfinfo;
-                    new_save_data.image.original_image = save_data.original_image;
-                    new_save_data.image.adjusted_image = save_data.adjusted_image;
-                    new_save_data.settings.image_adjustments = save_data.image_adjustments;
-                    new_save_data.settings.background.method = {};
-                    new_save_data.settings.background.size = [];
-                    for i = 1 : numel(new_save_data.fitting.par_fit)
-                        new_save_data.settings.background.method{i} = save_data.background_method;
-                        new_save_data.settings.background.size(i) = save_data.background_size;
+
+                if ~any(contains(save_data.settings.background.method,'('))
+                    
+                    for i = 1:numel(save_data.settings.background.method)
+                        save_data.settings.background.method{i} = "Rolling Ball (RB)";
                     end
-                    save_data = [];
-                    save_data = new_save_data;
+                    save_data.settings.background.rb_size = save_data.settings.background.size;
+                    save_data.settings.background = rmfield(save_data.settings.background,'size');
                 end
 
                 % Restore
@@ -793,10 +854,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_image_axis,[]);
 
                 n=size(save_data.boxes.box_position,1);
-                                
-                if ~isfield(app.gel_data.settings,'filtering')
-                    app.gel_data.settings.filtering.median.size = 3*ones(1,n);
-                end
                 control_strings = [];
                 app.gel_data.fitting.par_update = zeros(1,n);
 
@@ -826,21 +883,40 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'all';
 
                     end
-
                     p = app.gel_data.boxes.box_handle(i).Position;
                     app.gel_data.boxes.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
                         'Parent',app.gel_image_axis,'FontWeight',"bold","FontSize",18);
-
                     app.gel_data.old_width = p(3);
                     app.gel_data.old_height = p(4);
-
                     i=i;
                     addlistener(app.gel_data.boxes.box_handle(i),"MovingROI",@(src,evt) new_box_position2(evt));
                 end
-                app.BackgroundSubtractionDropDown.Value = save_data.settings.background.method(1);
-                app.RollingBallSizeSpinner.Value = save_data.settings.background.size(1);
+                back_method = app.gel_data.settings.background.method{1};
+                back_method = regexp(back_method,'[^()]*','match');
+                tab_name = sprintf('%sTab',back_method{2});
+                app.BackgroundTabGroup.SelectedTab = app.(tab_name);
+                
+                old_fields = {'size','fraction','smoothing'};
+                new_fields = {'rb_size','css_fraction','css_smoothing'};
+                for i = 1 : numel(old_fields)
+                    if isfield(app.gel_data.settings.background,(old_fields{i}))
+                        app.gel_data.settings.background.(new_fields{i}) = app.gel_data.settings.background.(old_fields{i});
+                        app.gel_data.settings.background = rmfield(app.gel_data.settings.background, old_fields{i});
+                    end
+                end
+                switch back_method{2}
+                    case 'CSS'
+                        app.FractionSpinner.Value = 100*app.gel_data.settings.background.css_fraction(1);
+                        app.SmoothingEditField.Value = app.gel_data.settings.background.css_smoothing(1);
+                    case 'RB'
+                        app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.rb_size(1);
+                end                                
                 app.NumberofBandsSpinner.Value = save_data.fitting.fitting_mode(1);
-                if app.gel_data.settings.filtering.median.size(1)
+                drawnow;
+                app.load_filters = 1;
+                UpdateDisplay(app)
+                app.par_est_na = 0;
+                if app.gel_data.settings.filtering.median.size(1) ~= 0
                     app.ApplyFilterCheckBox.Value = 1;
                     app.MedianFilterSizeSpinner.Enable = ' on';
                     app.MedianFilterSizeSpinnerLabel.Enable = 'on';
@@ -848,12 +924,9 @@ classdef GelBox_exported < matlab.apps.AppBase
                 else
                     app.ApplyFilterCheckBox.Value = 0;
                     app.MedianFilterSizeSpinner.Enable = ' off';
-                    app.MedianFilterSizeSpinnerLabel.Enable = 'off';    
+                    app.MedianFilterSizeSpinnerLabel.Enable = 'off';
                 end
-                app.gel_data.settings = save_data.settings;
-                drawnow;
-                UpdateDisplay(app)
-                app.par_est_na = 0;
+                app.load_filters = 0;
             end
 
 
@@ -898,7 +971,6 @@ classdef GelBox_exported < matlab.apps.AppBase
         % Button pushed function: NewBoxButton
         function NewBoxButtonPushed(app, event)
             if (~isfield(app.gel_data.boxes,'box_handle'))
-                app.DeleteBoxButton.Enable = 1;
                 n=1;
                 app.gel_data.boxes.box_handle(n) = drawrectangle(app.gel_image_axis);
                 p = app.gel_data.boxes.box_handle(n).Position;
@@ -907,9 +979,9 @@ classdef GelBox_exported < matlab.apps.AppBase
             else
                 n = 1 + numel(app.gel_data.boxes.box_handle);
                 p = app.gel_data.boxes.box_handle(n-1).Position;
-
+                offset = size(app.gel_data.image.im_data,2)*0.05;
                 app.gel_data.boxes.box_handle(n) = images.roi.Rectangle(app.gel_image_axis, ...
-                    'Position',p + [150,0,0,0]);
+                    'Position',p + [offset,0,0,0]);
                 for i=1:(n-1)
                     app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'none';
                 end
@@ -939,7 +1011,6 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BoxSelectionDropDown.Items = control_strings;
             app.BoxSelectionDropDown.Value = control_strings{n};
 
-            app.DeleteBoxButton.Enable = 1;
             app.SelectedBoxInformationMenu.Enable = 1;
             app.new_box = n;
             app.single_box_callback = 1;
@@ -954,6 +1025,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.single_box_callback = 0;
 
             function new_box_position(evt);
+                app.gel_data.fitting.par_update(i) = 0;
                 if (isfield(app.gel_data.boxes,'box_position'))
                     box_position = app.gel_data.boxes.box_position;
                     [r,c]=size(box_position);
@@ -1020,9 +1092,9 @@ classdef GelBox_exported < matlab.apps.AppBase
                 return
             end
             save_fields = {'image','fitting','settings'};
-            
+
             for i = 1 : numel(save_fields)
-            save_data.(save_fields{i}) = app.gel_data.(save_fields{i});
+                save_data.(save_fields{i}) = app.gel_data.(save_fields{i});
             end
 
             number_of_boxes = size(save_data.boxes.box_position,1);
@@ -1030,7 +1102,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             for i = 1:number_of_boxes
                 save_data.fitting.fitting_mode(i) = app.d.box(i).fitting_mode;
             end
-            
+
             [file_string,path_string] = uiputfile2( ...
                 {'*.gbx','GelBox file';'*.gdf','Gel data file'},'Select File Name To Save Analysis');
 
@@ -1068,98 +1140,23 @@ classdef GelBox_exported < matlab.apps.AppBase
                 app.ApplyFilterCheckBox.Value = 0;
                 app.MedianFilterSizeSpinner.Enable = 'off';
                 app.MedianFilterSizeSpinnerLabel.Enable = 'off';
+                app.gel_data.settings.filtering.median.size(selected_box) = 0;
             end
-            app.BackgroundSubtractionDropDown.Value = app.gel_data.settings.background.method(selected_box);
-            background_method = app.BackgroundSubtractionDropDown.Value;
-            
-            switch background_method
-                case 'Rolling Ball'
-                    app.RollingBallSizeSpinner.Visible = 1;
-                    app.RollingBallSizeSpinnerLabel.Visible = 1;
-                    app.DensityValueEditField.Visible = 0;
-                    app.DensityValueEditFieldLabel.Visible = 0;
-                    app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.size(selected_box);
-                case 'Linear'
-                    app.RollingBallSizeSpinner.Visible = 0;
-                    app.RollingBallSizeSpinnerLabel.Visible = 0;
-                    app.DensityValueEditField.Visible = 0;
-                    app.DensityValueEditFieldLabel.Visible = 0;
-                case 'Constant Value'
-                    app.DensityValueEditField.Visible = 1;
-                    app.DensityValueEditFieldLabel.Visible = 1;
-                    app.RollingBallSizeSpinner.Visible = 0;
-                    app.RollingBallSizeSpinnerLabel.Visible = 0;
-                    app.DensityValueEditField.Value = app.gel_data.settings.background.size(selected_box);
+
+            back_method = app.gel_data.settings.background.method{selected_box};
+            back_method = regexp(back_method,'[^()]*','match');
+            tab_name = sprintf('%sTab',back_method{2});
+            app.BackgroundTabGroup.SelectedTab = app.(tab_name);
+            switch back_method{2}
+                case 'CSS'
+                    app.FractionSpinner.Value = 100*app.gel_data.settings.background.css_fraction(selected_box);
+                    app.SmoothingEditField.Value = app.gel_data.settings.background.css_smoothing(selected_box);
+                case 'RB'
+                    app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.rb_size(selected_box);
             end
             app.single_box_callback = 1;
             UpdateDisplay(app)
             app.single_box_callback = 0;
-        end
-
-        % Button pushed function: DeleteBoxButton
-        function DeleteBoxButtonPushed(app, event)
-            selected_box = str2num(app.BoxSelectionDropDown.Value);
-            control_strings = app.BoxSelectionDropDown.Items;
-            if numel(app.gel_data.boxes) == 1
-                delete(app.gel_data.boxes.box_handle(selected_box))
-                rm = {'box_handle','box_label','box_position'};
-                app.gel_data.boxes = rmfield(app.gel_data,'box_handle');
-                app.BoxSelectionDropDown.Items = {};
-                app.BoxSelectionDropDown.Value = {};
-                app.BoxSelectionDropDown.Placeholder = 'No Data';
-            else
-            delete(app.gel_data.boxes.box_handle(selected_box))
-            delete(app.gel_data.boxes.box_label(selected_box))
-            field_names = fieldnames(app.gel_data.fitting.par_est);
-
-            for u = 1 : numel(field_names)
-                app.gel_data.fitting.par_est(selected_box).(field_names{u}) = [];
-            end
-
-            app.gel_data.boxes.box_handle(selected_box) = [];
-            app.gel_data.boxes.box_label(selected_box) = [];
-            app.gel_data.boxes.box_position(selected_box) = [];
-
-            n = numel(control_strings) - 1;
-            control_strings = {};
-            for i=1:n
-                control_strings{i} = sprintf('%.0f',i);
-            end
-
-            app.BoxSelectionDropDown.Items = control_strings;
-            if selected_box == 1
-                app.BoxSelectionDropDown.Value = num2str(selected_box);
-            else
-                app.BoxSelectionDropDown.Value = num2str(selected_box-1);
-            end
-
-            new_selected_box = str2num(app.BoxSelectionDropDown.Value);
-
-            for i=1:n
-                delete(app.gel_data.boxes.box_label(i));
-                if (i~=new_selected_box)
-                    app.gel_data.boxes.box_handle(i).Color = [1 0 0];
-                    app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'none';
-                else
-                    app.gel_data.boxes.box_handle(i).Color = [0 1 0];
-                    app.gel_data.boxes.box_handle(i).InteractionsAllowed = 'all';
-                end
-            end
-
-            app.gel_data.boxes.box_label = [];
-            for i = 1:n
-                p = app.gel_data.boxes.box_handle(i).Position;
-                app.gel_data.boxes.box_label(i) = text(p(1)+p(3),p(2)-50,sprintf('%.0f',i), ...
-                    'Parent',app.gel_image_axis,'FontWeight',"bold",'FontSize',18);
-
-                app.gel_data.old_width = p(3);
-                app.gel_data.old_height = p(4);
-            end
-
-            app.single_box_callback = 1;
-            UpdateDisplay(app)
-            app.single_box_callback = 0;
-            end
         end
 
         % Menu selected function: ExportResultsMenu
@@ -1175,11 +1172,9 @@ classdef GelBox_exported < matlab.apps.AppBase
                 o.image_file{i} = app.gel_data.image.image_file_string;
                 o.total_area(i) = app.gel_data.box_data(i).total_area;
                 o.background_method{i} = app.gel_data.settings.background.method{i};
-                if strcmp(o.background_method{i},'Rolling Ball')
-                    o.background_size(i) = app.gel_data.settings.background.size(i);
-                elseif strcmp(o.background_method{i}, 'Constant Value')
-                    o.background_size(i) = app.gel_data.settings.background.size(i);
-                end
+                o.background_size(i) = app.gel_data.settings.background.rb_size(i);
+                o.background_fraction(i) = app.gel_data.settings.background.css_fraction(i);
+                o.background_smoothing(i) = app.gel_data.settings.background.css_smoothing(i);
                 o.median_filter_size(i) = app.gel_data.settings.filtering.median.size(i);
                 o.background_area(i) = app.gel_data.box_data(i).background_area;
                 num_of_bands = numel(app.gel_data.box_data(i).band_area);
@@ -1196,119 +1191,119 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                     name = sprintf('band_area_%i',c);
                     o.(name)(i) = app.gel_data.summary(i).area(c);
-                    
-                    
-%                     l = length(o.(name)(c));
+
+
+                    %                     l = length(o.(name)(c));
                 end
-                
+
                 if num_of_bands < max_num_bands
                     for count = num_of_bands + 1 : max_num_bands
                         name = sprintf('band_area_%i',count);
                         o.(name)(i) = 0;
                     end
                 end
-                
-                
+
+
             end
 
             [file_string,path_string] = uiputfile2( ...
                 {'*.xlsx','Excel file'},'Enter Excel File Name For Analysis Results');
             layout_table = [];
             if (path_string~=0)
-            d_out = o;
-            names = fieldnames(d_out);
-            [file_string_layout,path_string_layout] = uigetfile2( ...
-                {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
-            
-            if (path_string_layout~=0)
-                
-                layout_file = fullfile(path_string_layout,file_string_layout);
-                layout_table = readtable(layout_file);
-                layout_names = layout_table.Properties.VariableNames;
-                
-                while ~any(strcmpi(names,'box'))
-                    message = ["Gel layout does not have ""Box"" as one of the columns.","Please make sure to add ""Box"" to Excel file."];
-                    selection = uiconfirm(app.GelBoxUIFigure,message,"Reload Gel Layout",...
-                        "Options",["Reload Gel Layout","Skip"],"DefaultOption",1,"CancelOption",2,'Icon','error');
-                    
-                    if ~strcmp(selection,'Skip')
-                        [file_string_layout,path_string_layout] = uigetfile2( ...
-                            {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
-                        
-                        layout_file = fullfile(path_string_layout,file_string_layout);
-                        layout_table = readtable(layout_file);
-                    else
-                        
-                        layout_table = [];
-                        return
-                    end
-                    
-                end
-            end
-            
-            for j = 1 : length(d_out)
-                for i = 1 : numel(names)
+                d_out = o;
+                names = fieldnames(d_out);
+                [file_string_layout,path_string_layout] = uigetfile2( ...
+                    {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
 
-                    [row,col] = size(d_out(j).(names{i}));
+                if (path_string_layout~=0)
 
-                    if row == 1 && col ~= 1
-                        d_out(j).(names{i}) = (d_out(j).(names{i}))';
+                    layout_file = fullfile(path_string_layout,file_string_layout);
+                    layout_table = readtable(layout_file);
+                    layout_names = layout_table.Properties.VariableNames;
+
+                    while ~any(strcmpi(names,'box'))
+                        message = ["Gel layout does not have ""Box"" as one of the columns.","Please make sure to add ""Box"" to Excel file."];
+                        selection = uiconfirm(app.GelBoxUIFigure,message,"Reload Gel Layout",...
+                            "Options",["Reload Gel Layout","Skip"],"DefaultOption",1,"CancelOption",2,'Icon','error');
+
+                        if ~strcmp(selection,'Skip')
+                            [file_string_layout,path_string_layout] = uigetfile2( ...
+                                {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
+
+                            layout_file = fullfile(path_string_layout,file_string_layout);
+                            layout_table = readtable(layout_file);
+                        else
+
+                            layout_table = [];
+                            return
+                        end
+
                     end
                 end
 
-            end
+                for j = 1 : length(d_out)
+                    for i = 1 : numel(names)
 
-            output_file = fullfile(path_string,file_string);
+                        [row,col] = size(d_out(j).(names{i}));
 
-            try
-                delete(output_file);
-            end
-            
-            if ~isempty(layout_table)
-                for i = 1 : numel(layout_names)
-                    if strcmpi(layout_names{i},'box')
-                        layout_table = renamevars(layout_table,layout_names{i},'box');
+                        if row == 1 && col ~= 1
+                            d_out(j).(names{i}) = (d_out(j).(names{i}))';
+                        end
+                    end
+
+                end
+
+                output_file = fullfile(path_string,file_string);
+
+                try
+                    delete(output_file);
+                end
+
+                if ~isempty(layout_table)
+                    for i = 1 : numel(layout_names)
+                        if strcmpi(layout_names{i},'box')
+                            layout_table = renamevars(layout_table,layout_names{i},'box');
+                        end
+                    end
+                    T = innerjoin(layout_table,struct2table(d_out));
+                    writetable(T,output_file,'Sheet','Summary')
+                else
+                    writetable(struct2table(d_out),output_file,'Sheet','Summary')
+                end
+
+                summary = app.gel_data.summary;
+
+                for i = 1:n
+                    i_name = sprintf('box_%i',i);
+                end
+                remf = {'area','r_squared','inset','summary_inset','box_position'};
+                summary = rmfield(summary,remf);
+
+                for box = 1 : size(summary,2)
+                    for i = 1 : max(o.num_of_bands)
+                        name = sprintf('band_%i',i);
+                        if size(summary(box).band,2) < i
+                            summary(box).(name) = NaN * ones(1,size(summary(box).band(:,1),1));
+                        else
+                            summary(box).(name) = summary(box).band(:,i);
+                        end
                     end
                 end
-                T = innerjoin(layout_table,struct2table(d_out));
-                writetable(T,output_file,'Sheet','Summary')
-            else
-                writetable(struct2table(d_out),output_file,'Sheet','Summary')
-            end
 
-            summary = app.gel_data.summary;
+                summary = rmfield(summary,'band');
+                names = fieldnames(summary);
+                for j = 1 : length(summary)
+                    for i = 1 : numel(names)
 
-            for i = 1:n
-                i_name = sprintf('box_%i',i);
-            end
-            remf = {'area','r_squared','inset','summary_inset','box_position'};
-            summary = rmfield(summary,remf);
+                        [row,col] = size(summary(j).(names{i}));
 
-            for box = 1 : size(summary,2)
-                for i = 1 : max(o.num_of_bands)
-                    name = sprintf('band_%i',i);
-                    if size(summary(box).band,2) < i
-                        summary(box).(name) = NaN * ones(1,size(summary(box).band(:,1),1));
-                    else
-                        summary(box).(name) = summary(box).band(:,i);
+                        if row == 1 && col ~= 1
+                            summary(j).(names{i}) = (summary(j).(names{i}))';
+                        end
                     end
+                    sheet = sprintf('box_%i',j);
+                    writetable(struct2table(summary(j)),output_file,'Sheet',sheet)
                 end
-            end
-
-            summary = rmfield(summary,'band');
-            names = fieldnames(summary);
-            for j = 1 : length(summary)
-                for i = 1 : numel(names)
-
-                    [row,col] = size(summary(j).(names{i}));
-
-                    if row == 1 && col ~= 1
-                        summary(j).(names{i}) = (summary(j).(names{i}))';
-                    end
-                end
-                sheet = sprintf('box_%i',j);
-                writetable(struct2table(summary(j)),output_file,'Sheet',sheet)
-            end
             end
 
         end
@@ -1368,42 +1363,6 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.single_box_callback = 0;
         end
 
-        % Value changed function: BackgroundSubtractionDropDown
-        function BackgroundSubtractionDropDownValueChanged(app, event)
-            value = app.BackgroundSubtractionDropDown.Value;
-            switch value
-                case 'Rolling Ball'
-                    app.RollingBallSizeSpinner.Visible = 1;
-                    app.RollingBallSizeSpinnerLabel.Visible = 1;
-                    app.DensityValueEditField.Visible = 0;
-                    app.DensityValueEditFieldLabel.Visible = 0;
-                case 'Linear'
-                    app.RollingBallSizeSpinner.Visible = 0;
-                    app.RollingBallSizeSpinnerLabel.Visible = 0;
-                    app.DensityValueEditField.Visible = 0;
-                    app.DensityValueEditFieldLabel.Visible = 0;
-                case 'Constant Value'
-                    app.DensityValueEditField.Visible = 1;
-                    app.DensityValueEditFieldLabel.Visible = 1;
-                    app.RollingBallSizeSpinner.Visible = 0;
-                    app.RollingBallSizeSpinnerLabel.Visible = 0;
-            end
-            box = str2num(app.BoxSelectionDropDown.Value);
-            app.background_token(box) = 0;
-            app.single_box_callback = 1;
-            UpdateDisplay(app)
-            app.single_box_callback = 0;
-        end
-
-        % Value changed function: DensityValueEditField
-        function DensityValueEditFieldValueChanged(app, event)
-            value = app.DensityValueEditField.Value;
-            app.background_token = 0;
-            app.single_box_callback = 1;
-            UpdateDisplay(app)
-            app.single_box_callback = 0;
-        end
-
         % Value changed function: MedianFilterSizeSpinner
         function MedianFilterSizeSpinnerValueChanged(app, event)
             value = app.MedianFilterSizeSpinner.Value;
@@ -1424,6 +1383,48 @@ classdef GelBox_exported < matlab.apps.AppBase
                 app.MedianFilterSizeSpinner.Enable = 'off';
                 app.MedianFilterSizeSpinnerLabel.Enable = 'off';
             end
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+        end
+
+        % Value changed function: FractionSpinner
+        function FractionSpinnerValueChanged(app, event)
+            value = app.FractionSpinner.Value;
+            box = str2num(app.BoxSelectionDropDown.Value);
+            app.background_token(box) = 0;
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+        end
+
+        % Value changed function: OrderSpinner
+        function OrderSpinnerValueChanged(app, event)
+            value = app.OrderSpinner.Value;
+            box = str2num(app.BoxSelectionDropDown.Value);
+            app.background_token(box) = 0;
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+        end
+
+        % Selection change function: BackgroundTabGroup
+        function BackgroundTabGroupSelectionChanged(app, event)
+            selectedTab = app.BackgroundTabGroup.SelectedTab;
+            if ~isempty(app.BoxSelectionDropDown.Value)
+                box = str2num(app.BoxSelectionDropDown.Value);
+                app.background_token(box) = 0;
+                app.single_box_callback = 1;
+                UpdateDisplay(app)
+                app.single_box_callback = 0;
+            end
+        end
+
+        % Value changed function: SmoothingEditField
+        function SmoothingEditFieldValueChanged(app, event)
+            value = app.SmoothingEditField.Value;
+            box = str2num(app.BoxSelectionDropDown.Value);
+            app.background_token(box) = 0;
             app.single_box_callback = 1;
             UpdateDisplay(app)
             app.single_box_callback = 0;
@@ -1497,77 +1498,56 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.OpticalDensitiesPanel.Title = 'Optical Densities';
             app.OpticalDensitiesPanel.Position = [848 289 848 314];
 
-            % Create raw_density
-            app.raw_density = uiaxes(app.OpticalDensitiesPanel);
-            xlabel(app.raw_density, 'Optical Density (A.U.)')
-            ylabel(app.raw_density, 'Pixel')
-            app.raw_density.Position = [163 47 254 209];
-
-            % Create background_corrected_raw_density
-            app.background_corrected_raw_density = uiaxes(app.OpticalDensitiesPanel);
-            xlabel(app.background_corrected_raw_density, 'Optical Density (A.U.)')
-            ylabel(app.background_corrected_raw_density, 'Pixel')
-            app.background_corrected_raw_density.YColor = [0.9412 0.9412 0.9412];
-            app.background_corrected_raw_density.Position = [401 47 254 209];
-
             % Create box_inset
             app.box_inset = uiaxes(app.OpticalDensitiesPanel);
             xlabel(app.box_inset, 'Optical Density')
             ylabel(app.box_inset, 'Pixel')
             app.box_inset.XColor = [0.9412 0.9412 0.9412];
             app.box_inset.YColor = [0.9412 0.9412 0.9412];
-            app.box_inset.Position = [4 47 150 209];
+            app.box_inset.Position = [11 47 150 209];
+
+            % Create raw_density
+            app.raw_density = uiaxes(app.OpticalDensitiesPanel);
+            xlabel(app.raw_density, 'Optical Density (A.U.)')
+            ylabel(app.raw_density, 'Pixel')
+            app.raw_density.Position = [165 47 234 209];
+
+            % Create background_corrected_raw_density
+            app.background_corrected_raw_density = uiaxes(app.OpticalDensitiesPanel);
+            xlabel(app.background_corrected_raw_density, 'Optical Density (A.U.)')
+            app.background_corrected_raw_density.YColor = [0.9412 0.9412 0.9412];
+            app.background_corrected_raw_density.Position = [396 46 234 209];
+
+            % Create ApplyFilterCheckBox
+            app.ApplyFilterCheckBox = uicheckbox(app.OpticalDensitiesPanel);
+            app.ApplyFilterCheckBox.ValueChangedFcn = createCallbackFcn(app, @ApplyFilterCheckBoxValueChanged, true);
+            app.ApplyFilterCheckBox.Text = 'Apply Filter';
+            app.ApplyFilterCheckBox.Position = [63 48 82 22];
 
             % Create BoxZoomLabel
             app.BoxZoomLabel = uilabel(app.OpticalDensitiesPanel);
             app.BoxZoomLabel.HorizontalAlignment = 'center';
             app.BoxZoomLabel.WordWrap = 'on';
-            app.BoxZoomLabel.Position = [34 260 126 22];
+            app.BoxZoomLabel.Position = [41 260 126 22];
             app.BoxZoomLabel.Text = 'Box Zoom';
 
-            % Create RawOpticalDensityLabel_2
-            app.RawOpticalDensityLabel_2 = uilabel(app.OpticalDensitiesPanel);
-            app.RawOpticalDensityLabel_2.HorizontalAlignment = 'center';
-            app.RawOpticalDensityLabel_2.WordWrap = 'on';
-            app.RawOpticalDensityLabel_2.Position = [238 260 126 22];
-            app.RawOpticalDensityLabel_2.Text = 'Raw Optical Density';
+            % Create MedianFilterSizeSpinnerLabel
+            app.MedianFilterSizeSpinnerLabel = uilabel(app.OpticalDensitiesPanel);
+            app.MedianFilterSizeSpinnerLabel.HorizontalAlignment = 'right';
+            app.MedianFilterSizeSpinnerLabel.Position = [22 17 102 22];
+            app.MedianFilterSizeSpinnerLabel.Text = 'Median Filter Size';
 
-            % Create BackgroundCorrectedOpticalDensityLabel_2
-            app.BackgroundCorrectedOpticalDensityLabel_2 = uilabel(app.OpticalDensitiesPanel);
-            app.BackgroundCorrectedOpticalDensityLabel_2.HorizontalAlignment = 'center';
-            app.BackgroundCorrectedOpticalDensityLabel_2.WordWrap = 'on';
-            app.BackgroundCorrectedOpticalDensityLabel_2.Position = [477 257 126 28];
-            app.BackgroundCorrectedOpticalDensityLabel_2.Text = 'Background Corrected Optical Density';
-
-            % Create TotalAreaEditFieldLabel
-            app.TotalAreaEditFieldLabel = uilabel(app.OpticalDensitiesPanel);
-            app.TotalAreaEditFieldLabel.Position = [665 241 59 22];
-            app.TotalAreaEditFieldLabel.Text = 'Total Area';
-
-            % Create TotalAreaField
-            app.TotalAreaField = uieditfield(app.OpticalDensitiesPanel, 'numeric');
-            app.TotalAreaField.ValueDisplayFormat = '%.2f';
-            app.TotalAreaField.Editable = 'off';
-            app.TotalAreaField.HorizontalAlignment = 'center';
-            app.TotalAreaField.Position = [743 241 100 22];
-
-            % Create RollingBallSizeSpinnerLabel
-            app.RollingBallSizeSpinnerLabel = uilabel(app.OpticalDensitiesPanel);
-            app.RollingBallSizeSpinnerLabel.WordWrap = 'on';
-            app.RollingBallSizeSpinnerLabel.Position = [665 153 52 33];
-            app.RollingBallSizeSpinnerLabel.Text = 'Rolling Ball Size';
-
-            % Create RollingBallSizeSpinner
-            app.RollingBallSizeSpinner = uispinner(app.OpticalDensitiesPanel);
-            app.RollingBallSizeSpinner.Limits = [1 Inf];
-            app.RollingBallSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @RollingBallSizeSpinnerValueChanged, true);
-            app.RollingBallSizeSpinner.Position = [743 157 100 22];
-            app.RollingBallSizeSpinner.Value = 80;
+            % Create MedianFilterSizeSpinner
+            app.MedianFilterSizeSpinner = uispinner(app.OpticalDensitiesPanel);
+            app.MedianFilterSizeSpinner.Limits = [3 Inf];
+            app.MedianFilterSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @MedianFilterSizeSpinnerValueChanged, true);
+            app.MedianFilterSizeSpinner.Position = [131 17 55 22];
+            app.MedianFilterSizeSpinner.Value = 3;
 
             % Create BackgroundCorrAreaLabel
             app.BackgroundCorrAreaLabel = uilabel(app.OpticalDensitiesPanel);
             app.BackgroundCorrAreaLabel.WordWrap = 'on';
-            app.BackgroundCorrAreaLabel.Position = [665 65 81 30];
+            app.BackgroundCorrAreaLabel.Position = [651 181 81 30];
             app.BackgroundCorrAreaLabel.Text = 'Background Corr. Area';
 
             % Create BackgroundCorrAreaField
@@ -1575,12 +1555,24 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BackgroundCorrAreaField.ValueDisplayFormat = '%.2f';
             app.BackgroundCorrAreaField.Editable = 'off';
             app.BackgroundCorrAreaField.HorizontalAlignment = 'center';
-            app.BackgroundCorrAreaField.Position = [743 69 100 22];
+            app.BackgroundCorrAreaField.Position = [729 185 109 22];
+
+            % Create TotalAreaEditFieldLabel
+            app.TotalAreaEditFieldLabel = uilabel(app.OpticalDensitiesPanel);
+            app.TotalAreaEditFieldLabel.Position = [651 258 59 22];
+            app.TotalAreaEditFieldLabel.Text = 'Total Area';
+
+            % Create TotalAreaField
+            app.TotalAreaField = uieditfield(app.OpticalDensitiesPanel, 'numeric');
+            app.TotalAreaField.ValueDisplayFormat = '%.2f';
+            app.TotalAreaField.Editable = 'off';
+            app.TotalAreaField.HorizontalAlignment = 'center';
+            app.TotalAreaField.Position = [729 258 109 22];
 
             % Create BackgroundAreaLabel
             app.BackgroundAreaLabel = uilabel(app.OpticalDensitiesPanel);
             app.BackgroundAreaLabel.WordWrap = 'on';
-            app.BackgroundAreaLabel.Position = [665 104 81 30];
+            app.BackgroundAreaLabel.Position = [651 221 81 30];
             app.BackgroundAreaLabel.Text = 'Background Area';
 
             % Create BackgroundAreaField
@@ -1588,56 +1580,95 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BackgroundAreaField.ValueDisplayFormat = '%.2f';
             app.BackgroundAreaField.Editable = 'off';
             app.BackgroundAreaField.HorizontalAlignment = 'center';
-            app.BackgroundAreaField.Position = [743 108 100 22];
+            app.BackgroundAreaField.Position = [729 225 109 22];
 
-            % Create DensityValueEditFieldLabel
-            app.DensityValueEditFieldLabel = uilabel(app.OpticalDensitiesPanel);
-            app.DensityValueEditFieldLabel.WordWrap = 'on';
-            app.DensityValueEditFieldLabel.Visible = 'off';
-            app.DensityValueEditFieldLabel.Position = [665 153 62 30];
-            app.DensityValueEditFieldLabel.Text = 'Density Value';
+            % Create BackgroundTabGroup
+            app.BackgroundTabGroup = uitabgroup(app.OpticalDensitiesPanel);
+            app.BackgroundTabGroup.Tooltip = {''};
+            app.BackgroundTabGroup.SelectionChangedFcn = createCallbackFcn(app, @BackgroundTabGroupSelectionChanged, true);
+            app.BackgroundTabGroup.Position = [651 37 188 97];
 
-            % Create DensityValueEditField
-            app.DensityValueEditField = uieditfield(app.OpticalDensitiesPanel, 'numeric');
-            app.DensityValueEditField.Limits = [0 Inf];
-            app.DensityValueEditField.ValueDisplayFormat = '%.2f';
-            app.DensityValueEditField.ValueChangedFcn = createCallbackFcn(app, @DensityValueEditFieldValueChanged, true);
-            app.DensityValueEditField.HorizontalAlignment = 'center';
-            app.DensityValueEditField.Visible = 'off';
-            app.DensityValueEditField.Position = [743 156 100 22];
-            app.DensityValueEditField.Value = 10;
+            % Create CSSTab
+            app.CSSTab = uitab(app.BackgroundTabGroup);
+            app.CSSTab.Tooltip = {'Cubic Smoothing Spline (CSS)'};
+            app.CSSTab.Title = 'CSS';
 
-            % Create BackgroundSubtractionDropDownLabel
-            app.BackgroundSubtractionDropDownLabel = uilabel(app.OpticalDensitiesPanel);
-            app.BackgroundSubtractionDropDownLabel.WordWrap = 'on';
-            app.BackgroundSubtractionDropDownLabel.Position = [665 193 114 37];
-            app.BackgroundSubtractionDropDownLabel.Text = 'Background Subtraction';
+            % Create FractionSpinnerLabel
+            app.FractionSpinnerLabel = uilabel(app.CSSTab);
+            app.FractionSpinnerLabel.HorizontalAlignment = 'right';
+            app.FractionSpinnerLabel.Position = [5 38 71 22];
+            app.FractionSpinnerLabel.Text = 'Fraction (%)';
 
-            % Create BackgroundSubtractionDropDown
-            app.BackgroundSubtractionDropDown = uidropdown(app.OpticalDensitiesPanel);
-            app.BackgroundSubtractionDropDown.Items = {'Rolling Ball', 'Linear', 'Constant Value', 'Cubic Spline', 'Polynomial', 'Polyline'};
-            app.BackgroundSubtractionDropDown.ValueChangedFcn = createCallbackFcn(app, @BackgroundSubtractionDropDownValueChanged, true);
-            app.BackgroundSubtractionDropDown.Position = [743 201 100 22];
-            app.BackgroundSubtractionDropDown.Value = 'Rolling Ball';
+            % Create FractionSpinner
+            app.FractionSpinner = uispinner(app.CSSTab);
+            app.FractionSpinner.Limits = [0 100];
+            app.FractionSpinner.ValueChangedFcn = createCallbackFcn(app, @FractionSpinnerValueChanged, true);
+            app.FractionSpinner.Position = [114 38 61 22];
+            app.FractionSpinner.Value = 10;
 
-            % Create ApplyFilterCheckBox
-            app.ApplyFilterCheckBox = uicheckbox(app.OpticalDensitiesPanel);
-            app.ApplyFilterCheckBox.ValueChangedFcn = createCallbackFcn(app, @ApplyFilterCheckBoxValueChanged, true);
-            app.ApplyFilterCheckBox.Text = 'Apply Filter';
-            app.ApplyFilterCheckBox.Position = [56 48 82 22];
+            % Create SmoothingEditFieldLabel
+            app.SmoothingEditFieldLabel = uilabel(app.CSSTab);
+            app.SmoothingEditFieldLabel.HorizontalAlignment = 'right';
+            app.SmoothingEditFieldLabel.Position = [5 8 63 22];
+            app.SmoothingEditFieldLabel.Text = 'Smoothing';
 
-            % Create MedianFilterSizeSpinnerLabel
-            app.MedianFilterSizeSpinnerLabel = uilabel(app.OpticalDensitiesPanel);
-            app.MedianFilterSizeSpinnerLabel.HorizontalAlignment = 'right';
-            app.MedianFilterSizeSpinnerLabel.Position = [15 17 102 22];
-            app.MedianFilterSizeSpinnerLabel.Text = 'Median Filter Size';
+            % Create SmoothingEditField
+            app.SmoothingEditField = uieditfield(app.CSSTab, 'numeric');
+            app.SmoothingEditField.Limits = [0 1];
+            app.SmoothingEditField.ValueChangedFcn = createCallbackFcn(app, @SmoothingEditFieldValueChanged, true);
+            app.SmoothingEditField.Position = [114 8 61 22];
+            app.SmoothingEditField.Value = 0.0001;
 
-            % Create MedianFilterSizeSpinner
-            app.MedianFilterSizeSpinner = uispinner(app.OpticalDensitiesPanel);
-            app.MedianFilterSizeSpinner.Limits = [3 Inf];
-            app.MedianFilterSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @MedianFilterSizeSpinnerValueChanged, true);
-            app.MedianFilterSizeSpinner.Position = [124 17 55 22];
-            app.MedianFilterSizeSpinner.Value = 3;
+            % Create LINTab
+            app.LINTab = uitab(app.BackgroundTabGroup);
+            app.LINTab.Tooltip = {'Linear (LIN)'};
+            app.LINTab.Title = 'LIN';
+
+            % Create NoAdditionalOptionsforLinearMethodLabel
+            app.NoAdditionalOptionsforLinearMethodLabel = uilabel(app.LINTab);
+            app.NoAdditionalOptionsforLinearMethodLabel.HorizontalAlignment = 'center';
+            app.NoAdditionalOptionsforLinearMethodLabel.WordWrap = 'on';
+            app.NoAdditionalOptionsforLinearMethodLabel.Position = [28 14 138 46];
+            app.NoAdditionalOptionsforLinearMethodLabel.Text = 'No Additional Options for Linear Method';
+
+            % Create RBTab
+            app.RBTab = uitab(app.BackgroundTabGroup);
+            app.RBTab.Tooltip = {'Rolling Ball (RB)'};
+            app.RBTab.Title = 'RB';
+
+            % Create RollingBallSizeSpinnerLabel
+            app.RollingBallSizeSpinnerLabel = uilabel(app.RBTab);
+            app.RollingBallSizeSpinnerLabel.WordWrap = 'on';
+            app.RollingBallSizeSpinnerLabel.Position = [9 19 90 33];
+            app.RollingBallSizeSpinnerLabel.Text = 'Rolling Ball Size';
+
+            % Create RollingBallSizeSpinner
+            app.RollingBallSizeSpinner = uispinner(app.RBTab);
+            app.RollingBallSizeSpinner.Limits = [1 Inf];
+            app.RollingBallSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @RollingBallSizeSpinnerValueChanged, true);
+            app.RollingBallSizeSpinner.Position = [114 25 66 22];
+            app.RollingBallSizeSpinner.Value = 80;
+
+            % Create RawOpticalDensityLabel_2
+            app.RawOpticalDensityLabel_2 = uilabel(app.OpticalDensitiesPanel);
+            app.RawOpticalDensityLabel_2.HorizontalAlignment = 'center';
+            app.RawOpticalDensityLabel_2.WordWrap = 'on';
+            app.RawOpticalDensityLabel_2.Position = [232 260 126 22];
+            app.RawOpticalDensityLabel_2.Text = 'Raw Optical Density';
+
+            % Create BackgroundCorrectedOpticalDensityLabel_2
+            app.BackgroundCorrectedOpticalDensityLabel_2 = uilabel(app.OpticalDensitiesPanel);
+            app.BackgroundCorrectedOpticalDensityLabel_2.HorizontalAlignment = 'center';
+            app.BackgroundCorrectedOpticalDensityLabel_2.WordWrap = 'on';
+            app.BackgroundCorrectedOpticalDensityLabel_2.Position = [464 257 126 28];
+            app.BackgroundCorrectedOpticalDensityLabel_2.Text = 'Background Corrected Optical Density';
+
+            % Create BackgroundSubtractionLabel
+            app.BackgroundSubtractionLabel = uilabel(app.OpticalDensitiesPanel);
+            app.BackgroundSubtractionLabel.HorizontalAlignment = 'center';
+            app.BackgroundSubtractionLabel.WordWrap = 'on';
+            app.BackgroundSubtractionLabel.Position = [641 134 152 28];
+            app.BackgroundSubtractionLabel.Text = 'Background Subtraction';
 
             % Create GelImagePanel
             app.GelImagePanel = uipanel(app.GelBoxUIFigure);
@@ -1663,17 +1694,10 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.NewBoxButton.Position = [130 537 100 22];
             app.NewBoxButton.Text = 'New Box';
 
-            % Create DeleteBoxButton
-            app.DeleteBoxButton = uibutton(app.GelImagePanel, 'push');
-            app.DeleteBoxButton.ButtonPushedFcn = createCallbackFcn(app, @DeleteBoxButtonPushed, true);
-            app.DeleteBoxButton.Enable = 'off';
-            app.DeleteBoxButton.Position = [247 537 101 22];
-            app.DeleteBoxButton.Text = 'Delete Box';
-
             % Create BoxSelectionDropDownLabel
             app.BoxSelectionDropDownLabel = uilabel(app.GelImagePanel);
             app.BoxSelectionDropDownLabel.HorizontalAlignment = 'center';
-            app.BoxSelectionDropDownLabel.Position = [354 537 98 22];
+            app.BoxSelectionDropDownLabel.Position = [242 537 98 22];
             app.BoxSelectionDropDownLabel.Text = 'Box Selection';
 
             % Create BoxSelectionDropDown
@@ -1681,51 +1705,51 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BoxSelectionDropDown.Items = {};
             app.BoxSelectionDropDown.ValueChangedFcn = createCallbackFcn(app, @BoxSelectionDropDownValueChanged, true);
             app.BoxSelectionDropDown.Placeholder = 'No Data';
-            app.BoxSelectionDropDown.Position = [451 537 100 22];
+            app.BoxSelectionDropDown.Position = [339 537 100 22];
             app.BoxSelectionDropDown.Value = {};
 
             % Create FittingPanel
             app.FittingPanel = uipanel(app.GelBoxUIFigure);
             app.FittingPanel.Title = 'Fitting';
-            app.FittingPanel.Position = [848 6 848 284];
+            app.FittingPanel.Position = [848 6 848 274];
 
             % Create background_corrected_raw_density_fit
             app.background_corrected_raw_density_fit = uiaxes(app.FittingPanel);
             xlabel(app.background_corrected_raw_density_fit, 'Optical Density (A.U.)')
             ylabel(app.background_corrected_raw_density_fit, 'Pixel')
             app.background_corrected_raw_density_fit.YColor = [0.9412 0.9412 0.9412];
-            app.background_corrected_raw_density_fit.Position = [255 13 254 209];
+            app.background_corrected_raw_density_fit.Position = [255 3 254 209];
 
             % Create raw_density_fit
             app.raw_density_fit = uiaxes(app.FittingPanel);
             xlabel(app.raw_density_fit, 'Optical Density (A.U.)')
             ylabel(app.raw_density_fit, 'Pixel')
-            app.raw_density_fit.Position = [11 13 254 209];
+            app.raw_density_fit.Position = [11 3 254 209];
 
             % Create RawOpticalDensityLabel
             app.RawOpticalDensityLabel = uilabel(app.FittingPanel);
             app.RawOpticalDensityLabel.HorizontalAlignment = 'center';
             app.RawOpticalDensityLabel.WordWrap = 'on';
-            app.RawOpticalDensityLabel.Position = [88 221 126 22];
+            app.RawOpticalDensityLabel.Position = [88 211 126 22];
             app.RawOpticalDensityLabel.Text = 'Raw Optical Density';
 
             % Create BackgroundCorrectedOpticalDensityLabel
             app.BackgroundCorrectedOpticalDensityLabel = uilabel(app.FittingPanel);
             app.BackgroundCorrectedOpticalDensityLabel.HorizontalAlignment = 'center';
             app.BackgroundCorrectedOpticalDensityLabel.WordWrap = 'on';
-            app.BackgroundCorrectedOpticalDensityLabel.Position = [338 218 126 28];
+            app.BackgroundCorrectedOpticalDensityLabel.Position = [338 208 126 28];
             app.BackgroundCorrectedOpticalDensityLabel.Text = 'Background Corrected Optical Density';
 
             % Create DrawFittingCheckBox
             app.DrawFittingCheckBox = uicheckbox(app.FittingPanel);
             app.DrawFittingCheckBox.ValueChangedFcn = createCallbackFcn(app, @DrawFittingCheckBoxValueChanged, true);
             app.DrawFittingCheckBox.Text = 'Draw Fitting';
-            app.DrawFittingCheckBox.Position = [710 181 86 22];
+            app.DrawFittingCheckBox.Position = [710 171 86 22];
 
             % Create FittingParametersButton
             app.FittingParametersButton = uibutton(app.FittingPanel, 'push');
             app.FittingParametersButton.ButtonPushedFcn = createCallbackFcn(app, @FittingParametersButtonPushed, true);
-            app.FittingParametersButton.Position = [699 223 113 23];
+            app.FittingParametersButton.Position = [699 213 113 23];
             app.FittingParametersButton.Text = 'Fitting Parameters';
 
             % Create rsquaredField
@@ -1733,32 +1757,59 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.rsquaredField.ValueDisplayFormat = '%.3f';
             app.rsquaredField.Editable = 'off';
             app.rsquaredField.HorizontalAlignment = 'center';
-            app.rsquaredField.Position = [626 181 70 22];
+            app.rsquaredField.Position = [626 171 70 22];
 
             % Create RsquaredLabel
             app.RsquaredLabel = uilabel(app.FittingPanel);
             app.RsquaredLabel.WordWrap = 'on';
-            app.RsquaredLabel.Position = [550 181 72 22];
+            app.RsquaredLabel.Position = [550 171 72 22];
             app.RsquaredLabel.Text = 'R - squared';
 
             % Create NumberofBandsSpinnerLabel
             app.NumberofBandsSpinnerLabel = uilabel(app.FittingPanel);
             app.NumberofBandsSpinnerLabel.HorizontalAlignment = 'right';
-            app.NumberofBandsSpinnerLabel.Position = [540 222 99 22];
+            app.NumberofBandsSpinnerLabel.Position = [540 212 99 22];
             app.NumberofBandsSpinnerLabel.Text = 'Number of Bands';
 
             % Create NumberofBandsSpinner
             app.NumberofBandsSpinner = uispinner(app.FittingPanel);
             app.NumberofBandsSpinner.Limits = [1 Inf];
             app.NumberofBandsSpinner.ValueChangedFcn = createCallbackFcn(app, @NumberofBandsSpinnerValueChanged, true);
-            app.NumberofBandsSpinner.Position = [647 222 46 24];
+            app.NumberofBandsSpinner.Position = [647 212 46 24];
             app.NumberofBandsSpinner.Value = 1;
 
             % Create BandTable
             app.BandTable = uitable(app.FittingPanel);
             app.BandTable.ColumnName = {'Band No'; 'Color'; 'Area'; 'Relative Area'};
             app.BandTable.RowName = {};
-            app.BandTable.Position = [518 20 321 148];
+            app.BandTable.Position = [518 10 321 148];
+
+            % Create OrderLabel
+            app.OrderLabel = uilabel(app.GelBoxUIFigure);
+            app.OrderLabel.HorizontalAlignment = 'right';
+            app.OrderLabel.Visible = 'off';
+            app.OrderLabel.Position = [1335 837 36 22];
+            app.OrderLabel.Text = 'Order';
+
+            % Create OrderSpinner
+            app.OrderSpinner = uispinner(app.GelBoxUIFigure);
+            app.OrderSpinner.Limits = [0 Inf];
+            app.OrderSpinner.ValueChangedFcn = createCallbackFcn(app, @OrderSpinnerValueChanged, true);
+            app.OrderSpinner.Visible = 'off';
+            app.OrderSpinner.Position = [1386 837 100 22];
+            app.OrderSpinner.Value = 5;
+
+            % Create BackgroundSubtractionDropDownLabel
+            app.BackgroundSubtractionDropDownLabel = uilabel(app.GelBoxUIFigure);
+            app.BackgroundSubtractionDropDownLabel.WordWrap = 'on';
+            app.BackgroundSubtractionDropDownLabel.Position = [1542 838 129 21];
+            app.BackgroundSubtractionDropDownLabel.Text = 'Background Subtraction';
+
+            % Create BackgroundSubtractionDropDown
+            app.BackgroundSubtractionDropDown = uidropdown(app.GelBoxUIFigure);
+            app.BackgroundSubtractionDropDown.Items = {'Cubic Smoothing Spline (CSC)', 'Linear (LIN)', 'Rolling Ball (RB)'};
+            app.BackgroundSubtractionDropDown.Position = [1537 814 199 22];
+            app.BackgroundSubtractionDropDown.Value = 'Cubic Smoothing Spline (CSC)';
 
             % Show the figure after all components are created
             app.GelBoxUIFigure.Visible = 'on';

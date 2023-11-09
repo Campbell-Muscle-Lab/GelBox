@@ -12,10 +12,10 @@ This page provides simple instructions on how to load an existing analysis to Ge
 ## Instructions
 
 + Using the GelBox through the cloned repository
-    - Launch MATLAB and double click `GelBox.mlapp`. It is located under `<repo>app` folder. 
+    - Launch MATLAB and double-click `GelBox.mlapp`. It is located under `<repo>app` folder. 
     - The `GelBox.mlapp` file starts the MATLAB App Designer, then press <kbd>F5</kbd> to start the application.
 
-+ Using the GelBox as a stand alone application
++ Using the GelBox as a stand-alone application
     - ... 
     - ...
 
@@ -35,3 +35,6 @@ After a few seconds, the analysis is loaded to the interface. All the operations
 
 <a href="media/loaded_analysis.png" target="_blank">![Loaded analysis](media/loaded_analysis.png)</a>
 
+Image adjustments are also loaded and can be reviewed using the Adjust Image button.
+
+<a href="media/loaded_image_adjustments.png" target="_blank">![Loaded image_adjustments](media/loaded_image_adjustments.png)</a>
