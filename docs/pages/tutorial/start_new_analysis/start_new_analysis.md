@@ -71,7 +71,7 @@ The box is stationary, yet it can be dragged around or resized. The histogram an
 
 The visibility of the image can be adjusted by changing the brightness or adjusting the contrast by mapping the pixel intensities. During these operations, GelBox keeps track of the "over-saturated" pixels. If a pixel is "over-saturated," it would be highlighted as red in the adjusted image panel. Please note that this feature is only for visual quality control purposes and will not modify the image with red pixels.
 
-<video src="brightness_adjustments.mp4" controls="controls" style="max-width: 730px;"></video>
+<video src="media/brightness_adjustments.mp4" controls="controls" style="max-width: 730px;"></video>
 
 Once the image is adjusted and ready for quantification, click the Accept Changes button, shown in the red rectangle, to transfer the adjusted image to the GelBox environment.
 
@@ -152,7 +152,7 @@ Relative Quantities = Area of the Band of Interest / The Total Area of the Bands
 
 The box can be resized and dragged along the image. The fitting process automatically follows the position of the box. You can explore a better fit by replacing or resizing the box.
 
-<video src="resize_box_1.mp4" controls="controls" style="max-width: 730px;"></video>
+<video src="media/resize_box_1.mp4" controls="controls" style="max-width: 730px;"></video>
 
 Besides moving the box around the lanes, users can change the estimated fitting parameters to obtain better fits. The Fitting Parameters button in the red rectangle opens the fitting parameters table. 
 
@@ -180,7 +180,7 @@ You can change the selected box using the Box Selection dropdown, shown in a rec
 
 The second box can also be dragged around the image. However, when the selected box is resized, all the existing boxes also change size. Please note that the fits may change because of resizing. Make sure to check all the existing boxes to verify fits.
 
-<video src="resize_boxes.mp4" controls="controls" style="max-width: 730px;"></video>
+<video src="media/resize_boxes.mp4" controls="controls" style="max-width: 730px;"></video>
 
 The new box positions, sizes, and area values can be accessed through the Selected Box Information window. Click the Data Analysis button on the toolbar in the red rectangle, then click the Selected Box Information.
 
@@ -196,7 +196,7 @@ Users can also access the Gel Image Information window and review the stored ima
 
 The rest of the analysis is shown in the below video.
 
-<video src="analysis.mp4" controls="controls" style="max-width: 730px;"></video>
+<video src="media/analysis.mp4" controls="controls" style="max-width: 730px;"></video>
 
 Here is the snapshot of the completed analysis.
 
