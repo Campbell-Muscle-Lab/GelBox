@@ -16,8 +16,7 @@ This page provides simple instructions on how to load an existing analysis to Ge
     - The `GelBox.mlapp` file starts the MATLAB App Designer, then press <kbd>F5</kbd> to start the application.
 
 + Using the GelBox as a stand-alone application
-    - ... 
-    - ...
+    - Locate your `GelBox.exe` shortcut and start the application by double-clicking.
 
 After a few seconds, you should see a program window. This is the main GelBox program. (Clicking on any of the images on this page will open a larger version in a new browser window.)
 
