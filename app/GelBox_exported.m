@@ -70,10 +70,8 @@ classdef GelBox_exported < matlab.apps.AppBase
         fitting_options
         new_box = 0
         mode_updated = 0
-        parameters_updated = 0
         box_changed = 0
         loaded_analysis = 0
-        par_est_na = 0
         image_adjusted = 0
         single_box_callback
         d
@@ -85,6 +83,8 @@ classdef GelBox_exported < matlab.apps.AppBase
         c_x = []
         c_y = []
         load_filters = 0
+        load_background = 0 
+        estimate_parameters = 0
     end
 
     properties (Access = private)
@@ -155,7 +155,10 @@ classdef GelBox_exported < matlab.apps.AppBase
                     % Calculate profile
                     app.d.box(i).inset = imcrop(app.gel_data.image.im_data, ...
                         app.d.box(i).position);
-                    summary_position = [app.d.box(i).position(1)-10, app.d.box(i).position(2)-10, app.d.box(i).position(3)+20, app.d.box(i).position(4)+20];
+                    summary_position = [app.d.box(i).position(1)-10, ...
+                        app.d.box(i).position(2)-10, ...
+                        app.d.box(i).position(3)+20, ...
+                        app.d.box(i).position(4)+20];
                     app.d.box(i).summary_inset = imcrop(app.gel_data.image.im_data, ...
                         summary_position);
 
@@ -182,6 +185,20 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.filtered_inset(i) = 0;
                     end
                     
+                    if app.load_background
+                        back_method = app.gel_data.settings.background.method{i};
+                        back_method = regexp(back_method,'[^()]*','match');
+                        tab_name = sprintf('%sTab',back_method{2});
+                        app.BackgroundTabGroup.SelectedTab = app.(tab_name);
+                        switch back_method{2}
+                            case 'CSS'
+                                app.FractionSpinner.Value = 100*app.gel_data.settings.background.css_fraction(i);
+                                app.SmoothingEditField.Value = app.gel_data.settings.background.css_smoothing(i);
+                            case 'RB'
+                                app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.rb_size(i);
+                        end
+                    end
+                    
                     method = app.BackgroundTabGroup.SelectedTab.Tooltip;
                     %                     m = imcomplement(app.d.box(i).inset);
                     m = (app.d.box(i).inset);
@@ -204,13 +221,23 @@ classdef GelBox_exported < matlab.apps.AppBase
                     end
 
                     box_no = str2num(app.BoxSelectionDropDown.Value);
-                    if (app.loaded_analysis && (app.new_box <= length(app.gel_data.fitting.par_est))) ...
-                            || app.parameters_updated || app.gel_data.fitting.par_update(i) 
-                    elseif app.new_box || app.mode_updated || app.par_est_na || app.moving_box
+%                     if (app.new_box <= length(app.gel_data.fitting.par_est)))|| app.gel_data.fitting.par_update(i) 
+%                     elseif app.new_box || app.moving_box
+%                         [par_est,par_con] = EstimateFittingParameters(app,y,x, ...
+%                             app.gel_data.background(i).x_back,num_of_bands);
+%                         app.gel_data.fitting.par_est(i) = deal(par_est);
+%                         if ~app.moving_box
+%                         app.gel_data.fitting.par_con(i) = deal(par_con);
+%                         end
+%                     end
+                    
+                    if app.estimate_parameters                  
                         [par_est,par_con] = EstimateFittingParameters(app,y,x, ...
                             app.gel_data.background(i).x_back,num_of_bands);
                         app.gel_data.fitting.par_est(i) = deal(par_est);
-                        app.gel_data.fitting.par_con(i) = deal(par_con);
+                        if ~app.moving_box
+                            app.gel_data.fitting.par_con(i) = deal(par_con);
+                        end
                     end
                     [x_bands,x_fit,r_squared,par_fit] = ...
                         FitGaussian(app,y,x,app.gel_data.background(i).x_back,i,num_of_bands);
@@ -397,12 +424,12 @@ classdef GelBox_exported < matlab.apps.AppBase
         end
 
         function UpdateFittingOptions(app)
-            app.parameters_updated = 1;
+            app.estimate_parameters = 0;
             selected_box = str2num(app.BoxSelectionDropDown.Value);
             app.gel_data.fitting.par_update(selected_box) = 1;
             app.single_box_callback = 1;
             UpdateDisplay(app)
-            app.parameters_updated = 0;
+            app.estimate_parameters = 0;
             app.single_box_callback = 0;
 
         end
@@ -846,7 +873,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.(save_fields{i}) = save_data.(save_fields{i});
                 end
 
-                app.new_box = 0;
+                app.estimate_parameters = 0;
 
 
                 center_image_with_preserved_aspect_ratio( ...
@@ -891,6 +918,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     i=i;
                     addlistener(app.gel_data.boxes.box_handle(i),"MovingROI",@(src,evt) new_box_position2(evt));
                 end
+                
                 back_method = app.gel_data.settings.background.method{1};
                 back_method = regexp(back_method,'[^()]*','match');
                 tab_name = sprintf('%sTab',back_method{2});
@@ -898,6 +926,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 
                 old_fields = {'size','fraction','smoothing'};
                 new_fields = {'rb_size','css_fraction','css_smoothing'};
+                
                 for i = 1 : numel(old_fields)
                     if isfield(app.gel_data.settings.background,(old_fields{i}))
                         app.gel_data.settings.background.(new_fields{i}) = app.gel_data.settings.background.(old_fields{i});
@@ -914,8 +943,9 @@ classdef GelBox_exported < matlab.apps.AppBase
                 app.NumberofBandsSpinner.Value = save_data.fitting.fitting_mode(1);
                 drawnow;
                 app.load_filters = 1;
+                app.load_background = 1;
+                app.estimate_parameters = 0;
                 UpdateDisplay(app)
-                app.par_est_na = 0;
                 if app.gel_data.settings.filtering.median.size(1) ~= 0
                     app.ApplyFilterCheckBox.Value = 1;
                     app.MedianFilterSizeSpinner.Enable = ' on';
@@ -927,42 +957,48 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.MedianFilterSizeSpinnerLabel.Enable = 'off';
                 end
                 app.load_filters = 0;
+                app.load_background = 0;
             end
 
 
 
             % Nested function
             function new_box_position2(evt);
+                selected_box = str2num(app.BoxSelectionDropDown.Value);
                 if (isfield(app.gel_data.boxes,'box_position'))
                     box_position = app.gel_data.boxes.box_position;
                     [r,c]=size(box_position);
-                    if (r>=n)&(~isequal(box_position(n,:),evt.CurrentPosition))
-                        app.new_box = n;
-                        old_size = box_position(n,3:4);
+                    if (r>=selected_box)&(~isequal(box_position(selected_box,:),evt.CurrentPosition))
+                        app.new_box = selected_box;
+                        old_size = box_position(selected_box,3:4);
                         current_size = evt.CurrentPosition(3:4);
                         if isequal(old_size,current_size)
                             app.single_box_callback = 1;
-                            app.background_token(n) = 0;
-                            app.filtered_inset(n) = 0;
+                            app.background_token(selected_box) = 0;
+                            app.filtered_inset(selected_box) = 0;
                         else
                             app.background_token(1:numel(app.gel_data.boxes.box_handle)) = 0;
                             app.filtered_inset(1:numel(app.gel_data.boxes.box_handle)) = 0;
                         end
                         app.moving_box = 1;
+                        app.estimate_parameters = 1;
                         UpdateDisplay(app);
                         app.single_box_callback = 0;
+                        app.estimate_parameters = 0;
                         app.moving_box = 0;
 
                     end
                 else
-                    app.new_box = n;
+                    app.new_box = selected_box;
                     app.single_box_callback = 1;
                     app.moving_box = 1;
-                    app.background_token(n) = 0;
-                    app.filtered_inset(n) = 0;
+                    app.estimate_parameters = 1;
+                    app.background_token(selected_box) = 0;
+                    app.filtered_inset(selected_box) = 0;
                     UpdateDisplay(app);
                     app.single_box_callback = 0;
                     app.moving_box = 0;
+                    app.estimate_parameters = 0;
 
                 end
             end
@@ -1012,7 +1048,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BoxSelectionDropDown.Value = control_strings{n};
 
             app.SelectedBoxInformationMenu.Enable = 1;
-            app.new_box = n;
+            app.estimate_parameters = 1;
             app.single_box_callback = 1;
             app.d.box(n).fitting_mode = app.NumberofBandsSpinner.Value;
             app.filtered_inset(n) = 0;
@@ -1022,40 +1058,46 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.MedianFilterSizeSpinner.Enable = 'off';
             app.MedianFilterSizeSpinnerLabel.Enable = 'off';
             UpdateDisplay(app)
+            app.estimate_parameters = 0;
             app.single_box_callback = 0;
 
             function new_box_position(evt);
+                selected_box = str2num(app.BoxSelectionDropDown.Value);
                 app.gel_data.fitting.par_update(i) = 0;
                 if (isfield(app.gel_data.boxes,'box_position'))
                     box_position = app.gel_data.boxes.box_position;
                     [r,c]=size(box_position);
-                    if (r>=n)&(~isequal(box_position(n,:),evt.CurrentPosition))
-                        app.new_box = n;
-                        old_size = box_position(n,3:4);
+                    if (r>=selected_box)&(~isequal(box_position(selected_box,:),evt.CurrentPosition))
+                        app.new_box = selected_box;
+                        old_size = box_position(selected_box,3:4);
                         current_size = evt.CurrentPosition(3:4);
                         if isequal(old_size,current_size)
                             app.single_box_callback = 1;
-                            app.background_token(n) = 0;
-                            app.filtered_inset(n) = 0;
+                            app.background_token(selected_box) = 0;
+                            app.filtered_inset(selected_box) = 0;
                         else
                             app.background_token(1:numel(app.gel_data.boxes.box_handle)) = 0;
                             app.filtered_inset(1:numel(app.gel_data.boxes.box_handle)) = 0;
                         end
                         app.moving_box = 1;
+                        app.estimate_parameters = 1;
                         UpdateDisplay(app);
                         app.single_box_callback = 0;
                         app.moving_box = 0;
+                        app.estimate_parameters = 0;
 
                     end
                 else
-                    app.new_box = n;
+                    app.new_box = selected_box;
                     app.single_box_callback = 1;
                     app.moving_box = 1;
-                    app.background_token(n) = 0;
-                    app.filtered_inset(n) = 0;
+                    app.estimate_parameters = 1;
+                    app.background_token(selected_box) = 0;
+                    app.filtered_inset(selected_box) = 0;
                     UpdateDisplay(app);
                     app.single_box_callback = 0;
                     app.moving_box = 0;
+                    app.estimate_parameters = 0;
 
                 end
             end
@@ -1065,7 +1107,7 @@ classdef GelBox_exported < matlab.apps.AppBase
         % Value changed function: NumberofBandsSpinner
         function NumberofBandsSpinnerValueChanged(app, event)
             value = app.NumberofBandsSpinner.Value;
-            app.mode_updated = 1;
+            app.estimate_parameters = 1;
             for u = 1:numel(app.gel_data.fitting.par_update)
                 app.gel_data.fitting.par_update(u) = 0;
             end
@@ -1078,7 +1120,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             end
             UpdateDisplay(app)
             app.single_box_callback = 0;
-            app.mode_updated = 0;
+            app.estimate_parameters = 0;
 
         end
 
@@ -1368,6 +1410,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             value = app.MedianFilterSizeSpinner.Value;
             box = str2num(app.BoxSelectionDropDown.Value);
             app.filtered_inset(box) = 0;
+            app.background_token(box) = 0;
             app.single_box_callback = 1;
             UpdateDisplay(app)
             app.single_box_callback = 0;
