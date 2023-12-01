@@ -707,7 +707,10 @@ classdef GelBox_exported < matlab.apps.AppBase
             % Reset optical density fields
             app.TotalAreaField.Value = 0;
             app.BackgroundAreaField.Value = 0;
-
+            app.BackgroundCorrAreaField.Value = 0;
+            app.BackgroundTabGroup.SelectedTab = app.CSSTab;
+            app.SmoothingEditField.Value = 0.0001;
+            app.FractionSpinner.Value = 10;
             % Reset fitting fields
             app.DrawFittingCheckBox.Value = 0;
             app.rsquaredField.Value = 0;
