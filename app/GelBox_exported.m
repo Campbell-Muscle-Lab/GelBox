@@ -221,15 +221,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                     end
 
                     box_no = str2num(app.BoxSelectionDropDown.Value);
-%                     if (app.new_box <= length(app.gel_data.fitting.par_est)))|| app.gel_data.fitting.par_update(i) 
-%                     elseif app.new_box || app.moving_box
-%                         [par_est,par_con] = EstimateFittingParameters(app,y,x, ...
-%                             app.gel_data.background(i).x_back,num_of_bands);
-%                         app.gel_data.fitting.par_est(i) = deal(par_est);
-%                         if ~app.moving_box
-%                         app.gel_data.fitting.par_con(i) = deal(par_con);
-%                         end
-%                     end
                     
                     if app.estimate_parameters                  
                         [par_est,par_con] = EstimateFittingParameters(app,y,x, ...
@@ -241,7 +232,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                     end
                     [x_bands,x_fit,r_squared,par_fit] = ...
                         FitGaussian(app,y,x,app.gel_data.background(i).x_back,i,num_of_bands);
-
 
                     app.gel_data.fitting.par_fit(i) = deal(par_fit);
                     fnames = fieldnames(par_fit);
@@ -257,6 +247,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.d.box(i).band_area = [];
                     for j = 1 : num_of_bands
                         app.d.box(i).band_area(j) = simps(y,x_bands(:,j));
+                        simps(y,x_bands(:,j));
                         sum(x_bands(:,j));
                     end
 
@@ -296,7 +287,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                         plot(app.raw_density,x,y,"Color",'k',"LineWidth",2)
                         hold(app.raw_density,"on")
                         if strcmp(app.gel_data.settings.background.method{i},'Cubic Smoothing Spline (CSS)')
-                            fraction = app.gel_data.settings.background.css_fraction(box_no);
+                            fraction = app.gel_data.settings.background.css_fraction(i);
                             fraction_ix = ceil(fraction*numel(x));
                             ix_1 = 1:fraction_ix;
                             ix_2 = numel(x):-1:(numel(x) - fraction_ix + 1);
@@ -316,8 +307,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.raw_density.XAxis.Exponent = 0;
                         xlim(app.raw_density,[0 x_t_end]);
                         ylim(app.raw_density,[1 max(y)]);
-                        %                         legend(app.raw_density,'','Baseline', ...
-                        %                             'Location','northeast')
+
 
 
                         xticks(app.raw_density_fit,x_ticks);
@@ -372,8 +362,6 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                         cla(app.raw_density_fit)
                         cla(app.background_corrected_raw_density_fit)
-
-
 
                         for j = 1 : num_of_bands
                             patch(app.background_corrected_raw_density_fit, ...
@@ -442,13 +430,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                 'min_rel_delta_y',0.05, ...
                 'min_x_index_spacing',2);
 
-            %             figure(99)
-            %             [pks,locs] = findpeaks(y);
-            %
-            %             [pks,ix] = sort(pks,'descend');
-            %
-            %             locs = locs()
-
 
             % The order of the parameters is as follows:
             %       1) peak_location
@@ -513,6 +494,18 @@ classdef GelBox_exported < matlab.apps.AppBase
                 center_image_with_preserved_aspect_ratio( ...
                     app.gel_data.image.im_data, ...
                     app.gel_image_axis,[]);
+            end
+            or_size = size(app.gel_data.image.original_image);
+            adj_size = size(app.gel_data.image.adjusted_image);
+            
+            if ~(or_size(1) == adj_size(1) && or_size(2) == adj_size(2))
+                
+            end
+            ResetDisplay(app)
+            remove_fields = {'boxes'};
+            for i = 1 : numel(remove_fields)
+            app.gel_data = rmfield(app.gel_data,remove_fields{i});
+            app.gel_data.(remove_fields{i}) = [];
             end
             UpdateDisplay(app)
         end
@@ -724,7 +717,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.NumberofBandsSpinner.Value = 1;
 
             % Reset box controls
-            control_strings = {'1'};
+            control_strings = {'No Data'};
             app.BoxSelectionDropDown.Items = control_strings;
             app.BoxSelectionDropDown.Value = control_strings{1};
 
@@ -806,7 +799,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 {'*.tif','TIF';'*.png','PNG';'*.bmp','BMP';'*.gif','GIF';'*.jpeg','JPEG';'*.jpeg2000','JPEG2000';'*.pbm','PBM';'*.pgm','PGM'}, ...
                 'Select Image File');
             if (path_string~=0)
-
+                app.loaded_analysis = 0;
                 ResetDisplay(app)
                 app.DataAnalysisMenu.Enable = 1;
                 app.gel_data = [];
@@ -848,7 +841,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     end
                 end
                 app.DataAnalysisMenu.Enable = 1;
-
+                app.loaded_analysis = 0;
                 temp = load(fullfile(path_string,file_string),'-mat','save_data');
                 save_data = temp.save_data;
 
@@ -932,14 +925,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.gel_data.settings.background.(new_fields{i}) = app.gel_data.settings.background.(old_fields{i});
                         app.gel_data.settings.background = rmfield(app.gel_data.settings.background, old_fields{i});
                     end
-                end
-                switch back_method{2}
-                    case 'CSS'
-                        app.FractionSpinner.Value = 100*app.gel_data.settings.background.css_fraction(1);
-                        app.SmoothingEditField.Value = app.gel_data.settings.background.css_smoothing(1);
-                    case 'RB'
-                        app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.rb_size(1);
-                end                                
+                end                               
                 app.NumberofBandsSpinner.Value = save_data.fitting.fitting_mode(1);
                 drawnow;
                 app.load_filters = 1;
@@ -956,8 +942,16 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.MedianFilterSizeSpinner.Enable = ' off';
                     app.MedianFilterSizeSpinnerLabel.Enable = 'off';
                 end
+                switch back_method{2}
+                    case 'CSS'
+                        app.FractionSpinner.Value = 100*app.gel_data.settings.background.css_fraction(1);
+                        app.SmoothingEditField.Value = app.gel_data.settings.background.css_smoothing(1);
+                    case 'RB'
+                        app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.rb_size(1);
+                end
                 app.load_filters = 0;
                 app.load_background = 0;
+                app.loaded_analysis = 1;
             end
 
 
@@ -1115,9 +1109,6 @@ classdef GelBox_exported < matlab.apps.AppBase
             selected_box = str2num(app.BoxSelectionDropDown.Value);
             app.d.box(selected_box).fitting_mode = app.NumberofBandsSpinner.Value;
             app.single_box_callback = 1;
-            if app.loaded_analysis
-                app.loaded_analysis = 0;
-            end
             UpdateDisplay(app)
             app.single_box_callback = 0;
             app.estimate_parameters = 0;
@@ -1130,7 +1121,8 @@ classdef GelBox_exported < matlab.apps.AppBase
             try
                 save_data.boxes.box_position = app.gel_data.boxes.box_position;
             catch
-                warndlg('The analysis boxes are not available.')
+                h = warndlg('The analysis boxes are not available.');
+                msgboxFontSize(h,10);
                 return
             end
             save_fields = {'image','fitting','settings'};
@@ -1392,6 +1384,15 @@ classdef GelBox_exported < matlab.apps.AppBase
 
         % Button pushed function: AdjustImageButton
         function AdjustImageButtonPushed(app, event)
+            if(isfield(app.gel_data.boxes,'box_handle')) && app.loaded_analysis
+                dlg = warndlg('This is a loaded analysis. The image adjustments are only available for review.','Loaded analysis: Image adjustments are in review mode');
+                msgboxFontSize(dlg,10);
+                waitfor(dlg);
+            elseif (isfield(app.gel_data.boxes,'box_handle'))
+                dlg = warndlg('There are analysis boxes. Further image adjustments will delete the existing analysis.','Analysis in progress');
+                msgboxFontSize(dlg,10);
+                waitfor(dlg);
+            end
             app.AdjustImage = AdjustImageWindow(app);
         end
 
