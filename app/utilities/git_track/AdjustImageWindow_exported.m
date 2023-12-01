@@ -3,9 +3,10 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
     % Properties that correspond to app components
     properties (Access = public)
         AdjustImageUIFigure            matlab.ui.Figure
+        MaximizeContrastButton         matlab.ui.control.Button
         ReverttoOriginalImageButton    matlab.ui.control.Button
         BrightnessandContrastPanel     matlab.ui.container.Panel
-        MaximizeContrastButton         matlab.ui.control.Button
+        MaximizeContrastCheckBox       matlab.ui.control.CheckBox
         MaximumInPixelIntensitySlider  matlab.ui.control.Slider
         MaximumInPixelIntensitySliderLabel  matlab.ui.control.Label
         BrightnessSlider               matlab.ui.control.Slider
@@ -103,7 +104,9 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
                 app.GelBoxApp.gel_data.settings.image_adjustments.contrast_upper],[]);
             plot(app.in_out_axis,linspace(0,1),app.in_out,'LineWidth',2,'Color','k')
             OverlayOriginalHistogram(app)
-
+            if app.GelBoxApp.gel_data.settings.image_adjustments.max_contrast
+                app.MaximizeContrastCheckBox.Value = 1;
+            end
             app.adjusted_image = app.GelBoxApp.gel_data.image.adjusted_image;
             bit_d = class(app.adjusted_image);
 
@@ -128,8 +131,10 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
                 app.im_crop_box.FaceAlpha = 0;
                 app.im_crop_box.Color = [0 1 0];
                 app.crop_pos = app.im_crop_box.Position;
-                if app.GelBoxApp.gel_data.settings.invert_status
-                    app.original_image = imcomplement(app.original_image);
+                if isfield(app.GelBoxApp.gel_data.settings,'invert_status')
+                    if app.GelBoxApp.gel_data.settings.invert_status
+                        app.original_image = imcomplement(app.original_image);
+                    end
                 end
                 app.cropped_image = imcrop(app.original_image,app.crop_pos);
                 addlistener(app.im_crop_box,"MovingROI", ...
@@ -150,22 +155,23 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
                     InvertImageCheckBoxValueChanged(app)
                 end
             end
+           
             
             UpdateAdjustedImageDisplay(app,app.adjusted_image)
             
-            if app.GelBoxApp.loaded_analysis
-                comp_names = {'CropImageButton','AcceptChangesButton',...
-                    'BrightnessSlider',...
-                    'MaximumInPixelIntensitySlider',...
-                    'MinimumInPixelIntensitySlider',...
-                    'MaximizeContrastButton',...
-                    'InvertImageCheckBox'};
-                
-                for i = 1 : numel(comp_names)
-                    app.(comp_names{i}).Enable = 'off';
-                end
-                app.im_crop_box.InteractionsAllowed = 'none';
-            end
+%             if app.GelBoxApp.loaded_analysis
+%                 comp_names = {'CropImageButton','AcceptChangesButton',...
+%                     'BrightnessSlider',...
+%                     'MaximumInPixelIntensitySlider',...
+%                     'MinimumInPixelIntensitySlider',...
+%                     'MaximizeContrastButton',...
+%                     'InvertImageCheckBox'};
+%                 
+%                 for i = 1 : numel(comp_names)
+%                     app.(comp_names{i}).Enable = 'off';
+%                 end
+%                 app.im_crop_box.InteractionsAllowed = 'none';
+%             end
 
             function crop_box_position_2(evt);
                 app.cropped_image = [];
@@ -507,6 +513,46 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             UpdateAdjustedImageDisplay(app,im)
 
         end
+
+        % Value changed function: MaximizeContrastCheckBox
+        function MaximizeContrastCheckBoxValueChanged(app, event)
+            value = app.MaximizeContrastCheckBox.Value;
+            if value
+                if isempty(app.adjusted_image)
+                    if isempty(app.cropped_image)
+                        app.cropped_image = app.original_image;
+                    end
+                    app.adjusted_image = imadjust(app.cropped_image,stretchlim(app.cropped_image,[0 1]),[0 1]);
+                    app.in_out = imadjust(app.in_out,stretchlim(app.in_out,[0 1]),[0 1]);
+                    cla(app.in_out_axis)
+                    plot(app.in_out_axis,linspace(0,1),app.in_out,'LineWidth',2,'Color','k')
+                    xlim(app.in_out_axis,[0 1])
+                    ylim(app.in_out_axis,[0 1])
+                    UpdateAdjustedImageDisplay(app,app.adjusted_image);
+                else
+                    app.adjusted_image_2 = imadjust(app.adjusted_image,stretchlim(app.adjusted_image,[0 1]),[0 1]);
+                    app.in_out = imadjust(app.in_out,stretchlim(app.in_out,[0 1]),[0 1]);
+                    cla(app.in_out_axis)
+                    plot(app.in_out_axis,linspace(0,1),app.in_out,'LineWidth',2,'Color','k')
+                    xlim(app.in_out_axis,[0 1])
+                    ylim(app.in_out_axis,[0 1])
+                    UpdateAdjustedImageDisplay(app,app.adjusted_image_2);
+                end
+            else
+                if ~isempty(app.adjusted_image_2)
+                    app.adjusted_image_2 = [];
+                    UpdateAdjustedImageDisplay(app,app.adjusted_image);
+                elseif ~isempty(app.adjusted_image)
+                    app.adjusted_image = [];
+                    if isempty(app.cropped_image)
+                        app.cropped_image = app.original_image;
+                    end
+                    UpdateAdjustedImageDisplay(app,app.cropped_image);
+                end
+            end
+
+            app.max_contrast = true;
+        end
     end
 
     % Component initialization
@@ -630,17 +676,23 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             app.MaximumInPixelIntensitySlider.Position = [28 73 156 3];
             app.MaximumInPixelIntensitySlider.Value = 1;
 
-            % Create MaximizeContrastButton
-            app.MaximizeContrastButton = uibutton(app.BrightnessandContrastPanel, 'push');
-            app.MaximizeContrastButton.ButtonPushedFcn = createCallbackFcn(app, @MaximizeContrastButtonPushed, true);
-            app.MaximizeContrastButton.Position = [47 9 115 22];
-            app.MaximizeContrastButton.Text = 'Maximize Contrast';
+            % Create MaximizeContrastCheckBox
+            app.MaximizeContrastCheckBox = uicheckbox(app.BrightnessandContrastPanel);
+            app.MaximizeContrastCheckBox.ValueChangedFcn = createCallbackFcn(app, @MaximizeContrastCheckBoxValueChanged, true);
+            app.MaximizeContrastCheckBox.Text = 'Maximize Contrast';
+            app.MaximizeContrastCheckBox.Position = [51 7 121 22];
 
             % Create ReverttoOriginalImageButton
             app.ReverttoOriginalImageButton = uibutton(app.AdjustImageUIFigure, 'push');
             app.ReverttoOriginalImageButton.ButtonPushedFcn = createCallbackFcn(app, @ReverttoOriginalImageButtonPushed, true);
             app.ReverttoOriginalImageButton.Position = [676 621 146 22];
             app.ReverttoOriginalImageButton.Text = 'Revert to Original Image';
+
+            % Create MaximizeContrastButton
+            app.MaximizeContrastButton = uibutton(app.AdjustImageUIFigure, 'push');
+            app.MaximizeContrastButton.ButtonPushedFcn = createCallbackFcn(app, @MaximizeContrastButtonPushed, true);
+            app.MaximizeContrastButton.Position = [651 -65 115 22];
+            app.MaximizeContrastButton.Text = 'Maximize Contrast';
 
             % Show the figure after all components are created
             app.AdjustImageUIFigure.Visible = 'on';

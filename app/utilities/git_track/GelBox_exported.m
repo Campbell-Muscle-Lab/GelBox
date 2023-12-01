@@ -711,6 +711,9 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BackgroundTabGroup.SelectedTab = app.CSSTab;
             app.SmoothingEditField.Value = 0.0001;
             app.FractionSpinner.Value = 10;
+            app.ApplyFilterCheckBox.Value = 0;
+            app.MedianFilterSizeSpinner.Enable = 'off';
+            app.MedianFilterSizeSpinnerLabel.Enable = 'off';
             % Reset fitting fields
             app.DrawFittingCheckBox.Value = 0;
             app.rsquaredField.Value = 0;
@@ -1388,7 +1391,7 @@ classdef GelBox_exported < matlab.apps.AppBase
         % Button pushed function: AdjustImageButton
         function AdjustImageButtonPushed(app, event)
             if(isfield(app.gel_data.boxes,'box_handle')) && app.loaded_analysis
-                dlg = warndlg('This is a loaded analysis. The image adjustments are only available for review.','Loaded analysis: Image adjustments are in review mode');
+                dlg = warndlg('This is a loaded analysis. Further image adjustments will delete the existing analysis.','Loaded analysis');
                 msgboxFontSize(dlg,10);
                 waitfor(dlg);
             elseif (isfield(app.gel_data.boxes,'box_handle'))
