@@ -236,7 +236,7 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                     y = 0.5*y + 1;
                     rectangle('Position',[11 11 size(summary(i).inset,2) size(summary(i).inset,1)],'EdgeColor','g')
                     subplot(sp(back_fit_handles(i)))
-                    plot(summary(i).x,summary(i).y,'k', 'LineWidth',1);
+                    plot(summary(i).x,summary(i).y,'k', 'LineWidth',0.9);
 
                     hold on
                     subplot(sp(fit_handles(i)))
@@ -288,6 +288,7 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                     
                     back_method = regexp(app.GelBoxApp.gel_data.settings.background.method{i},'[^()]*','match');
                     if strcmp(back_method{2},'CSS')
+                        leg_buffer = 90;
                         fraction = app.GelBoxApp.gel_data.settings.background.css_fraction(i);
                         fraction_ix = ceil(fraction*numel(summary(i).x));
                         ix_1 = 1:fraction_ix;
@@ -303,40 +304,54 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                         end
                         formatting = sprintf('%s%i%s','%s: Fr (%%) = %.0f S = %.',n,'f');
                         
-                        padding = 0.03*(summary(i).x(1) + summary(i).x(end));
+                        padding = 0.05*(summary(i).x(1) + summary(i).x(end));
                         [l,p] = boundedline(summary(i).x(ix_1),ix_1',[padding padding], 'orientation', 'horiz','r','alpha',sp(back_fit_handles(i)));
-                        outlinebounds(l,p);
+                        l.Color = [0 0 0];
+                        p.FaceAlpha = 0.2;
                         [l,p] = boundedline(summary(i).x(ix_2),ix_2',[padding padding], 'orientation', 'horiz','r','alpha',sp(back_fit_handles(i)));
-                        css_buffer = outlinebounds(l,p);
-                        
-%                         figs(end+1) = plot(sp(back_fit_handles(i)),c_y,c_x,s,'LineWidth',1,'MarkerSize',1);
-                        css_buffer_label = sprintf(formatting,back_method{2},fraction*100,s);
+                        l.Color = [0 0 0];
+                        p.FaceAlpha = 0.2;
+                        %                         figs(end+1) = plot(sp(back_fit_handles(i)),c_y,c_x,s,'LineWidth',1,'MarkerSize',1);
+                        back_corr_label = sprintf(formatting,back_method{2},fraction*100,s);
+                    elseif strcmp(back_method{2},'LIN')
+                        leg_buffer = 50;
+                        scatter(summary(i).x(1),summary(i).y(1),40, ...
+                            's','MarkerFaceColor','r',...
+                            "MarkerEdgeColor",'r',...
+                            'MarkerEdgeAlpha',0,'MarkerFaceAlpha',0.2)
+                        scatter(summary(i).x(end),summary(i).y(numel(summary(i).x)),40, ...
+                            's','MarkerFaceColor','r',...
+                            "MarkerEdgeColor",'r',...
+                            'MarkerEdgeAlpha',0,'MarkerFaceAlpha',0.2)
+                        back_corr_label = 'LIN';
+                    else
+                        leg_buffer = 50;
+                        rb_size = app.GelBoxApp.gel_data.settings.background.rb_size(i);
+                        back_corr_label = sprintf('%s: Size = %.0f',back_method{2},rb_size);
                     end
 
                     subplot(sp(back_fit_handles(i)))
                     hold on
-                    plot(summary(i).x_back,summary(i).y, ...
-                        'r','LineWidth',1);
-                    plot(summary(i).x_back + summary(i).x_fit, ...
-                        summary(i).y,':',"LineWidth",1,'Color',f_color)
+                    back_corr = plot(summary(i).x_back,summary(i).y,'Color',...
+                        [1 0 0 0.5],"LineWidth",1.25);
 
                     subplot(sp(fit_handles(i)))
                     hold on
-                    plot(zeros(1,numel(summary(i).y)),summary(i).y, ...
-                        'r','LineWidth',1);
+                    plot(zeros(1,numel(summary(i).y)),summary(i).y,...
+                        'Color',[1 0 0 0.5],"LineWidth",1);
                     f = plot(summary(i).x_fit, ...
                         summary(i).y,':',"LineWidth",1,'Color',f_color);
                     leg_labels{end+1} = f_leg;
                     figs(end+1) = f;
                     
-                    figs(end) = css_buffer;
-                    leg_labels{end} = css_buffer_label;
+                    figs(end+1) = back_corr;
+                    leg_labels{end+1} = back_corr_label;
                     
                     
                     legendflex(figs, leg_labels, ...
                         'xscale',0.15, ...
                         'anchor',{'ne','ne'}, ...
-                        'buffer',[90 0], ...
+                        'buffer',[leg_buffer 0], ...
                         'padding',[1 1 2], ...
                         'FontSize',4.5, ...
                         'text_y_padding', 0);
@@ -362,7 +377,7 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                         'clip_y_axis',1,...
                         'tick_font_size',8,...
                         'label_font_size',7,...
-                        'y_label_rotation',90)
+                        'y_label_rotation',90);
                 end
 
                 for i = 1:length(fit_handles)
@@ -395,7 +410,7 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                         'y_ticks',[1 length(summary(i).x)],...
                         'title_font_size', 8, ...
                         'title_y_offset',1.2,...
-                        'y_axis_off',1)
+                        'y_axis_off',1);
                 end
 
                 for i = 1:length(back_fit_handles)
@@ -422,7 +437,7 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                         'x_axis_label',{'Opt.','Density (A.U.)'},...
                         'x_ticks',x_ticks,...
                         'y_ticks',[1 length(summary(i).x)],...
-                        'y_label_rotation',90)
+                        'y_label_rotation',90);
                 end
                 fname = sprintf('%s_%s',app.box_layout_fname,scaling{fig_no});
                 figure_export('output_file_string', fname, ...

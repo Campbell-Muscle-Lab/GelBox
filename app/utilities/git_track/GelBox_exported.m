@@ -297,11 +297,20 @@ classdef GelBox_exported < matlab.apps.AppBase
                             app.c_y = x(app.c_x);
                             padding = 0.025*(x(1) + x(end));
                             [l,p] = boundedline(x(ix_1),ix_1',[padding padding], 'orientation', 'horiz','r','alpha',app.raw_density);
-                            outlinebounds(l,p);
+                            l.Color = [0 0 0];
+                            p.FaceAlpha = 0.2;
                             [l,p] = boundedline(x(ix_2),ix_2',[padding padding], 'orientation', 'horiz','r','alpha',app.raw_density);
-                            outlinebounds(l,p);
+                            l.Color = [0 0 0];
+                            p.FaceAlpha = 0.2;
+                        elseif strcmp(app.gel_data.settings.background.method{i},'Linear (LIN)')
+                            scatter(app.raw_density,x(1),y(1),50,'s',...
+                                'MarkerEdgeColor','r','MarkerFaceColor','r',...
+                                'MarkerEdgeAlpha',0,'MarkerFaceAlpha',0.2)
+                            scatter(app.raw_density,x(end),y(numel(x)),50,'s',...
+                                'MarkerEdgeColor','r','MarkerFaceColor','r',...
+                                'MarkerEdgeAlpha',0,'MarkerFaceAlpha',0.2)
                         end
-                        plot(app.raw_density,app.gel_data.background(i).x_back,y,'r',"LineWidth",2)
+                        plot(app.raw_density,app.gel_data.background(i).x_back,y,'Color',[1 0 0 0.5],"LineWidth",2)
                         x_pow = ceil(log10(max(x)));
                         x_tick_rounder = 10^(x_pow - 1);
                         x_t_end = ceil(max(x)/x_tick_rounder)*x_tick_rounder;
@@ -327,7 +336,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                             x-app.gel_data.background(i).x_back,y,'-.k',"LineWidth",2)
                         hold(app.background_corrected_raw_density,"on")
                         plot(app.background_corrected_raw_density, ...
-                            zeros(1,numel(y)),y,'r',"LineWidth",2)
+                            zeros(1,numel(y)),y,'Color',[1 0 0 0.5],"LineWidth",2)
                         %                         legend(app.background_corrected_raw_density,'','Baseline', ...
                         %                             'Location','northeast')
                         ylim(app.background_corrected_raw_density, ...

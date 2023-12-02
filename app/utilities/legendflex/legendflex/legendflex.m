@@ -315,10 +315,11 @@ for i = 1:numel(h.obj)
     tx = class(h.obj(i));
     tx = erase(tx,'matlab.graphics.primitive.');
     if strcmp(tx,'Patch')
-        
         h.obj(i).FaceAlpha = 0.35;
         h.obj(i).EdgeAlpha = 0;
-        
+    end
+    if strcmp(tx,'Line') && isequal(h.obj(i).Color,[1 0 0])     
+        h.obj(i).Color = [1 0 0 0.5];
     end
 end
 
