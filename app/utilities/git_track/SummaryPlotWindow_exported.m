@@ -146,9 +146,9 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
             right_pads = 0.25 * ones(1,no_of_panels_wide);
             right_pads(3) = 0.5; 
             if no_of_panels_wide == 3
-                right_pads(no_of_panels_wide) = 0.95;
+                right_pads(no_of_panels_wide) = 1;
             else
-                right_pads(no_of_panels_wide) = 0.95;
+                right_pads(no_of_panels_wide) = 1;
             end
 
             omit_panels = [2:no_of_panels_wide];
@@ -183,7 +183,7 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                     'no_of_panels_high', no_of_panels_high, ...
                     'top_margin', 0.5, ...
                     'bottom_margin', 0.15, ...
-                    'right_margin', 0.15, ...
+                    'right_margin', 0.05, ...
                     'individual_padding', 1, ...
                     'left_pads', repmat(left_pads,[1 no_of_panels_high]), ...
                     'right_pads', repmat(right_pads,[1 no_of_panels_high]), ...
@@ -285,22 +285,6 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
 
                     f_leg = sprintf('R^2 = %.3f',summary(i).r_squared);
                     f_color = '#1aff00';
-
-                    subplot(sp(back_fit_handles(i)))
-                    hold on
-                    plot(summary(i).x_back,summary(i).y, ...
-                        '-.m','LineWidth',1);
-                    plot(summary(i).x_back + summary(i).x_fit, ...
-                        summary(i).y,':',"LineWidth",1,'Color',f_color)
-
-                    subplot(sp(fit_handles(i)))
-                    hold on
-                    plot(zeros(1,numel(summary(i).y)),summary(i).y, ...
-                        '-.m','LineWidth',1);
-                    f = plot(summary(i).x_fit, ...
-                        summary(i).y,':',"LineWidth",1,'Color',f_color);
-                    leg_labels{end+1} = f_leg;
-                    figs(end+1) = f;
                     
                     back_method = regexp(app.GelBoxApp.gel_data.settings.background.method{i},'[^()]*','match');
                     if strcmp(back_method{2},'CSS')
@@ -318,10 +302,37 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                             n=n+1;
                         end
                         formatting = sprintf('%s%i%s','%s: Fr (%%) = %.0f S = %.',n,'f');
-                        figs(end+1) = plot(sp(back_fit_handles(i)),c_y,c_x,'ro','LineWidth',1,'MarkerSize',1);
-                        leg_labels{end+1} = sprintf(formatting,back_method{2},fraction*100,s);
+                        
+                        padding = 0.03*(summary(i).x(1) + summary(i).x(end));
+                        [l,p] = boundedline(summary(i).x(ix_1),ix_1',[padding padding], 'orientation', 'horiz','r','alpha',sp(back_fit_handles(i)));
+                        outlinebounds(l,p);
+                        [l,p] = boundedline(summary(i).x(ix_2),ix_2',[padding padding], 'orientation', 'horiz','r','alpha',sp(back_fit_handles(i)));
+                        css_buffer = outlinebounds(l,p);
+                        
+%                         figs(end+1) = plot(sp(back_fit_handles(i)),c_y,c_x,s,'LineWidth',1,'MarkerSize',1);
+                        css_buffer_label = sprintf(formatting,back_method{2},fraction*100,s);
                     end
 
+                    subplot(sp(back_fit_handles(i)))
+                    hold on
+                    plot(summary(i).x_back,summary(i).y, ...
+                        'r','LineWidth',1);
+                    plot(summary(i).x_back + summary(i).x_fit, ...
+                        summary(i).y,':',"LineWidth",1,'Color',f_color)
+
+                    subplot(sp(fit_handles(i)))
+                    hold on
+                    plot(zeros(1,numel(summary(i).y)),summary(i).y, ...
+                        'r','LineWidth',1);
+                    f = plot(summary(i).x_fit, ...
+                        summary(i).y,':',"LineWidth",1,'Color',f_color);
+                    leg_labels{end+1} = f_leg;
+                    figs(end+1) = f;
+                    
+                    figs(end) = css_buffer;
+                    leg_labels{end} = css_buffer_label;
+                    
+                    
                     legendflex(figs, leg_labels, ...
                         'xscale',0.15, ...
                         'anchor',{'ne','ne'}, ...
