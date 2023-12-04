@@ -291,6 +291,8 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                         leg_buffer = 90;
                         fraction = app.GelBoxApp.gel_data.settings.background.css_fraction(i);
                         fraction_ix = ceil(fraction*numel(summary(i).x));
+                        ix_1 = [];
+                        ix_2 = [];
                         ix_1 = 1:fraction_ix;
                         ix_2 = numel(summary(i).x):-1:(numel(summary(i).x) - fraction_ix + 1);
                         c_x = [];
@@ -311,19 +313,27 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                         [l,p] = boundedline(summary(i).x(ix_2),ix_2',[padding padding], 'orientation', 'horiz','r','alpha',sp(back_fit_handles(i)));
                         l.Color = [0 0 0];
                         p.FaceAlpha = 0.2;
-                        %                         figs(end+1) = plot(sp(back_fit_handles(i)),c_y,c_x,s,'LineWidth',1,'MarkerSize',1);
                         back_corr_label = sprintf(formatting,back_method{2},fraction*100,s);
                     elseif strcmp(back_method{2},'LIN')
-                        leg_buffer = 50;
-                        scatter(summary(i).x(1),summary(i).y(1),40, ...
-                            's','MarkerFaceColor','r',...
-                            "MarkerEdgeColor",'r',...
-                            'MarkerEdgeAlpha',0,'MarkerFaceAlpha',0.2)
-                        scatter(summary(i).x(end),summary(i).y(numel(summary(i).x)),40, ...
-                            's','MarkerFaceColor','r',...
-                            "MarkerEdgeColor",'r',...
-                            'MarkerEdgeAlpha',0,'MarkerFaceAlpha',0.2)
-                        back_corr_label = 'LIN';
+                        leg_buffer = 60;
+                        fraction = app.GelBoxApp.gel_data.settings.background.lin_fraction(i);
+                        fraction_ix = ceil(fraction*numel(summary(i).x));
+                        ix_1 = [];
+                        ix_2 = [];
+                        ix_1 = 1:fraction_ix;
+                        ix_2 = numel(summary(i).x):-1:(numel(summary(i).x) - fraction_ix + 1);
+                        l_x = [];
+                        l_y = [];
+                        l_x = [ix_1 ix_2];
+                        l_y = summary(i).x(l_x);
+                        padding = 0.05*(summary(i).x(1) + summary(i).x(end));
+                        [l,p] = boundedline(summary(i).x(ix_1),ix_1',[padding padding], 'orientation', 'horiz','r','alpha',sp(back_fit_handles(i)));
+                        l.Color = [0 0 0];
+                        p.FaceAlpha = 0.2;
+                        [l,p] = boundedline(summary(i).x(ix_2),ix_2',[padding padding], 'orientation', 'horiz','r','alpha',sp(back_fit_handles(i)));
+                        l.Color = [0 0 0];
+                        p.FaceAlpha = 0.2;
+                        back_corr_label = sprintf('%s: Fr (%%) = %.0f',back_method{2},fraction*100);
                     else
                         leg_buffer = 50;
                         rb_size = app.GelBoxApp.gel_data.settings.background.rb_size(i);
@@ -444,11 +454,6 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                     'output_type', 'png');
             end
             delete(app)
-
-
-
-
-
         end
 
         % Value changed function: ControlLanesCheckBox

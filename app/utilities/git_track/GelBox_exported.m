@@ -45,7 +45,8 @@ classdef GelBox_exported < matlab.apps.AppBase
         FractionSpinner                matlab.ui.control.Spinner
         FractionSpinnerLabel           matlab.ui.control.Label
         LINTab                         matlab.ui.container.Tab
-        NoAdditionalOptionsforLinearMethodLabel  matlab.ui.control.Label
+        FractionSpinner_Linear         matlab.ui.control.Spinner
+        FractionSpinner_2Label         matlab.ui.control.Label
         RBTab                          matlab.ui.container.Tab
         RollingBallSizeSpinner         matlab.ui.control.Spinner
         RollingBallSizeSpinnerLabel    matlab.ui.control.Label
@@ -85,6 +86,8 @@ classdef GelBox_exported < matlab.apps.AppBase
         load_filters = 0
         load_background = 0 
         estimate_parameters = 0
+        l_x = []
+        l_y = []
     end
 
     properties (Access = private)
@@ -194,6 +197,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                             case 'CSS'
                                 app.FractionSpinner.Value = 100*app.gel_data.settings.background.css_fraction(i);
                                 app.SmoothingEditField.Value = app.gel_data.settings.background.css_smoothing(i);
+                            case 'LIN'
+                                app.FractionSpinner_Linear.Value = 100*app.gel_data.settings.background.lin_fraction(i);
                             case 'RB'
                                 app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.rb_size(i);
                         end
@@ -287,14 +292,13 @@ classdef GelBox_exported < matlab.apps.AppBase
                         plot(app.raw_density,x,y,"Color",'k',"LineWidth",2)
                         hold(app.raw_density,"on")
                         if strcmp(app.gel_data.settings.background.method{i},'Cubic Smoothing Spline (CSS)')
-                            fraction = app.gel_data.settings.background.css_fraction(i);
-                            fraction_ix = ceil(fraction*numel(x));
+                            ix_1 = [];
+                            ix_2 = [];
+                            number_of_elements = numel(x);
+                            fraction = app.FractionSpinner.Value/100;
+                            fraction_ix = ceil(fraction*number_of_elements);
                             ix_1 = 1:fraction_ix;
-                            ix_2 = numel(x):-1:(numel(x) - fraction_ix + 1);
-                            app.c_x = [];
-                            app.c_y = [];
-                            app.c_x = [ix_1 ix_2];
-                            app.c_y = x(app.c_x);
+                            ix_2 = number_of_elements:-1:(number_of_elements - fraction_ix + 1);
                             padding = 0.025*(x(1) + x(end));
                             [l,p] = boundedline(x(ix_1),ix_1',[padding padding], 'orientation', 'horiz','r','alpha',app.raw_density);
                             l.Color = [0 0 0];
@@ -303,12 +307,20 @@ classdef GelBox_exported < matlab.apps.AppBase
                             l.Color = [0 0 0];
                             p.FaceAlpha = 0.2;
                         elseif strcmp(app.gel_data.settings.background.method{i},'Linear (LIN)')
-                            scatter(app.raw_density,x(1),y(1),50,'s',...
-                                'MarkerEdgeColor','r','MarkerFaceColor','r',...
-                                'MarkerEdgeAlpha',0,'MarkerFaceAlpha',0.2)
-                            scatter(app.raw_density,x(end),y(numel(x)),50,'s',...
-                                'MarkerEdgeColor','r','MarkerFaceColor','r',...
-                                'MarkerEdgeAlpha',0,'MarkerFaceAlpha',0.2)
+                            ix_1 = [];
+                            ix_2 = [];
+                            number_of_elements = numel(x);
+                            fraction = app.FractionSpinner_Linear.Value/100;
+                            fraction_ix = ceil(fraction*number_of_elements);
+                            ix_1 = 1:fraction_ix;
+                            ix_2 = number_of_elements:-1:(number_of_elements - fraction_ix + 1);
+                            padding = 0.025*(x(1) + x(end));
+                            [l,p] = boundedline(x(ix_1),ix_1',[padding padding], 'orientation', 'horiz','r','alpha',app.raw_density);
+                            l.Color = [0 0 0];
+                            p.FaceAlpha = 0.2;
+                            [l,p] = boundedline(x(ix_2),ix_2',[padding padding], 'orientation', 'horiz','r','alpha',app.raw_density);
+                            l.Color = [0 0 0];
+                            p.FaceAlpha = 0.2;
                         end
                         plot(app.raw_density,app.gel_data.background(i).x_back,y,'Color',[1 0 0 0.5],"LineWidth",2)
                         x_pow = ceil(log10(max(x)));
@@ -741,17 +753,18 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BoxSelectionDropDown.Value = control_strings{1};
 
         end
-
         function BackgroundCorrection(app,x,method,box_no)
             switch char(method)
                 case 'Cubic Smoothing Spline (CSS)'
                     number_of_elements = numel(x);
                     fraction = app.FractionSpinner.Value/100;
                     fraction_ix = ceil(fraction*number_of_elements);
-                    ix_1 = 1:fraction_ix;
-                    ix_2 = number_of_elements:-1:(number_of_elements - fraction_ix + 1);
                     app.c_x = [];
                     app.c_y = [];
+                    ix_1 = [];
+                    ix_2 = [];
+                    ix_1 = 1:fraction_ix;
+                    ix_2 = number_of_elements:-1:(number_of_elements - fraction_ix + 1);
                     app.c_x = [ix_1 ix_2];
                     app.c_y = x(app.c_x);
                     s = app.SmoothingEditField.Value;
@@ -759,14 +772,25 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.settings.background.method{box_no} = char(method);
                     app.gel_data.settings.background.css_fraction(box_no) = fraction;
                     app.gel_data.settings.background.css_smoothing(box_no) = s;
+                    app.gel_data.settings.background.lin_fraction(box_no) = 0;
                     app.gel_data.settings.background.rb_size(box_no) = 0;
                     app.background_token(box_no) = 1;
                 case 'Linear (LIN)'
-                    app.c_x = [];
-                    app.c_y = [];
-                    app.gel_data.background(box_no).x_back = linspace(x(1),x(end),numel(x));
-                    app.gel_data.background(box_no).x_back = app.gel_data.background(box_no).x_back';
+                    app.l_x = [];
+                    app.l_y = [];
+                    ix_1 = [];
+                    ix_2 = [];
+                    number_of_elements = numel(x);
+                    fraction = app.FractionSpinner_Linear.Value/100;
+                    fraction_ix = ceil(fraction*number_of_elements);
+                    ix_1 = 1:fraction_ix;
+                    ix_2 = number_of_elements:-1:(number_of_elements - fraction_ix + 1);
+                    app.l_x = [ix_1 ix_2];
+                    app.l_y = x(app.l_x);                  
+                    [slope,intercept,~,~,~]=fit_straight_line(app.l_x,app.l_y);
+                    app.gel_data.background(box_no).x_back = intercept + slope*([1:numel(x)]');
                     app.gel_data.settings.background.method{box_no} = char(method);
+                    app.gel_data.settings.background.lin_fraction(box_no) = fraction;
                     app.gel_data.settings.background.css_fraction(box_no) = 0;
                     app.gel_data.settings.background.css_smoothing(box_no) = 0;
                     app.gel_data.settings.background.rb_size(box_no) = 0;
@@ -786,6 +810,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.settings.background.rb_size(box_no) = radius;
                     app.gel_data.settings.background.css_fraction(box_no) = 0;
                     app.gel_data.settings.background.css_smoothing(box_no) = 0;
+                    app.gel_data.settings.background.lin_fraction(box_no) = 0;
                     app.background_token(box_no) = 1;
             end
         end
@@ -965,6 +990,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                     case 'CSS'
                         app.FractionSpinner.Value = 100*app.gel_data.settings.background.css_fraction(1);
                         app.SmoothingEditField.Value = app.gel_data.settings.background.css_smoothing(1);
+                    case 'LIN'
+                        app.FractionSpinner_Linear.Value = 100*app.gel_data.settings.background.lin_fraction(1);
                     case 'RB'
                         app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.rb_size(1);
                 end
@@ -1204,6 +1231,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                 case 'CSS'
                     app.FractionSpinner.Value = 100*app.gel_data.settings.background.css_fraction(selected_box);
                     app.SmoothingEditField.Value = app.gel_data.settings.background.css_smoothing(selected_box);
+                case 'LIN'
+                    app.FractionSpinner_Linear.Value = 100*app.gel_data.settings.background.lin_fraction(selected_box);
                 case 'RB'
                     app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.rb_size(selected_box);
             end
@@ -1225,9 +1254,10 @@ classdef GelBox_exported < matlab.apps.AppBase
                 o.image_file{i} = app.gel_data.image.image_file_string;
                 o.total_area(i) = app.gel_data.box_data(i).total_area;
                 o.background_method{i} = app.gel_data.settings.background.method{i};
-                o.background_size(i) = app.gel_data.settings.background.rb_size(i);
-                o.background_fraction(i) = app.gel_data.settings.background.css_fraction(i);
-                o.background_smoothing(i) = app.gel_data.settings.background.css_smoothing(i);
+                o.background_css_fraction(i) = app.gel_data.settings.background.css_fraction(i);
+                o.background_css_smoothing(i) = app.gel_data.settings.background.css_smoothing(i);
+                o.background_lin_fraction(i) = app.gel_data.settings.background.lin_fraction(i);
+                o.background_rb_size(i) = app.gel_data.settings.background.rb_size(i);
                 o.median_filter_size(i) = app.gel_data.settings.filtering.median.size(i);
                 o.background_area(i) = app.gel_data.box_data(i).background_area;
                 num_of_bands = numel(app.gel_data.box_data(i).band_area);
@@ -1492,6 +1522,16 @@ classdef GelBox_exported < matlab.apps.AppBase
             UpdateDisplay(app)
             app.single_box_callback = 0;
         end
+
+        % Value changed function: FractionSpinner_Linear
+        function FractionSpinner_LinearValueChanged(app, event)
+            value = app.FractionSpinner_Linear.Value;
+            box = str2num(app.BoxSelectionDropDown.Value);
+            app.background_token(box) = 0;
+            app.single_box_callback = 1;
+            UpdateDisplay(app)
+            app.single_box_callback = 0;
+        end
     end
 
     % Component initialization
@@ -1687,12 +1727,18 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.LINTab.Tooltip = {'Linear (LIN)'};
             app.LINTab.Title = 'LIN';
 
-            % Create NoAdditionalOptionsforLinearMethodLabel
-            app.NoAdditionalOptionsforLinearMethodLabel = uilabel(app.LINTab);
-            app.NoAdditionalOptionsforLinearMethodLabel.HorizontalAlignment = 'center';
-            app.NoAdditionalOptionsforLinearMethodLabel.WordWrap = 'on';
-            app.NoAdditionalOptionsforLinearMethodLabel.Position = [28 14 138 46];
-            app.NoAdditionalOptionsforLinearMethodLabel.Text = 'No Additional Options for Linear Method';
+            % Create FractionSpinner_2Label
+            app.FractionSpinner_2Label = uilabel(app.LINTab);
+            app.FractionSpinner_2Label.HorizontalAlignment = 'right';
+            app.FractionSpinner_2Label.Position = [11 26 71 22];
+            app.FractionSpinner_2Label.Text = 'Fraction (%)';
+
+            % Create FractionSpinner_Linear
+            app.FractionSpinner_Linear = uispinner(app.LINTab);
+            app.FractionSpinner_Linear.Limits = [0 100];
+            app.FractionSpinner_Linear.ValueChangedFcn = createCallbackFcn(app, @FractionSpinner_LinearValueChanged, true);
+            app.FractionSpinner_Linear.Position = [120 26 61 22];
+            app.FractionSpinner_Linear.Value = 10;
 
             % Create RBTab
             app.RBTab = uitab(app.BackgroundTabGroup);
