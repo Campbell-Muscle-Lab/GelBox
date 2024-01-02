@@ -307,7 +307,7 @@ The following sheets are named after the boxes. There is a sheet for each box in
 + band_1: The first Gaussian function value
 + band_2: The second Gaussian function value
 
-<a href="media/excel_fits.png" target="_blank">![Excel fits](media/excel_fits.png)</a>
+<a href="media/excel_fits.PNG" target="_blank">![Excel fits](media/excel_fits.PNG)</a>
 
 In addition, users can generate summary plots for their analysis. Click the Data Analysis button on the toolbar. The Summary Plot button is located at the bottom of the dropdown, shown in the red rectangle.
 
