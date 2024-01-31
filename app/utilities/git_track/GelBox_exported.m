@@ -2,67 +2,65 @@ classdef GelBox_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        GelBoxUIFigure                 matlab.ui.Figure
-        FileMenu                       matlab.ui.container.Menu
-        LoadImageMenu                  matlab.ui.container.Menu
-        LoadAnalysisMenu               matlab.ui.container.Menu
-        SaveAnalysisMenu               matlab.ui.container.Menu
-        ExportResultsMenu              matlab.ui.container.Menu
-        DataAnalysisMenu               matlab.ui.container.Menu
-        GelImageFileInformationMenu    matlab.ui.container.Menu
-        SelectedBoxInformationMenu     matlab.ui.container.Menu
-        SummaryPlotMenu                matlab.ui.container.Menu
-        BackgroundSubtractionDropDown  matlab.ui.control.DropDown
-        BackgroundSubtractionDropDownLabel  matlab.ui.control.Label
-        OrderSpinner                   matlab.ui.control.Spinner
-        OrderLabel                     matlab.ui.control.Label
-        FittingPanel                   matlab.ui.container.Panel
-        BandTable                      matlab.ui.control.Table
-        NumberofBandsSpinner           matlab.ui.control.Spinner
-        NumberofBandsSpinnerLabel      matlab.ui.control.Label
-        RsquaredLabel                  matlab.ui.control.Label
-        rsquaredField                  matlab.ui.control.NumericEditField
-        FittingParametersButton        matlab.ui.control.Button
-        DrawFittingCheckBox            matlab.ui.control.CheckBox
+        GelBoxUIFigure                matlab.ui.Figure
+        FileMenu                      matlab.ui.container.Menu
+        LoadImageMenu                 matlab.ui.container.Menu
+        LoadLaneLayoutMenu            matlab.ui.container.Menu
+        LoadAnalysisMenu              matlab.ui.container.Menu
+        SaveAnalysisMenu              matlab.ui.container.Menu
+        ExportResultsMenu             matlab.ui.container.Menu
+        DataAnalysisMenu              matlab.ui.container.Menu
+        GelImageFileInformationMenu   matlab.ui.container.Menu
+        SelectedBoxInformationMenu    matlab.ui.container.Menu
+        SummaryPlotMenu               matlab.ui.container.Menu
+        FittingPanel                  matlab.ui.container.Panel
+        BandTable                     matlab.ui.control.Table
+        NumberofBandsSpinner          matlab.ui.control.Spinner
+        NumberofBandsSpinnerLabel     matlab.ui.control.Label
+        RsquaredLabel                 matlab.ui.control.Label
+        rsquaredField                 matlab.ui.control.NumericEditField
+        FittingParametersButton       matlab.ui.control.Button
+        DrawFittingCheckBox           matlab.ui.control.CheckBox
         BackgroundCorrectedOpticalDensityLabel  matlab.ui.control.Label
-        RawOpticalDensityLabel         matlab.ui.control.Label
-        raw_density_fit                matlab.ui.control.UIAxes
+        RawOpticalDensityLabel        matlab.ui.control.Label
+        raw_density_fit               matlab.ui.control.UIAxes
         background_corrected_raw_density_fit  matlab.ui.control.UIAxes
-        GelImagePanel                  matlab.ui.container.Panel
-        BoxSelectionDropDown           matlab.ui.control.DropDown
-        BoxSelectionDropDownLabel      matlab.ui.control.Label
-        NewBoxButton                   matlab.ui.control.Button
-        AdjustImageButton              matlab.ui.control.Button
-        gel_image_axis                 matlab.ui.control.UIAxes
-        OpticalDensitiesPanel          matlab.ui.container.Panel
-        BackgroundSubtractionLabel     matlab.ui.control.Label
+        GelImagePanel                 matlab.ui.container.Panel
+        ShowLaneLayoutButton          matlab.ui.control.Button
+        BoxSelectionDropDown          matlab.ui.control.DropDown
+        BoxSelectionDropDownLabel     matlab.ui.control.Label
+        NewBoxButton                  matlab.ui.control.Button
+        AdjustImageButton             matlab.ui.control.Button
+        gel_image_axis                matlab.ui.control.UIAxes
+        OpticalDensitiesPanel         matlab.ui.container.Panel
+        BackgroundSubtractionLabel    matlab.ui.control.Label
         BackgroundCorrectedOpticalDensityLabel_2  matlab.ui.control.Label
-        RawOpticalDensityLabel_2       matlab.ui.control.Label
-        BackgroundTabGroup             matlab.ui.container.TabGroup
-        CSSTab                         matlab.ui.container.Tab
-        SmoothingEditField             matlab.ui.control.NumericEditField
-        SmoothingEditFieldLabel        matlab.ui.control.Label
-        FractionSpinner                matlab.ui.control.Spinner
-        FractionSpinnerLabel           matlab.ui.control.Label
-        LINTab                         matlab.ui.container.Tab
-        FractionSpinner_Linear         matlab.ui.control.Spinner
-        FractionSpinner_2Label         matlab.ui.control.Label
-        RBTab                          matlab.ui.container.Tab
-        RollingBallSizeSpinner         matlab.ui.control.Spinner
-        RollingBallSizeSpinnerLabel    matlab.ui.control.Label
-        BackgroundAreaField            matlab.ui.control.NumericEditField
-        BackgroundAreaLabel            matlab.ui.control.Label
-        TotalAreaField                 matlab.ui.control.NumericEditField
-        TotalAreaEditFieldLabel        matlab.ui.control.Label
-        BackgroundCorrAreaField        matlab.ui.control.NumericEditField
-        BackgroundCorrAreaLabel        matlab.ui.control.Label
-        MedianFilterSizeSpinner        matlab.ui.control.Spinner
-        MedianFilterSizeSpinnerLabel   matlab.ui.control.Label
-        BoxZoomLabel                   matlab.ui.control.Label
-        ApplyFilterCheckBox            matlab.ui.control.CheckBox
+        RawOpticalDensityLabel_2      matlab.ui.control.Label
+        BackgroundTabGroup            matlab.ui.container.TabGroup
+        CSSTab                        matlab.ui.container.Tab
+        SmoothingEditField            matlab.ui.control.NumericEditField
+        SmoothingEditFieldLabel       matlab.ui.control.Label
+        FractionSpinner               matlab.ui.control.Spinner
+        FractionSpinnerLabel          matlab.ui.control.Label
+        LINTab                        matlab.ui.container.Tab
+        FractionSpinner_Linear        matlab.ui.control.Spinner
+        FractionSpinner_2Label        matlab.ui.control.Label
+        RBTab                         matlab.ui.container.Tab
+        RollingBallSizeSpinner        matlab.ui.control.Spinner
+        RollingBallSizeSpinnerLabel   matlab.ui.control.Label
+        BackgroundAreaField           matlab.ui.control.NumericEditField
+        BackgroundAreaLabel           matlab.ui.control.Label
+        TotalAreaField                matlab.ui.control.NumericEditField
+        TotalAreaEditFieldLabel       matlab.ui.control.Label
+        BackgroundCorrAreaField       matlab.ui.control.NumericEditField
+        BackgroundCorrAreaLabel       matlab.ui.control.Label
+        MedianFilterSizeSpinner       matlab.ui.control.Spinner
+        MedianFilterSizeSpinnerLabel  matlab.ui.control.Label
+        BoxZoomLabel                  matlab.ui.control.Label
+        ApplyFilterCheckBox           matlab.ui.control.CheckBox
         background_corrected_raw_density  matlab.ui.control.UIAxes
-        raw_density                    matlab.ui.control.UIAxes
-        box_inset                      matlab.ui.control.UIAxes
+        raw_density                   matlab.ui.control.UIAxes
+        box_inset                     matlab.ui.control.UIAxes
     end
 
 
@@ -96,6 +94,7 @@ classdef GelBox_exported < matlab.apps.AppBase
         FittingOptions % Description
         SummaryPlot
         AdjustImage
+        LayoutTable
     end
 
     methods (Access = public)
@@ -299,7 +298,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                             fraction_ix = ceil(fraction*number_of_elements);
                             ix_1 = 1:fraction_ix;
                             ix_2 = number_of_elements:-1:(number_of_elements - fraction_ix + 1);
-                            padding = 0.025*(x(1) + x(end));
+                            padding = 0.04*(x(1) + x(end));
                             [l,p] = boundedline(x(ix_1),ix_1',[padding padding], 'orientation', 'horiz','r','alpha',app.raw_density);
                             l.Color = [0 0 0];
                             p.FaceAlpha = 0.2;
@@ -314,7 +313,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                             fraction_ix = ceil(fraction*number_of_elements);
                             ix_1 = 1:fraction_ix;
                             ix_2 = number_of_elements:-1:(number_of_elements - fraction_ix + 1);
-                            padding = 0.025*(x(1) + x(end));
+                            padding = 0.04*(x(1) + x(end));
                             [l,p] = boundedline(x(ix_1),ix_1',[padding padding], 'orientation', 'horiz','r','alpha',app.raw_density);
                             l.Color = [0 0 0];
                             p.FaceAlpha = 0.2;
@@ -365,18 +364,11 @@ classdef GelBox_exported < matlab.apps.AppBase
                         x_t_beginning = ceil(min(x-app.gel_data.background(i).x_back)/x_tick_rounder)*x_tick_rounder;
                         x_t_mid = round(x_t_end/2);
                         app.background_corrected_raw_density.XAxis.Exponent = 0;
-                        background_method = app.BackgroundSubtractionDropDown.Value;
-                        if strcmp(background_method,'Rolling Ball')
-                            xlim(app.background_corrected_raw_density,[0 x_t_end])
-                            xlim(app.background_corrected_raw_density_fit,[0 x_t_end])
-                            x_ticks = [0 x_t_mid x_t_end];
 
-                        else
-                            xlim(app.background_corrected_raw_density,[x_t_beginning x_t_end])
-                            xlim(app.background_corrected_raw_density_fit,[x_t_beginning x_t_end])
-                            x_ticks = [x_t_beginning x_t_mid x_t_end];
+                        xlim(app.background_corrected_raw_density,[x_t_beginning x_t_end])
+                        xlim(app.background_corrected_raw_density_fit,[x_t_beginning x_t_end])
+                        x_ticks = [x_t_beginning x_t_mid x_t_end];
 
-                        end
                         xticks(app.background_corrected_raw_density,x_ticks)
                         ylim(app.background_corrected_raw_density,[1 max(y)]);
                         xticks(app.background_corrected_raw_density_fit,x_ticks)
@@ -847,6 +839,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 ResetDisplay(app)
                 app.DataAnalysisMenu.Enable = 1;
                 app.gel_data = [];
+                app.gel_data.layout.layout_table = [];
                 app.gel_data.fitting.par_update = 0;
                 app.gel_data.boxes = [];
                 app.d = [];
@@ -900,14 +893,25 @@ classdef GelBox_exported < matlab.apps.AppBase
 
                 % Restore
                 app.gel_data = [];
+                app.gel_data.layout.layout_table = [];
                 app.gel_data.boxes = [];
                 app.filtered_inset = [];
                 app.background_token = [];
                 app.d=[];
-                save_fields = {'image','fitting','settings'};
+                save_fields = {'image','fitting','settings','layout'};
 
                 for i = 1 : numel(save_fields)
-                    app.gel_data.(save_fields{i}) = save_data.(save_fields{i});
+                    if isfield(save_data,save_fields{i})
+                        app.gel_data.(save_fields{i}) = save_data.(save_fields{i});
+                    else
+                        app.gel_data.(save_fields{i}) = [];
+                    end
+                end
+                
+                if ~isempty(app.gel_data.layout)
+                    app.ShowLaneLayoutButton.Enable = 1;
+                else
+                    app.ShowLaneLayoutButton.Enable = 0;
                 end
 
                 app.estimate_parameters = 0;
@@ -1171,7 +1175,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                 msgboxFontSize(h,10);
                 return
             end
-            save_fields = {'image','fitting','settings'};
+            save_fields = {'image','fitting','settings','layout'};
 
             for i = 1 : numel(save_fields)
                 save_data.(save_fields{i}) = app.gel_data.(save_fields{i});
@@ -1291,20 +1295,19 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             [file_string,path_string] = uiputfile2( ...
                 {'*.xlsx','Excel file'},'Enter Excel File Name For Analysis Results');
-            layout_table = [];
             if (path_string~=0)
                 d_out = o;
                 names = fieldnames(d_out);
+                if isempty(app.gel_data.layout.layout_table)
                 [file_string_layout,path_string_layout] = uigetfile2( ...
                     {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
 
                 if (path_string_layout~=0)
 
-                    layout_file = fullfile(path_string_layout,file_string_layout);
-                    layout_table = readtable(layout_file);
-                    layout_names = layout_table.Properties.VariableNames;
-
-                    while ~any(strcmpi(names,'box'))
+                    app.gel_data.layout.layout_file = fullfile(path_string_layout,file_string_layout);
+                    app.gel_data.layout.layout_table = readtable(app.gel_data.layout.layout_file);
+                    layout_names = app.gel_data.layout.layout_table.Properties.VariableNames;
+                    while ~any(strcmpi(layout_names,'box'))
                         message = ["Gel layout does not have ""Box"" as one of the columns.","Please make sure to add ""Box"" to Excel file."];
                         selection = uiconfirm(app.GelBoxUIFigure,message,"Reload Gel Layout",...
                             "Options",["Reload Gel Layout","Skip"],"DefaultOption",1,"CancelOption",2,'Icon','error');
@@ -1313,15 +1316,15 @@ classdef GelBox_exported < matlab.apps.AppBase
                             [file_string_layout,path_string_layout] = uigetfile2( ...
                                 {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
 
-                            layout_file = fullfile(path_string_layout,file_string_layout);
-                            layout_table = readtable(layout_file);
+                            app.gel_data.layout.layout_file = fullfile(path_string_layout,file_string_layout);
+                            app.gel_data.layout.layout_table = readtable(app.gel_data.layout.layout_file);
                         else
-
-                            layout_table = [];
+                            app.gel_data.layout.layout_table = [];
                             return
                         end
 
                     end
+                end
                 end
 
                 for j = 1 : length(d_out)
@@ -1342,13 +1345,14 @@ classdef GelBox_exported < matlab.apps.AppBase
                     delete(output_file);
                 end
 
-                if ~isempty(layout_table)
+                if ~isempty(app.gel_data.layout.layout_table)
+                    layout_names = app.gel_data.layout.layout_table.Properties.VariableNames;
                     for i = 1 : numel(layout_names)
                         if strcmpi(layout_names{i},'box')
-                            layout_table = renamevars(layout_table,layout_names{i},'box');
+                            app.gel_data.layout.layout_table = renamevars(app.gel_data.layout.layout_table,layout_names{i},'box');
                         end
                     end
-                    T = innerjoin(layout_table,struct2table(d_out));
+                    T = innerjoin(app.gel_data.layout.layout_table,struct2table(d_out));
                     writetable(T,output_file,'Sheet','Summary')
                 else
                     writetable(struct2table(d_out),output_file,'Sheet','Summary')
@@ -1491,7 +1495,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.single_box_callback = 0;
         end
 
-        % Value changed function: OrderSpinner
+        % Callback function
         function OrderSpinnerValueChanged(app, event)
             value = app.OrderSpinner.Value;
             box = str2num(app.BoxSelectionDropDown.Value);
@@ -1532,6 +1536,42 @@ classdef GelBox_exported < matlab.apps.AppBase
             UpdateDisplay(app)
             app.single_box_callback = 0;
         end
+
+        % Menu selected function: LoadLaneLayoutMenu
+        function LoadLaneLayoutMenuSelected(app, event)
+            [file_string_layout,path_string_layout] = uigetfile2( ...
+                {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
+
+            if (path_string_layout~=0)
+                app.gel_data.layout.layout_table = [];
+                app.gel_data.layout.layout_file = fullfile(path_string_layout,file_string_layout);
+                app.gel_data.layout.layout_table = readtable(app.gel_data.layout.layout_file);
+                layout_names = app.gel_data.layout.layout_table.Properties.VariableNames;
+                while ~any(strcmpi(layout_names,'box'))
+                    message = ["Gel layout does not have ""Box"" as one of the columns.","Please make sure to add ""Box"" to Excel file."];
+                    selection = uiconfirm(app.GelBoxUIFigure,message,"Reload Gel Layout",...
+                        "Options",["Reload Gel Layout","Skip"],"DefaultOption",1,"CancelOption",2,'Icon','error');
+
+                    if ~strcmp(selection,'Skip')
+                        [file_string_layout,path_string_layout] = uigetfile2( ...
+                            {'*.xlsx','Excel file'},'Select The Gel Layout File For The Results Excel File');
+
+                        app.gel_data.layout.layout_file = fullfile(path_string_layout,file_string_layout);
+                        app.gel_data.layout.layout_table = readtable(app.gel_data.layout.layout_file);
+                    else
+                        app.gel_data.layout.layout_table = [];
+                        return
+                    end
+
+                end
+                app.ShowLaneLayoutButton.Enable = 1;
+            end
+        end
+
+        % Button pushed function: ShowLaneLayoutButton
+        function ShowLaneLayoutButtonPushed(app, event)
+            app.LayoutTable = LayoutTableWindow(app);
+        end
     end
 
     % Component initialization
@@ -1555,6 +1595,12 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.LoadImageMenu = uimenu(app.FileMenu);
             app.LoadImageMenu.MenuSelectedFcn = createCallbackFcn(app, @LoadImageButtonPushed, true);
             app.LoadImageMenu.Text = 'Load Image';
+
+            % Create LoadLaneLayoutMenu
+            app.LoadLaneLayoutMenu = uimenu(app.FileMenu);
+            app.LoadLaneLayoutMenu.MenuSelectedFcn = createCallbackFcn(app, @LoadLaneLayoutMenuSelected, true);
+            app.LoadLaneLayoutMenu.Separator = 'on';
+            app.LoadLaneLayoutMenu.Text = 'Load Lane Layout';
 
             % Create LoadAnalysisMenu
             app.LoadAnalysisMenu = uimenu(app.FileMenu);
@@ -1611,13 +1657,13 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             % Create raw_density
             app.raw_density = uiaxes(app.OpticalDensitiesPanel);
-            xlabel(app.raw_density, 'Optical Density (A.U.)')
+            xlabel(app.raw_density, 'Optical Density (Bits)')
             ylabel(app.raw_density, 'Pixel')
             app.raw_density.Position = [165 47 234 209];
 
             % Create background_corrected_raw_density
             app.background_corrected_raw_density = uiaxes(app.OpticalDensitiesPanel);
-            xlabel(app.background_corrected_raw_density, 'Optical Density (A.U.)')
+            xlabel(app.background_corrected_raw_density, 'Optical Density (Bits)')
             app.background_corrected_raw_density.YColor = [0.9412 0.9412 0.9412];
             app.background_corrected_raw_density.Position = [396 46 234 209];
 
@@ -1756,7 +1802,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.RollingBallSizeSpinner.Limits = [1 Inf];
             app.RollingBallSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @RollingBallSizeSpinnerValueChanged, true);
             app.RollingBallSizeSpinner.Position = [114 25 66 22];
-            app.RollingBallSizeSpinner.Value = 80;
+            app.RollingBallSizeSpinner.Value = 200;
 
             % Create RawOpticalDensityLabel_2
             app.RawOpticalDensityLabel_2 = uilabel(app.OpticalDensitiesPanel);
@@ -1817,6 +1863,13 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BoxSelectionDropDown.Position = [339 537 100 22];
             app.BoxSelectionDropDown.Value = {};
 
+            % Create ShowLaneLayoutButton
+            app.ShowLaneLayoutButton = uibutton(app.GelImagePanel, 'push');
+            app.ShowLaneLayoutButton.ButtonPushedFcn = createCallbackFcn(app, @ShowLaneLayoutButtonPushed, true);
+            app.ShowLaneLayoutButton.Enable = 'off';
+            app.ShowLaneLayoutButton.Position = [460 536 115 22];
+            app.ShowLaneLayoutButton.Text = 'Show Lane Layout';
+
             % Create FittingPanel
             app.FittingPanel = uipanel(app.GelBoxUIFigure);
             app.FittingPanel.Title = 'Fitting';
@@ -1824,14 +1877,14 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             % Create background_corrected_raw_density_fit
             app.background_corrected_raw_density_fit = uiaxes(app.FittingPanel);
-            xlabel(app.background_corrected_raw_density_fit, 'Optical Density (A.U.)')
+            xlabel(app.background_corrected_raw_density_fit, 'Optical Density (Bits)')
             ylabel(app.background_corrected_raw_density_fit, 'Pixel')
             app.background_corrected_raw_density_fit.YColor = [0.9412 0.9412 0.9412];
             app.background_corrected_raw_density_fit.Position = [255 3 254 209];
 
             % Create raw_density_fit
             app.raw_density_fit = uiaxes(app.FittingPanel);
-            xlabel(app.raw_density_fit, 'Optical Density (A.U.)')
+            xlabel(app.raw_density_fit, 'Optical Density (Bits)')
             ylabel(app.raw_density_fit, 'Pixel')
             app.raw_density_fit.Position = [11 3 254 209];
 
@@ -1892,33 +1945,6 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BandTable.ColumnName = {'Band No'; 'Color'; 'Area'; 'Relative Area'};
             app.BandTable.RowName = {};
             app.BandTable.Position = [518 10 321 148];
-
-            % Create OrderLabel
-            app.OrderLabel = uilabel(app.GelBoxUIFigure);
-            app.OrderLabel.HorizontalAlignment = 'right';
-            app.OrderLabel.Visible = 'off';
-            app.OrderLabel.Position = [1335 837 36 22];
-            app.OrderLabel.Text = 'Order';
-
-            % Create OrderSpinner
-            app.OrderSpinner = uispinner(app.GelBoxUIFigure);
-            app.OrderSpinner.Limits = [0 Inf];
-            app.OrderSpinner.ValueChangedFcn = createCallbackFcn(app, @OrderSpinnerValueChanged, true);
-            app.OrderSpinner.Visible = 'off';
-            app.OrderSpinner.Position = [1386 837 100 22];
-            app.OrderSpinner.Value = 5;
-
-            % Create BackgroundSubtractionDropDownLabel
-            app.BackgroundSubtractionDropDownLabel = uilabel(app.GelBoxUIFigure);
-            app.BackgroundSubtractionDropDownLabel.WordWrap = 'on';
-            app.BackgroundSubtractionDropDownLabel.Position = [1542 838 129 21];
-            app.BackgroundSubtractionDropDownLabel.Text = 'Background Subtraction';
-
-            % Create BackgroundSubtractionDropDown
-            app.BackgroundSubtractionDropDown = uidropdown(app.GelBoxUIFigure);
-            app.BackgroundSubtractionDropDown.Items = {'Cubic Smoothing Spline (CSC)', 'Linear (LIN)', 'Rolling Ball (RB)'};
-            app.BackgroundSubtractionDropDown.Position = [1537 814 199 22];
-            app.BackgroundSubtractionDropDown.Value = 'Cubic Smoothing Spline (CSC)';
 
             % Show the figure after all components are created
             app.GelBoxUIFigure.Visible = 'on';

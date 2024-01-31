@@ -12,6 +12,7 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
         BandLabelsCommaSeparetedEditField  matlab.ui.control.EditField
         BandLabelsCommaSeparetedEditFieldLabel  matlab.ui.control.Label
         FileOptionsPanel              matlab.ui.container.Panel
+        ExportAnalyzedImageCheckBox   matlab.ui.control.CheckBox
         FigureFileNameField           matlab.ui.control.EditField
         FigureFileNameEditFieldLabel  matlab.ui.control.Label
         OutputPathField               matlab.ui.control.EditField
@@ -415,7 +416,7 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                         'x_label_offset',-0.30,...
                         'tick_font_size',8,...
                         'label_font_size',8,...
-                        'x_axis_label',{'Opt.','Density (A.U.)'},...
+                        'x_axis_label',{'Opt.','Density (Bits)'},...
                         'x_ticks', x_ticks,...
                         'y_ticks',[1 length(summary(i).x)],...
                         'title_font_size', 8, ...
@@ -444,7 +445,7 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                         'tick_font_size',8,...
                         'label_font_size',8,...
                         'y_axis_label',{'Pixels'},...
-                        'x_axis_label',{'Opt.','Density (A.U.)'},...
+                        'x_axis_label',{'Opt.','Density (Bits)'},...
                         'x_ticks',x_ticks,...
                         'y_ticks',[1 length(summary(i).x)],...
                         'y_label_rotation',90);
@@ -452,6 +453,12 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
                 fname = sprintf('%s_%s',app.box_layout_fname,scaling{fig_no});
                 figure_export('output_file_string', fname, ...
                     'output_type', 'png');
+            end
+            if app.ExportAnalyzedImageCheckBox.Value
+                im_name = sprintf('%s_analyzed_image.png',app.box_layout_fname);
+                imwrite(app.GelBoxApp.gel_data.image.im_data,im_name)
+%                 figure_export('output_file_string', fname, ...
+%                     'output_type', 'png');
             end
             delete(app)
         end
@@ -481,48 +488,53 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
 
             % Create SummaryPlotUIFigure and hide until all components are created
             app.SummaryPlotUIFigure = uifigure('Visible', 'off');
-            app.SummaryPlotUIFigure.Position = [100 100 345 416];
+            app.SummaryPlotUIFigure.Position = [100 100 345 431];
             app.SummaryPlotUIFigure.Name = 'Summary Plot';
 
             % Create GenerateSummaryPlotsButton
             app.GenerateSummaryPlotsButton = uibutton(app.SummaryPlotUIFigure, 'push');
             app.GenerateSummaryPlotsButton.ButtonPushedFcn = createCallbackFcn(app, @GenerateSummaryPlotsButtonPushed, true);
-            app.GenerateSummaryPlotsButton.Position = [97 8 150 23];
+            app.GenerateSummaryPlotsButton.Position = [97 9 150 23];
             app.GenerateSummaryPlotsButton.Text = 'Generate Summary Plots';
 
             % Create FileOptionsPanel
             app.FileOptionsPanel = uipanel(app.SummaryPlotUIFigure);
             app.FileOptionsPanel.Title = 'File Options';
-            app.FileOptionsPanel.Position = [10 293 328 113];
+            app.FileOptionsPanel.Position = [10 287 328 134];
 
             % Create SelectOutputFolderButton
             app.SelectOutputFolderButton = uibutton(app.FileOptionsPanel, 'push');
             app.SelectOutputFolderButton.ButtonPushedFcn = createCallbackFcn(app, @SelectOutputFolderButtonPushed, true);
             app.SelectOutputFolderButton.WordWrap = 'on';
-            app.SelectOutputFolderButton.Position = [12 43 88 41];
+            app.SelectOutputFolderButton.Position = [12 64 88 41];
             app.SelectOutputFolderButton.Text = 'Select Output Folder';
 
             % Create OutputPathField
             app.OutputPathField = uieditfield(app.FileOptionsPanel, 'text');
             app.OutputPathField.Editable = 'off';
             app.OutputPathField.FontSize = 11;
-            app.OutputPathField.Position = [111 54 202 22];
+            app.OutputPathField.Position = [111 75 202 22];
 
             % Create FigureFileNameEditFieldLabel
             app.FigureFileNameEditFieldLabel = uilabel(app.FileOptionsPanel);
             app.FigureFileNameEditFieldLabel.HorizontalAlignment = 'right';
-            app.FigureFileNameEditFieldLabel.Position = [8 12 97 22];
+            app.FigureFileNameEditFieldLabel.Position = [8 33 97 22];
             app.FigureFileNameEditFieldLabel.Text = 'Figure File Name';
 
             % Create FigureFileNameField
             app.FigureFileNameField = uieditfield(app.FileOptionsPanel, 'text');
             app.FigureFileNameField.ValueChangedFcn = createCallbackFcn(app, @FigureFileNameFieldValueChanged, true);
-            app.FigureFileNameField.Position = [111 12 202 22];
+            app.FigureFileNameField.Position = [111 33 202 22];
+
+            % Create ExportAnalyzedImageCheckBox
+            app.ExportAnalyzedImageCheckBox = uicheckbox(app.FileOptionsPanel);
+            app.ExportAnalyzedImageCheckBox.Text = 'Export Analyzed Image';
+            app.ExportAnalyzedImageCheckBox.Position = [112 1 145 22];
 
             % Create BandLabelsPanel
             app.BandLabelsPanel = uipanel(app.SummaryPlotUIFigure);
             app.BandLabelsPanel.Title = 'Band Labels';
-            app.BandLabelsPanel.Position = [10 38 328 244];
+            app.BandLabelsPanel.Position = [10 39 328 244];
 
             % Create BandLabelsCommaSeparetedEditFieldLabel
             app.BandLabelsCommaSeparetedEditFieldLabel = uilabel(app.BandLabelsPanel);
@@ -562,13 +574,13 @@ classdef SummaryPlotWindow_exported < matlab.apps.AppBase
             app.ControlLabelsCommaSeparatedEditFieldLabel.HorizontalAlignment = 'center';
             app.ControlLabelsCommaSeparatedEditFieldLabel.WordWrap = 'on';
             app.ControlLabelsCommaSeparatedEditFieldLabel.Enable = 'off';
-            app.ControlLabelsCommaSeparatedEditFieldLabel.Position = [17 51 118 56];
+            app.ControlLabelsCommaSeparatedEditFieldLabel.Position = [17 52 118 56];
             app.ControlLabelsCommaSeparatedEditFieldLabel.Text = 'Control Labels (Comma Separated)';
 
             % Create ControlLabelsCommaSeparatedEditField
             app.ControlLabelsCommaSeparatedEditField = uieditfield(app.SummaryPlotUIFigure, 'text');
             app.ControlLabelsCommaSeparatedEditField.Enable = 'off';
-            app.ControlLabelsCommaSeparatedEditField.Position = [148 68 175 22];
+            app.ControlLabelsCommaSeparatedEditField.Position = [148 69 175 22];
 
             % Show the figure after all components are created
             app.SummaryPlotUIFigure.Visible = 'on';
