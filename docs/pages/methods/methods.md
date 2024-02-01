@@ -23,6 +23,3 @@ GelBox adjusts the parameters for each Gaussian function until the minimum resid
 where k is the number of pixels in the ROI, D(x) is the densitometry profile, S(x) is the fitted function at the end of each iteration. Each Gaussian function is then numerically integrated, using the Simpson's rule, to find the areas. Generalized relative band content expression is given as follows:
 
 ![relative_quantity](media/relative_quantity.png)
-
-When $a \ne 0$, there are two solutions to $ax^2 + bx + c = 0$ and they are:
-$$x = {-b \pm \sqrt{b^2-4ac} \over 2a}.$$
