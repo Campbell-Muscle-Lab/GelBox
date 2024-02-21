@@ -2,27 +2,29 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        AdjustImageUIFigure            matlab.ui.Figure
-        MaximizeContrastButton         matlab.ui.control.Button
-        ReverttoOriginalImageButton    matlab.ui.control.Button
-        BrightnessandContrastPanel     matlab.ui.container.Panel
-        MaximizeContrastCheckBox       matlab.ui.control.CheckBox
-        MaximumInPixelIntensitySlider  matlab.ui.control.Slider
+        AdjustImageUIFigure             matlab.ui.Figure
+        MaximizeContrastButton          matlab.ui.control.Button
+        ReverttoOriginalImageButton     matlab.ui.control.Button
+        BrightnessandContrastPanel      matlab.ui.container.Panel
+        MaximizeContrastCheckBox        matlab.ui.control.CheckBox
+        MaximumInPixelIntensitySlider   matlab.ui.control.Slider
         MaximumInPixelIntensitySliderLabel  matlab.ui.control.Label
-        BrightnessSlider               matlab.ui.control.Slider
-        BrightnessSliderLabel          matlab.ui.control.Label
-        MinimumInPixelIntensitySlider  matlab.ui.control.Slider
+        BrightnessSlider                matlab.ui.control.Slider
+        BrightnessSliderLabel           matlab.ui.control.Label
+        MinimumInPixelIntensitySlider   matlab.ui.control.Slider
         MinimumInPixelIntensitySliderLabel  matlab.ui.control.Label
-        adjusted_image_hist_working    matlab.ui.control.UIAxes
-        in_out_axis                    matlab.ui.control.UIAxes
-        AdjustedImagePanel             matlab.ui.container.Panel
-        adjusted_image_axis            matlab.ui.control.UIAxes
-        OriginalImagePanel             matlab.ui.container.Panel
-        RevertChangesButton            matlab.ui.control.Button
-        AcceptChangesButton            matlab.ui.control.Button
-        InvertImageCheckBox            matlab.ui.control.CheckBox
-        CropImageButton                matlab.ui.control.Button
-        original_image_axis            matlab.ui.control.UIAxes
+        adjusted_image_hist_working     matlab.ui.control.UIAxes
+        in_out_axis                     matlab.ui.control.UIAxes
+        AdjustedImagePanel              matlab.ui.container.Panel
+        RevertChangesButton             matlab.ui.control.Button
+        AcceptChangesButton             matlab.ui.control.Button
+        adjusted_image_axis             matlab.ui.control.UIAxes
+        OriginalImagePanel              matlab.ui.container.Panel
+        RotateImageDegreesSpinner       matlab.ui.control.Spinner
+        RotateImageDegreesSpinnerLabel  matlab.ui.control.Label
+        InvertImageCheckBox             matlab.ui.control.CheckBox
+        CropImageButton                 matlab.ui.control.Button
+        original_image_axis             matlab.ui.control.UIAxes
     end
 
 
@@ -45,6 +47,7 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
         inverted_image % Description
         col = {'r','b'} % Description
         overlay_original_image % Description
+        im_rotation_angle = [] % Description
     end
 
     methods (Access = public)
@@ -155,6 +158,23 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
                     InvertImageCheckBoxValueChanged(app)
                 end
             end
+            
+            try
+                app.RotateImageDegreesSpinner.Value = ...
+                    app.GelBoxApp.gel_data.settings.image_adjustments.im_rotation;
+            catch
+                app.RotateImageDegreesSpinner.Value = 0;
+            end
+            rot = app.RotateImageDegreesSpinner.Value;
+            app.adjusted_image = imrotate(app.original_image,rot,'crop');
+            rot_mask = [];
+            rot_mask = ~imrotate(app.original_image,rot,'crop');
+            if app.inverted_image
+                pad_val = 1;
+            else
+                pad_val = 0;
+            end
+            app.adjusted_image(rot_mask) = pad_val;
            
             
             UpdateAdjustedImageDisplay(app,app.adjusted_image)
@@ -435,14 +455,20 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
 
         % Button pushed function: RevertChangesButton
         function RevertChangesButtonPushed(app, event)
+            app.cropped_image = [];
             app.adjusted_image = [];
             app.adjusted_image_2 = [];
+            app.RotateImageDegreesSpinner.Value = 0;
             app.MinimumInPixelIntensitySlider.Value = 0;
             app.MaximumInPixelIntensitySlider.Value = 1;
             app.BrightnessSlider.Value = 0;
             app.in_out = linspace(0,1);
             plot(app.in_out_axis,app.in_out,app.in_out,'LineWidth',2,'Color','k')
-            UpdateAdjustedImageDisplay(app,app.cropped_image)
+            if app.inverted_image
+                app.original_image = imcomplement(app.original_image);
+                app.inverted_image = 0;
+            end
+            UpdateAdjustedImageDisplay(app,app.original_image)
 
         end
 
@@ -454,8 +480,9 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             app.GelBoxApp.gel_data.settings.image_adjustments.contrast_lower = app.MinimumInPixelIntensitySlider.Value;
             app.GelBoxApp.gel_data.settings.image_adjustments.contrast_upper = app.MaximumInPixelIntensitySlider.Value;
             app.GelBoxApp.gel_data.settings.image_adjustments.max_contrast = app.max_contrast;
+            app.GelBoxApp.gel_data.settings.image_adjustments.im_rotation = app.RotateImageDegreesSpinner.Value;
             app.GelBoxApp.gel_data.settings.invert_status = app.inverted_image;
-            if isempty(app.cropped_image)
+            if isempty(app.cropped_image) && isempty(app.im_rotation_angle)
                 if app.inverted_image
                     app.GelBoxApp.gel_data.image.adjusted_image = imcomplement(app.GelBoxApp.gel_data.image.original_image);
                 else
@@ -496,7 +523,7 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
         function InvertImageCheckBoxValueChanged(app, event)
 
             value = app.InvertImageCheckBox.Value;
-            if isempty(app.cropped_image)
+            if isempty(app.cropped_image) && isempty(app.im_rotation_angle)
                 app.original_image = imcomplement(app.original_image);
                 im = app.original_image;
             elseif isempty(app.adjusted_image)
@@ -553,6 +580,50 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
 
             app.max_contrast = true;
         end
+
+        % Value changing function: RotateImageDegreesSpinner
+        function RotateImageDegreesSpinnerValueChanging(app, event)
+            changingValue = event.Value;
+            if app.im_rotation_angle
+                rot = changingValue - app.im_rotation_angle;
+            else
+                rot = changingValue;
+            end
+            if app.inverted_image
+                pad_val = 1;
+            else
+                pad_val = 0;
+            end
+            if isempty(app.adjusted_image)
+                app.adjusted_image = imrotate(app.original_image,rot,'crop');
+                rot_mask = [];
+                rot_mask = ~imrotate(app.original_image,rot,'crop');
+                app.adjusted_image(rot_mask) = pad_val;
+                im = app.adjusted_image;
+
+                app.im_rotation_angle = changingValue;
+            elseif isempty(app.adjusted_image_2)
+                app.adjusted_image_2 = imrotate(app.adjusted_image,rot,'crop');
+                rot_mask = [];
+                rot_mask = ~imrotate(app.adjusted_image,rot,'crop');
+                app.adjusted_image_2(rot_mask) = pad_val;
+                im = app.adjusted_image_2;
+
+                app.im_rotation_angle = changingValue;
+            else
+                app.adjusted_image_2 = imrotate(app.adjusted_image_2,rot,'crop');
+                rot_mask = [];
+                rot_mask = ~imrotate(app.adjusted_image_2,rot,'crop');
+                app.adjusted_image_2(rot_mask) = pad_val;
+                im = app.adjusted_image_2;
+
+
+                app.im_rotation_angle = changingValue;
+            end
+            UpdateAdjustedImageDisplay(app,im);
+
+
+        end
     end
 
     % Component initialization
@@ -581,26 +652,25 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             % Create CropImageButton
             app.CropImageButton = uibutton(app.OriginalImagePanel, 'push');
             app.CropImageButton.ButtonPushedFcn = createCallbackFcn(app, @CropImageButtonPushed, true);
-            app.CropImageButton.Position = [15 503 100 22];
+            app.CropImageButton.Position = [12 495 100 22];
             app.CropImageButton.Text = 'Crop Image';
 
             % Create InvertImageCheckBox
             app.InvertImageCheckBox = uicheckbox(app.OriginalImagePanel);
             app.InvertImageCheckBox.ValueChangedFcn = createCallbackFcn(app, @InvertImageCheckBoxValueChanged, true);
             app.InvertImageCheckBox.Text = 'Invert Image';
-            app.InvertImageCheckBox.Position = [129 503 89 22];
+            app.InvertImageCheckBox.Position = [126 495 89 22];
 
-            % Create AcceptChangesButton
-            app.AcceptChangesButton = uibutton(app.OriginalImagePanel, 'push');
-            app.AcceptChangesButton.ButtonPushedFcn = createCallbackFcn(app, @AcceptChangesButtonPushed, true);
-            app.AcceptChangesButton.Position = [230 503 104 22];
-            app.AcceptChangesButton.Text = 'Accept Changes';
+            % Create RotateImageDegreesSpinnerLabel
+            app.RotateImageDegreesSpinnerLabel = uilabel(app.OriginalImagePanel);
+            app.RotateImageDegreesSpinnerLabel.HorizontalAlignment = 'right';
+            app.RotateImageDegreesSpinnerLabel.Position = [222 495 134 22];
+            app.RotateImageDegreesSpinnerLabel.Text = 'Rotate Image (Degrees)';
 
-            % Create RevertChangesButton
-            app.RevertChangesButton = uibutton(app.OriginalImagePanel, 'push');
-            app.RevertChangesButton.ButtonPushedFcn = createCallbackFcn(app, @RevertChangesButtonPushed, true);
-            app.RevertChangesButton.Position = [350 503 102 22];
-            app.RevertChangesButton.Text = 'Revert Changes';
+            % Create RotateImageDegreesSpinner
+            app.RotateImageDegreesSpinner = uispinner(app.OriginalImagePanel);
+            app.RotateImageDegreesSpinner.ValueChangingFcn = createCallbackFcn(app, @RotateImageDegreesSpinnerValueChanging, true);
+            app.RotateImageDegreesSpinner.Position = [363 495 50 22];
 
             % Create AdjustedImagePanel
             app.AdjustedImagePanel = uipanel(app.AdjustImageUIFigure);
@@ -613,6 +683,18 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             app.adjusted_image_axis.YTick = [];
             app.adjusted_image_axis.Box = 'on';
             app.adjusted_image_axis.Position = [10 7 540 478];
+
+            % Create AcceptChangesButton
+            app.AcceptChangesButton = uibutton(app.AdjustedImagePanel, 'push');
+            app.AcceptChangesButton.ButtonPushedFcn = createCallbackFcn(app, @AcceptChangesButtonPushed, true);
+            app.AcceptChangesButton.Position = [10 495 104 22];
+            app.AcceptChangesButton.Text = 'Accept Changes';
+
+            % Create RevertChangesButton
+            app.RevertChangesButton = uibutton(app.AdjustedImagePanel, 'push');
+            app.RevertChangesButton.ButtonPushedFcn = createCallbackFcn(app, @RevertChangesButtonPushed, true);
+            app.RevertChangesButton.Position = [130 495 102 22];
+            app.RevertChangesButton.Text = 'Revert Changes';
 
             % Create BrightnessandContrastPanel
             app.BrightnessandContrastPanel = uipanel(app.AdjustImageUIFigure);

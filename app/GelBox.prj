@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="1075674624" file="C:\utku\GitHub\GelBox\app\GelBox.prj" location="C:\utku\GitHub\GelBox\app" name="GelBox" preferred-package-location="C:\utku\GitHub\GelBox\app\GelBox\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="584686690" file="C:\utku\GitHub\Software\GelBox\app\GelBox.prj" location="C:\utku\GitHub\Software\GelBox\app" name="GelBox" preferred-package-location="C:\utku\GitHub\GelBox\app\GelBox\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>GelBox</param.appname>
     <param.icon>${PROJECT_ROOT}\GelBox_resources\icon.ico</param.icon>
     <param.icons>
@@ -86,70 +86,66 @@
       <file>${PROJECT_ROOT}\GelBox.mlapp</file>
     </fileset.main>
     <fileset.resources>
+      <file>${PROJECT_ROOT}\utilities</file>
+    </fileset.resources>
+    <fileset.package />
+    <fileset.depfun>
       <file>${PROJECT_ROOT}\utilities\AdjustImageWindow.mlapp</file>
+      <file>${PROJECT_ROOT}\utilities\boundedline\boundedline\boundedline.m</file>
+      <file>${PROJECT_ROOT}\utilities\boundedline\catuneven\catuneven.m</file>
+      <file>${PROJECT_ROOT}\utilities\boundedline\Inpaint_nans\inpaint_nans.m</file>
+      <file>${PROJECT_ROOT}\utilities\boundedline\singlepatch\singlepatch.m</file>
       <file>${PROJECT_ROOT}\utilities\calculate_r_squared.m</file>
       <file>${PROJECT_ROOT}\utilities\center_image_with_preserved_aspect_ratio.m</file>
-      <file>${PROJECT_ROOT}\utilities\estimate_fitting_parameters.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\copyfig.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\crop_borders.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\eps2pdf.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\export_fig.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\fix_lines.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\ghostscript.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\hyperlink.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\isolate_axes.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\pdf2eps.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\pdftops.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\print2array.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\print2eps.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\read_write_entire_textfile.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\user_string.m</file>
+      <file>${PROJECT_ROOT}\utilities\export_fig\using_hg2.m</file>
       <file>${PROJECT_ROOT}\utilities\figure_export.m</file>
       <file>${PROJECT_ROOT}\utilities\find_peaks.m</file>
-      <file>${PROJECT_ROOT}\utilities\fit_2gaussian.m</file>
-      <file>${PROJECT_ROOT}\utilities\fit_3gaussian.m</file>
-      <file>${PROJECT_ROOT}\utilities\fitting_parameters.mlapp</file>
+      <file>${PROJECT_ROOT}\utilities\fit_straight_line.m</file>
       <file>${PROJECT_ROOT}\utilities\FittingOptionsDialog.mlapp</file>
       <file>${PROJECT_ROOT}\utilities\fminsearchbnd.m</file>
-      <file>${PROJECT_ROOT}\utilities\fminsearchcon.m</file>
-      <file>${PROJECT_ROOT}\utilities\gel_box_summary.m</file>
-      <file>${PROJECT_ROOT}\utilities\gel_box_summary3.m</file>
       <file>${PROJECT_ROOT}\utilities\ImFInfoDialog.mlapp</file>
       <file>${PROJECT_ROOT}\utilities\improve_axes.m</file>
       <file>${PROJECT_ROOT}\utilities\initialise_publication_quality_figure.m</file>
-      <file>${PROJECT_ROOT}\utilities\intersections.m</file>
-      <file>${PROJECT_ROOT}\utilities\jsonlab_1_5</file>
+      <file>${PROJECT_ROOT}\utilities\jsonlab_1_5\jsonopt.m</file>
+      <file>${PROJECT_ROOT}\utilities\jsonlab_1_5\mergestruct.m</file>
+      <file>${PROJECT_ROOT}\utilities\jsonlab_1_5\savejson.m</file>
+      <file>${PROJECT_ROOT}\utilities\jsonlab_1_5\varargin2struct.m</file>
       <file>${PROJECT_ROOT}\utilities\lastUsedDir.mat</file>
-      <file>${PROJECT_ROOT}\utilities\legacy_code</file>
-      <file>${PROJECT_ROOT}\utilities\legendflex</file>
+      <file>${PROJECT_ROOT}\utilities\LayoutTableWindow.mlapp</file>
+      <file>${PROJECT_ROOT}\utilities\legendflex\legendflex\legendflex.m</file>
+      <file>${PROJECT_ROOT}\utilities\legendflex\setgetpos_V1.2\getpos.m</file>
+      <file>${PROJECT_ROOT}\utilities\msgboxFontSize.m</file>
       <file>${PROJECT_ROOT}\utilities\parse_pv_pairs.m</file>
       <file>${PROJECT_ROOT}\utilities\print_number_to_specified_decimal_places.m</file>
-      <file>${PROJECT_ROOT}\utilities\printstruct.m</file>
       <file>${PROJECT_ROOT}\utilities\SelectedBoxDialog.mlapp</file>
       <file>${PROJECT_ROOT}\utilities\simps.m</file>
       <file>${PROJECT_ROOT}\utilities\SummaryPlotWindow.mlapp</file>
       <file>${PROJECT_ROOT}\utilities\uigetdir2.m</file>
       <file>${PROJECT_ROOT}\utilities\uigetfile2.m</file>
       <file>${PROJECT_ROOT}\utilities\uiputfile2.m</file>
-      <file>${PROJECT_ROOT}\utilities\write_structure_to_excel.m</file>
-    </fileset.resources>
-    <fileset.package />
-    <fileset.depfun>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\+mixin\Container.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\+mixin\Panel.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\Box.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\calcPixelSizes.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\ChildEvent.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\ChildObserver.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\Container.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\FigureData.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\FigureObserver.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\HBox.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\Node.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\Panel.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\SelectionData.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\set.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\setPosition.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\tracking.m</file>
-      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\VBox.m</file>
-      <file>${PROJECT_ROOT}\utilities\msgboxFontSize.m</file>
-      <file>C:\utku\GitHub\GelBox\lastUsedDir.mat</file>
     </fileset.depfun>
     <build-deliverables>
-      <file location="${PROJECT_ROOT}\GelBox\for_testing" name="GelBox.exe" optional="false">C:\utku\GitHub\GelBox\app\GelBox\for_testing\GelBox.exe</file>
-      <file location="${PROJECT_ROOT}\GelBox\for_testing" name="readme.txt" optional="true">C:\utku\GitHub\GelBox\app\GelBox\for_testing\readme.txt</file>
-      <file location="${PROJECT_ROOT}\GelBox\for_testing" name="splash.png" optional="false">C:\utku\GitHub\GelBox\app\GelBox\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\GelBox\for_testing" name="splash.png" optional="false">C:\utku\GitHub\Software\GelBox\app\GelBox\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\GelBox\for_testing" name="GelBox.exe" optional="false">C:\utku\GitHub\Software\GelBox\app\GelBox\for_testing\GelBox.exe</file>
+      <file location="${PROJECT_ROOT}\GelBox\for_testing" name="readme.txt" optional="true">C:\utku\GitHub\Software\GelBox\app\GelBox\for_testing\readme.txt</file>
     </build-deliverables>
     <workflow />
     <matlab>
-      <root>C:\Program Files\MATLAB\R2021a</root>
+      <root>C:\Program Files\MATLAB\R2023b</root>
       <toolboxes>
         <toolbox name="matlabcoder" />
         <toolbox name="neuralnetwork" />

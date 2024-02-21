@@ -1657,13 +1657,13 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             % Create raw_density
             app.raw_density = uiaxes(app.OpticalDensitiesPanel);
-            xlabel(app.raw_density, 'Optical Density (Bits)')
+            xlabel(app.raw_density, 'Optical Density (AU)')
             ylabel(app.raw_density, 'Pixel')
             app.raw_density.Position = [165 47 234 209];
 
             % Create background_corrected_raw_density
             app.background_corrected_raw_density = uiaxes(app.OpticalDensitiesPanel);
-            xlabel(app.background_corrected_raw_density, 'Optical Density (Bits)')
+            xlabel(app.background_corrected_raw_density, 'Optical Density (AU)')
             app.background_corrected_raw_density.YColor = [0.9412 0.9412 0.9412];
             app.background_corrected_raw_density.Position = [396 46 234 209];
 
@@ -1877,14 +1877,14 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             % Create background_corrected_raw_density_fit
             app.background_corrected_raw_density_fit = uiaxes(app.FittingPanel);
-            xlabel(app.background_corrected_raw_density_fit, 'Optical Density (Bits)')
+            xlabel(app.background_corrected_raw_density_fit, 'Optical Density (AU)')
             ylabel(app.background_corrected_raw_density_fit, 'Pixel')
             app.background_corrected_raw_density_fit.YColor = [0.9412 0.9412 0.9412];
             app.background_corrected_raw_density_fit.Position = [255 3 254 209];
 
             % Create raw_density_fit
             app.raw_density_fit = uiaxes(app.FittingPanel);
-            xlabel(app.raw_density_fit, 'Optical Density (Bits)')
+            xlabel(app.raw_density_fit, 'Optical Density (AU)')
             ylabel(app.raw_density_fit, 'Pixel')
             app.raw_density_fit.Position = [11 3 254 209];
 
