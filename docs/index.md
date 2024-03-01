@@ -5,9 +5,6 @@ nav_order: 1
 
 ## GelBox
 
-A software written and developed in MATLAB App Designer. It is a new workflow aiming to improve rigor, reproducibility, and traceability of the gels and blots. GelBox workflow starts with the gel image and ties the raw gel image, image adjustments, data quantification, analysis export, and import together under a single tool.
+GelBox is open-source software that was developed with the goal of enhancing rigor, reproducibility, and transparency when analyzing gels and immunoblots. It combines image adjustments (cropping, rotation, brightness, and contrast), background correction, and band-fitting in a single application. Users can also associate each lane in an image with metadata (for example, sample type). GelBox data files integrate the raw data, any supplied metadata, image adjustments, and band-level data in a single file to improve traceability. GelBox has a user-friendly interface and was developed using MATLAB. 
 
-It employs curve-fitting techniques to represent the density profiles using a mathematical function in the form of a summation of Gaussian functions.
-
-GelBox saves analysis in a unique GBX format and these files can be opened. Researchers can revisit and review their analysis at any given time in the future.
-
+<a href="media/figure_gelbox_gui.png" target="_blank">![GelBox GUI](media/figure_gelbox_gui.png)</a>
