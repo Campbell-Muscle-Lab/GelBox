@@ -1,0 +1,44 @@
+<h1 id="troubleshooting">Troubleshooting</h1>
+
+<p>This page provides simple troubleshooting steps for analysis with GelBox. Clicking on any of the images on this page will open a larger version in a new browser window.</p>
+
+<p>Here’s an example of a situation you might encounter with your gels. Please note that the fitted function does not properly represent the density profile. The application only captures one peak, so there is only one non-zero Gaussian function.</p>
+
+<p>The problem is that the software has not found a good fit. There are two distinct possibilities.</p>
+
+<ul>
+  <li>There is not  a good mathematical fit to the experimentally measured profile, and</li>
+  <li>There is a good fit, but GelBox could not find it.</li>
+</ul>
+
+<p><a href="media/single_curve.png" target="_blank"><img src="media/single_curve.png" alt="Single curve" /></a></p>
+
+<p>It is not always easy to identify the situation. One possible first step is visualizing the fitting process to observe how the function develops through iterations. Draw Fitting checkbox, shown in the red rectangle, lets users visualize fitting. As soon as the box is checked, the fitting starts over. This may take a little longer as each fitting iteration is plotted simultaneously.</p>
+
+<video src="media/draw_fitting.mp4" controls="controls" style="max-width: 730px;"></video>
+
+<p>The first couple of iterations show that the application does not accurately predict the peak locations. Click the Fitting Parameters in the Fitting panel for the starting parameter estimates. Although the peak locations are roughly around 41 and 73 for band 1 and band 2, only the peak location of band 1 is correctly estimated.</p>
+
+<p><a href="media/change_parameters.png" target="_blank"><img src="media/change_parameters.png" alt="Change parameters" /></a></p>
+
+<p>Change the peak location of band 2 to 73 and click the Update Fitting button.</p>
+
+<p><a href="media/parameters_changed.png" target="_blank"><img src="media/parameters_changed.png" alt="Parameters changed" /></a></p>
+
+<p>Please note that GelBox successfully detected the two peaks after changing the peak locations. You can look for better fits by changing the size and position of the region of interest (ROI) box.</p>
+
+<p><a href="media/drag_box_down.png" target="_blank"><img src="media/drag_box_down.png" alt="Drag box down" /></a></p>
+
+<p>Change the peak estimate of the peak one and constrain it to capture the amplitude accurately. Use the constrain checkbox, shown in the red rectangle.</p>
+
+<p><a href="media/constrain_parameter.png" target="_blank"><img src="media/constrain_parameter.png" alt="Constrain parameter" /></a></p>
+
+<p>After constraining the peak amplitude, the new fit accurately predicts the peak amplitude.</p>
+
+<p><a href="media/constrained_parameter_new_fit.png" target="_blank"><img src="media/constrained_parameter_new_fit.png" alt="Constrain parameter new fit" /></a></p>
+
+<p>Further improvement can be made by changing the width offset of the second band using the Fitting Parameters.</p>
+
+<p><a href="media/final_analysis.png" target="_blank"><img src="media/final_analysis.png" alt="final analysis" /></a></p>
+
+<p>These troubleshooting steps obtain an acceptable R-squared value for the fitted function. In addition, both bands are represented with non-zero Gaussian functions.</p>

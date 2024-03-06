@@ -35,11 +35,33 @@ Upon clicking the Load Image button, it opens a normal Windows File Open Dialog.
 
 <a href="media/file_open.png" target="_blank">![File open](media/file_open.png)</a>
 
+You can download the test image used in this tutorial <a download = "example_gel_image.tif" href="media/demo/example_gel_images/example_gel_image.tif">here</a>.
+
 An image of your gel should now be displayed in the gel image panel (red rectangle).
 
 <a href="media/raw_gel.png" target="_blank">![Raw gel](media/raw_gel.png)</a>
 
-The loaded gel image has a darker background, and users can obtain a brighter background image using the GelBox's built-in image adjustments window. To access the window, click the Adjust Image button in the red rectangle.
+GelBox allows users to load their metadata consisting of information on the loaded samples. These data can be loaded in an Excel file. An example of metadata is given below. Following the analysis, the metadata will be combined with the analysis. GelBox requires the "Lane" column to be present in the layout file to perform this task.
+
+<a href="media/example_layout.png" target="_blank">![Example layout](media/example_layout.png)</a>
+
+Click the file button on the top menu to access the options and click the Load Layout File button, shown in red rectangle.
+
+<a href="media/load_lane_layout.png" target="_blank">![Load lane layout](media/load_lane_layout.png)</a>
+
+It opens a file dialog for you to locate the layout file.
+
+<a href="media/layout_file_dialog.png" target="_blank">![Layout file dialog](media/layout_file_dialog.png)</a>
+
+Upon loading the Excel file, you can review the layout using the Show Lane Layout button, shown in the red rectangle.
+ 
+ <a href="media/show_lane_layout.png" target="_blank">![Show lane layout](media/show_lane_layout.png)</a>
+
+The layout table opens in a separate window.
+
+ <a href="media/layout_table.png" target="_blank">![Layout table](media/layout_table.png)</a>
+
+ The loaded gel image has a darker background, and users can obtain a brighter background image using the GelBox's built-in image adjustments window. To access the window, click the Adjust Image button in the red rectangle.
 
 <a href="media/adjust_image.png" target="_blank">![Adjust image](media/adjust_image.png)</a>
 
@@ -57,6 +79,14 @@ Upon clicking the Invert Image checkbox, the inverted image appears in the Adjus
 Clicking the Invert Image button transforms bright pixels into dark pixels and vice versa. The inverted image appears in the Gel Image panel. In addition, the adjusted image intensity histogram appears in the plot. Please note that both red and blue histograms are symmetric.
 
 <a href="media/invert_image.png" target="_blank">![Invert image](media/invert_image.png)</a>
+
+You can also rotate your image if needed using the Rotate Image spinner, shown in the red rectangle.
+
+<a href="media/rotate_image.png" target="_blank">![Rotate image](media/rotate_image.png)</a>
+
+Set the angle to a desired value. the below example shows the image rotated by 50 degrees.
+
+<a href="media/rotated_image.png" target="_blank">![Rotated image](media/rotated_image.png)</a>
 
 In this tutorial, the loaded gel image is a titin gel. We are interested in quantifying the relative quantities of cardiac N2B and N2BA titin isoforms. The first lane of the gel is loaded with a skeletal control sample. We are interested in the two bands that appeared around the mid-height of the gel. The rest of the gel image does not hold useful information. Therefore, the next step is to crop the image for the analysis. The Crop Image button, shown in the red rectangle, is in the Original Image panel.
 
@@ -137,21 +167,21 @@ In the below example, the radius of 5 for the rolling ball removed almost all of
 
 The tutorial continues with the CSS background correction method.
 
-In the Fitting panel, the fitted function is displayed in a dashed green line in this panel. The yellow-shaded area in the Background Corrected Optical Density axes shows the area under the Gaussian function. The R-squared value is employed as a goodness-of-fit measure. The Band table shows the list of the bands and their color designation. The color designation follows the [Parula colormap](https://blogs.mathworks.com/steve/2014/10/13/a-new-colormap-for-matlab-part-1-introduction/). The enumeration starts from the bottom of the density profile. The area is given in pixels, and the relative area is 1 as the number of bands is selected as one. Users can increase the number of bands in the ROI using the Number of Bands spinner, shown in the red rectangle.
+The box can be resized and moved along the image. The fitting process automatically follows the position of the box. You can explore a better fit by replacing or resizing the box.
 
-<a href="media/num_of_bands_one.png" target="_blank">![Num of bands 1](media/num_of_bands_one.png)</a>
+<video src="media/resize_box_1.mp4" controls="controls" style="max-width: 730px;"></video>
 
-Upon changing the number of bands, GelBox automatically calculates the new Gaussian fit and updates all the fields. Please note that the color code has changed. While the purple-shaded area shows Band 1, the yellow-shaded area shows Band 2. 
+Usually, there is more than one lane of interest in gels. Once you complete the current box, generate your next box as mentioned above. GelBox will automatically place a new box near the old box. All the boxes have the exact dimensions. The new box becomes the selected box (light green), and the old box is shown in red. Drag the new box to the desired position. Please note that the inset and density figures are updated as the box moves.
+
+<a href="media/new_box_2.png" target="_blank">![new box 2](media/new_box_2.png)</a>
+
+In the Fitting panel, the fitted function is displayed in a dashed green line in this panel. The yellow-shaded area in the Background Corrected Optical Density axes shows the area under the Gaussian function. The R-squared value is employed as a goodness-of-fit measure. The Band table shows the list of the bands and their color designation. The color designation follows the [Parula colormap](https://blogs.mathworks.com/steve/2014/10/13/a-new-colormap-for-matlab-part-1-introduction/). The enumeration starts from the bottom of the density profile. The area is given in pixels, and the relative area is 1 as the number of bands is selected as one. Users can increase the number of bands in the ROI using the Number of Bands spinner, shown in the red rectangle. Upon changing the number of bands, GelBox automatically calculates the new Gaussian fit and updates all the fields. Please note that the color code has changed. While the purple-shaded area shows Band 1, the yellow-shaded area shows Band 2. 
 
 <a href="media/num_of_bands_two.png" target="_blank">![Two bands](media/num_of_bands_two.png)</a>
 
 The relative quantities are calculated as:
 
 Relative Quantities = Area of the Band of Interest / The Total Area of the Bands in the ROI.
-
-The box can be resized and dragged along the image. The fitting process automatically follows the position of the box. You can explore a better fit by replacing or resizing the box.
-
-<video src="media/resize_box_1.mp4" controls="controls" style="max-width: 730px;"></video>
 
 Besides moving the box around the lanes, users can change the estimated fitting parameters to obtain better fits. The Fitting Parameters button in the red rectangle opens the fitting parameters table. 
 
@@ -165,13 +195,9 @@ The width and the skew offset parameters are constrained to zero by default. Unc
 
 <a href="media/change_fitting_parameter.png" target="_blank">![Change fitting parameter](media/change_fitting_parameter.png)</a>
 
-The calculated width offset parameter value is -0.0061. The R-squared is changed to 0.994 and the relative area values changed by 0.03.
+GelBox adjusts the parameters with the new constraint condition.
 
 <a href="media/fitting_parameters_changed.png" target="_blank">![Fitting parameters changed](media/fitting_parameters_changed.png)</a>
-
-Usually, there is more than one lane of interest in gels. Once you complete the current box, generate your next box as mentioned above. GelBox will automatically place a new box near the old box. All the boxes have the exact dimensions. The new box becomes the selected box (light green), and the old box is shown in red. Drag the new box to the desired position. Please note that the inset and density figures are updated as the box moves.
-
-<a href="media/new_box_2.png" target="_blank">![new box 2](media/new_box_2.png)</a>
 
 You can change the selected box using the Box Selection dropdown, shown in a rectangle. 
 
@@ -192,10 +218,6 @@ Users can also access the Gel Image Information window and review the stored ima
 <a href="media/gel_image_information_menu.png" target="_blank">![Gel image information menu](media/gel_image_information_menu.png)</a>
 
 <a href="media/gel_image_information.png" target="_blank">![Gel image information](media/gel_image_information.png)</a>
-
-The rest of the analysis is shown in the below video.
-
-<video src="media/analysis.mp4" controls="controls" style="max-width: 730px;"></video>
 
 Here is the snapshot of the completed analysis.
 
@@ -219,16 +241,17 @@ The settings JSON file has the following structure.
 {
 	"GelBox Settings": {
 		"image_adjustments": {
-			"crop_pos": [307.4171975,941.3990467,2153.675159,338.0020316],
+			"crop_pos": [329.5579915,957.8658124,2126.878359,339.7353753],
 			"brightness": 0,
-			"contrast_lower": 0.2,
+			"contrast_lower": 0.1733333333,
 			"contrast_upper": 1,
-			"max_contrast": 0
+			"max_contrast": 0,
+			"im_rotation": 0
 		},
 		"invert_status": 1,
 		"filtering": {
 			"median": {
-				"size": [0,0,0,3,0,0,3,3,0,0,0,3]
+				"size": [0,0,0,0,3,3,3,3,0,0,0,0,0]
 			}
 		},
 		"background": {
@@ -244,15 +267,16 @@ The settings JSON file has the following structure.
 				"Cubic Smoothing Spline (CSS)",
 				"Cubic Smoothing Spline (CSS)",
 				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
 				"Cubic Smoothing Spline (CSS)"
 			],
-			"css_fraction": [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],
-			"css_smoothing": [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
-			"rb_size": [0,0,0,0,0,0,0,0,0,0,0,0]
+			"css_fraction": [0.1,0.1,0.1,0.1,0.15,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],
+			"css_smoothing": [0.0001,0.0001,0.0001,0.0001,0.1,0.001,0.001,0.001,0.001,0.001,0.001,0.001,0.001],
+			"lin_fraction": [0,0,0,0,0,0,0,0,0,0,0,0,0],
+			"rb_size": [0,0,0,0,0,0,0,0,0,0,0,0,0]
 		}
 	}
 }
-
 ```
 
 The Export Results button, shown in the red rectangle, opens a file dialog box for the analysis summary Excel file. You can combine your gel layout Excel files with the analysis Excel file to improve traceability. 
@@ -263,24 +287,12 @@ First, GelBox asks users to select the name of the Analysis Results Excel file. 
 
 <a href="media/output_results_file_dialog.png" target="_blank">![Output excel file dialog](media/output_results_file_dialog.png)</a>
 
-Then, GelBox asks users to locate the gel layout file.
-
-<a href="media/gel_layout_file_dialog.png" target="_blank">![Gel layout excel file dialog](media/gel_layout_file_dialog.png)</a>
-
-The snapshot of the gel layout Excel is given below.
-
-<a href="media/demo_gel_layout.png" target="_blank">![Demo gel layout](media/demo_gel_layout.png)</a>
-
-GelBox uses the "Box" as the key for joining the tables in the backend. Please make sure to have "Box" in your layout. If the "Box" is not found, GelBox returns a warning window.
-
 Here is the snapshot of the Analysis Summary Excel file.
 
 <a href="media/results_excel_file.png" target="_blank">![Results excel file](media/results_excel_file.png)</a>
 
 Summary Excel file has multiple sheets. The first sheet is the Summary sheet, and here are the brief descriptions of each column:
-+ (Optional) SampleCode: Identifier for the host of the samples
-+ (Optional) Region: The region of the sample
-+ (Optional) Gel: The gel number that was run
++ (Optional) Sample: Sample identifier
 + (Optional) Lane: The lane number in which the sample was loaded
 + box: The box number
 + image_file: File path of the image
@@ -327,3 +339,7 @@ After a few seconds, the following figure appears and is saved under the selecte
 
 <a href="media/demo/summary_plots/summary_plot_box_layout_same_scale.png" target="_blank">![Summary plot box layout](media/demo/summary_plots/summary_plot_box_layout_same_scale.png)</a>
 
+
+The analyzed image is also exported. It can be found in the same folder as the summary plot.
+
+<a href="media/demo/summary_plots/summary_plot_box_layout_analyzed_image.png" target="_blank">![Summary plot box layout analyzed image](media/demo/summary_plots/summary_plot_box_layout_analyzed_image.png)</a>

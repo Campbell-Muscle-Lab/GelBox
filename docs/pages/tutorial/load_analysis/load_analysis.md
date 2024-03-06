@@ -28,7 +28,7 @@ Click the File button on the toolbar. The file button opens a dropdown menu, whi
 
 This button brings up a Windows File Open Dialog. Locate and load the GelBox analysis file. To learn how to save a GelBox analysis, please follow the [start new analysis tutorial](../start_new_analysis/start_new_analysis.html).
 
-<a href="media/load_analysis.png" target="_blank">![Load analysis](media/load_analysis.PNG)</a>
+<a href="media/load_analysis.PNG" target="_blank">![Load analysis](media/load_analysis.PNG)</a>
 
 After a few seconds, the analysis is loaded to the interface. All the operations described in [start new analysis tutorial](../start_new_analysis/start_new_analysis.html) are available upon loading.
 

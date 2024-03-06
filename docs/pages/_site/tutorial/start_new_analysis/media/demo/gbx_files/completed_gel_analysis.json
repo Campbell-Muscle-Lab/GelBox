@@ -1,0 +1,36 @@
+{
+	"GelBox Settings": {
+		"image_adjustments": {
+			"crop_pos": [307.4171975,941.3990467,2153.675159,338.0020316],
+			"brightness": 0,
+			"contrast_lower": 0.2,
+			"contrast_upper": 1,
+			"max_contrast": 0
+		},
+		"invert_status": 1,
+		"filtering": {
+			"median": {
+				"size": [0,0,0,3,0,0,3,3,0,0,0,3]
+			}
+		},
+		"background": {
+			"method": [
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)",
+				"Cubic Smoothing Spline (CSS)"
+			],
+			"css_fraction": [0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1],
+			"css_smoothing": [0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],
+			"rb_size": [0,0,0,0,0,0,0,0,0,0,0,0]
+		}
+	}
+}

@@ -90,53 +90,25 @@
     </fileset.resources>
     <fileset.package />
     <fileset.depfun>
-      <file>${PROJECT_ROOT}\utilities\AdjustImageWindow.mlapp</file>
-      <file>${PROJECT_ROOT}\utilities\boundedline\boundedline\boundedline.m</file>
-      <file>${PROJECT_ROOT}\utilities\boundedline\catuneven\catuneven.m</file>
-      <file>${PROJECT_ROOT}\utilities\boundedline\Inpaint_nans\inpaint_nans.m</file>
-      <file>${PROJECT_ROOT}\utilities\boundedline\singlepatch\singlepatch.m</file>
-      <file>${PROJECT_ROOT}\utilities\calculate_r_squared.m</file>
-      <file>${PROJECT_ROOT}\utilities\center_image_with_preserved_aspect_ratio.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\copyfig.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\crop_borders.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\eps2pdf.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\export_fig.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\fix_lines.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\ghostscript.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\hyperlink.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\isolate_axes.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\pdf2eps.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\pdftops.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\print2array.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\print2eps.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\read_write_entire_textfile.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\user_string.m</file>
-      <file>${PROJECT_ROOT}\utilities\export_fig\using_hg2.m</file>
-      <file>${PROJECT_ROOT}\utilities\figure_export.m</file>
-      <file>${PROJECT_ROOT}\utilities\find_peaks.m</file>
-      <file>${PROJECT_ROOT}\utilities\fit_straight_line.m</file>
-      <file>${PROJECT_ROOT}\utilities\FittingOptionsDialog.mlapp</file>
-      <file>${PROJECT_ROOT}\utilities\fminsearchbnd.m</file>
-      <file>${PROJECT_ROOT}\utilities\ImFInfoDialog.mlapp</file>
-      <file>${PROJECT_ROOT}\utilities\improve_axes.m</file>
-      <file>${PROJECT_ROOT}\utilities\initialise_publication_quality_figure.m</file>
-      <file>${PROJECT_ROOT}\utilities\jsonlab_1_5\jsonopt.m</file>
-      <file>${PROJECT_ROOT}\utilities\jsonlab_1_5\mergestruct.m</file>
-      <file>${PROJECT_ROOT}\utilities\jsonlab_1_5\savejson.m</file>
-      <file>${PROJECT_ROOT}\utilities\jsonlab_1_5\varargin2struct.m</file>
-      <file>${PROJECT_ROOT}\utilities\lastUsedDir.mat</file>
-      <file>${PROJECT_ROOT}\utilities\LayoutTableWindow.mlapp</file>
-      <file>${PROJECT_ROOT}\utilities\legendflex\legendflex\legendflex.m</file>
-      <file>${PROJECT_ROOT}\utilities\legendflex\setgetpos_V1.2\getpos.m</file>
-      <file>${PROJECT_ROOT}\utilities\msgboxFontSize.m</file>
-      <file>${PROJECT_ROOT}\utilities\parse_pv_pairs.m</file>
-      <file>${PROJECT_ROOT}\utilities\print_number_to_specified_decimal_places.m</file>
-      <file>${PROJECT_ROOT}\utilities\SelectedBoxDialog.mlapp</file>
-      <file>${PROJECT_ROOT}\utilities\simps.m</file>
-      <file>${PROJECT_ROOT}\utilities\SummaryPlotWindow.mlapp</file>
-      <file>${PROJECT_ROOT}\utilities\uigetdir2.m</file>
-      <file>${PROJECT_ROOT}\utilities\uigetfile2.m</file>
-      <file>${PROJECT_ROOT}\utilities\uiputfile2.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\+mixin\Container.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\+mixin\Panel.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\Box.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\calcPixelSizes.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\ChildEvent.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\ChildObserver.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\Container.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\FigureData.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\FigureObserver.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\HBox.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\Node.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\Panel.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\SelectionData.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\set.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\setPosition.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\tracking.m</file>
+      <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\VBox.m</file>
+      <file>${PROJECT_ROOT}\lastUsedDir.mat</file>
+      <file>${PROJECT_ROOT}\matlab.mat</file>
     </fileset.depfun>
     <build-deliverables>
       <file location="${PROJECT_ROOT}\GelBox\for_testing" name="splash.png" optional="false">C:\utku\GitHub\Software\GelBox\app\GelBox\for_testing\splash.png</file>

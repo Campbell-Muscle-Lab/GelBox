@@ -21,11 +21,11 @@ It is not always easy to identify the situation. One possible first step is visu
 
 <video src="media/draw_fitting.mp4" controls="controls" style="max-width: 730px;"></video>
 
-The first couple of iterations show that the application does not accurately predict the peak locations. Click the Fitting Parameters in the Fitting panel for the starting parameter estimates. Although the peak locations are roughly around 41 and 73 for band 1 and band 2, only the peak location of band 1 is correctly estimated.
+The first couple of iterations show that the application does not accurately predict the peak locations. Click the Fitting Parameters in the Fitting panel for the starting parameter estimates. Although the peak locations are roughly around 60 and 90 for band 1 and band 2, both peaks are wrongly estimated.
 
 <a href="media/change_parameters.png" target="_blank">![Change parameters](media/change_parameters.png)</a>
 
-Change the peak location of band 2 to 73 and click the Update Fitting button.
+Change the peak location of band 1 to 60 and click the Update Fitting button.
 
 <a href="media/parameters_changed.png" target="_blank">![Parameters changed](media/parameters_changed.png)</a>
 
