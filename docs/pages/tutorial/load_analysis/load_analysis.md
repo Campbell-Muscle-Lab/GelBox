@@ -11,12 +11,11 @@ This page provides simple instructions on how to load an existing analysis to Ge
 
 ## Instructions
 
-+ Using the GelBox through the cloned repository
-    - Launch MATLAB and double-click `GelBox.mlapp`. It is located under `<repo>app` folder. 
-    - The `GelBox.mlapp` file starts the MATLAB App Designer, then press <kbd>F5</kbd> to start the application.
++ Using the GelBox through MATLAB:
+    - Launch MATLAB and navigate to the Apps tab on the top menu. Find the GelBox under My Apps and start the application by clicking it. The instructions on how to locate the Apps tab can be found [here](../../installation/installing_matlab_app/installing_matlab_app.html)
 
-+ Using the GelBox as a stand-alone application
-    - Locate your `GelBox.exe` shortcut and start the application by double-clicking.
++ Using the GelBox as a stand-alone application:
+    - Locate your `GelBox.exe` shortcut and start the application by double-clicking it.
 
 After a few seconds, you should see a program window. This is the main GelBox program. (Clicking on any of the images on this page will open a larger version in a new browser window.)
 

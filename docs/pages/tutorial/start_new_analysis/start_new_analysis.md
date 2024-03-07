@@ -11,12 +11,11 @@ This page provides simple instructions on performing a new analysis with GelBox.
 
 ## Instructions
 
-+ Using the GelBox through the cloned repository:
-    - Launch MATLAB and double-click `GelBox.mlapp`. It is located under `<repo>app` folder. 
-    - The `GelBox.mlapp` file starts the MATLAB App Designer, then press <kbd>F5</kbd> to start the application.
++ Using the GelBox through MATLAB:
+    - Launch MATLAB and navigate to the Apps tab on the top menu. Find the GelBox under My Apps and start the application by clicking it. The instructions on how to locate the Apps tab can be found [here](../../installation/installing_matlab_app/installing_matlab_app.html)
 
 + Using the GelBox as a stand-alone application:
-    - Locate your `GelBox.exe` shortcut and start the application by double-clicking.
+    - Locate your `GelBox.exe` shortcut and start the application by double-clicking it.
 
 After a few seconds, you should see a program window. Here is the GelBox interface. (Clicking on any of the images on this page will open a larger version in a new browser window.).
 
@@ -294,11 +293,14 @@ Here is the snapshot of the Analysis Summary Excel file.
 Summary Excel file has multiple sheets. The first sheet is the Summary sheet, and here are the brief descriptions of each column:
 + (Optional) Sample: Sample identifier
 + (Optional) Lane: The lane number in which the sample was loaded
-+ box: The box number
++ Box: The box number
 + image_file: File path of the image
 + total_area: Area under the raw density trace
 + background_method: Implemented background correction method
-+ background_size: The size of the structural element for correction
++ background_css_fraction: The portion of the density profile used for cubic spline interpolation
++ background_css_smoothing: The smoothing parameter for the cubic spline
++ background_lin_fraction: The portion of the density profile used for linear interpolation
++ background_rb_size: The radius of the structural element
 + background_area: The Area under the baseline
 + band_left: Position of the upper left corner on the x-axis
 + band_top: Position of the upper left corner on the y-axis
@@ -310,16 +312,17 @@ Summary Excel file has multiple sheets. The first sheet is the Summary sheet, an
 + band_area_1: Area under the first Gaussian function representing the first band
 + band_area_2: Area under the second Gaussian function representing the first band
 
+The following sheets are named after the boxes. There is a sheet for each box in the analysis. 
 
-The following sheets are named after the boxes. There is a sheet for each box in the analysis. Here are the brief descriptions of each column.
+<a href="media/excel_fits.PNG" target="_blank">![Excel fits](media/excel_fits.PNG)</a>
+
+Here are the brief descriptions of each column.
 + x: Raw optical density value
 + y: Pixel index along the height of the box
 + x_fit: Fitted function value
 + x_back: Background density value
 + band_1: The first Gaussian function value
 + band_2: The second Gaussian function value
-
-<a href="media/excel_fits.PNG" target="_blank">![Excel fits](media/excel_fits.PNG)</a>
 
 In addition, users can generate summary plots for their analysis. Click the Data Analysis button on the toolbar. The Summary Plot button is located at the bottom of the dropdown, shown in the red rectangle.
 

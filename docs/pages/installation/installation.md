@@ -10,4 +10,4 @@ has_children: True
 * TOC
 {:toc}
 
-Users can use GelBox 3 by either cloning the repository or installing the stand alone application.
+Users can use GelBox either through MATLAB or as a stand alone application. The installation files for both approaches can be downloaded or obtained by cloning the GitHub repository.

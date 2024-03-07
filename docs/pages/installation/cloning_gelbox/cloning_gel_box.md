@@ -1,5 +1,5 @@
 ---
-title: Cloning GelBox
+title: Cloning GelBox Repository
 has_children: false
 parent: Installation
 nav_order: 1
@@ -7,7 +7,7 @@ nav_order: 1
 
 # Installation
 
-## Cloning GelBox
+## Cloning GelBox Repository
 
 This page instructs you on how to clone the GelBox repository.
 

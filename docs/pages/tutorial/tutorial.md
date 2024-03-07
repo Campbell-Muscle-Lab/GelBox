@@ -10,4 +10,4 @@ has_children: True
 * TOC
 {:toc}
 
-Users can start a new analysis and also revisit their old analyses by loading it.
+Users can start a new analysis and also revisit their old analyses by loading them.
