@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration build-checksum="312060448" file="C:\utku\GitHub\Software\GelBox\code\GelBox_stand_alone.prj" location="C:\utku\GitHub\Software\GelBox\code" name="GelBox_stand_alone" preferred-package-location="C:\utku\GitHub\Software\GelBox\code\GelBox_stand_alone\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="2890922654" file="C:\utku\GitHub\Software\GelBox\code\GelBox_stand_alone.prj" location="C:\utku\GitHub\Software\GelBox\code" name="GelBox_stand_alone" preferred-package-location="C:\utku\GitHub\Software\GelBox\code\GelBox_stand_alone\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>GelBox</param.appname>
     <param.icon />
     <param.icons />
@@ -102,8 +102,8 @@
       <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\setPosition.m</file>
       <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\tracking.m</file>
       <file>C:\Users\utkug\AppData\Roaming\MathWorks\MATLAB Add-Ons\Toolboxes\GUI Layout Toolbox\layout\+uix\VBox.m</file>
+      <file>${PROJECT_ROOT}\lastUsedDir.mat</file>
       <file>${PROJECT_ROOT}\matlab.mat</file>
-      <file>C:\utku\lastUsedDir.mat</file>
     </fileset.depfun>
     <build-deliverables>
       <file location="${PROJECT_ROOT}\GelBox_stand_alone\for_testing" name="readme.txt" optional="true">C:\utku\GitHub\Software\GelBox\code\GelBox_stand_alone\for_testing\readme.txt</file>
