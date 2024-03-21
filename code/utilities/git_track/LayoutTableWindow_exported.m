@@ -18,8 +18,17 @@ classdef LayoutTableWindow_exported < matlab.apps.AppBase
         % Code that executes after component creation
         function startupFcn(app, caller)
             movegui(app.LaneLayoutUIFigure,'center')
-            app.GelBoxApp = caller;             
-            app.UITable.Data = app.GelBoxApp.gel_data.layout.layout_table;
+            app.GelBoxApp = caller;          
+            layout_table = (app.GelBoxApp.gel_data.layout.layout_table);
+            column_names =  layout_table.Properties.VariableNames;
+            
+            for i = 1 : numel(column_names)
+                if isnumeric(layout_table.(column_names{i}))
+                    layout_table.(column_names{i}) = num2str(layout_table.(column_names{i}));
+                end
+            end
+            layout_table = convertvars(layout_table, @ischar, @nanblank);
+            app.UITable.Data = layout_table;
             app.UITable.ColumnName = app.GelBoxApp.gel_data.layout.layout_table.Properties.VariableNames;
 
         end
