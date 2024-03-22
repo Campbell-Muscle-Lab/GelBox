@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
-  <configuration file="C:\utku\GitHub\Software\GelBox\code\GelBox_stand_alone.prj" location="C:\utku\GitHub\Software\GelBox\code" name="GelBox_stand_alone" target="target.ezdeploy.standalone" target-name="Application Compiler">
+  <configuration build-checksum="2890922654" file="C:\utku\GitHub\Software\GelBox\code\GelBox_stand_alone.prj" location="C:\utku\GitHub\Software\GelBox\code" name="GelBox_stand_alone" preferred-package-location="C:\utku\GitHub\Software\GelBox\code\GelBox_stand_alone\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
     <param.appname>GelBox</param.appname>
     <param.icon />
     <param.icons />
