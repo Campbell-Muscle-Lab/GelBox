@@ -9,7 +9,6 @@ classdef GelBox_exported < matlab.apps.AppBase
         LoadAnalysisMenu              matlab.ui.container.Menu
         SaveAnalysisMenu              matlab.ui.container.Menu
         ExportResultsMenu             matlab.ui.container.Menu
-        ExportGelBoxSettingsMenu      matlab.ui.container.Menu
         DataAnalysisMenu              matlab.ui.container.Menu
         GelImageFileInformationMenu   matlab.ui.container.Menu
         SelectedBoxInformationMenu    matlab.ui.container.Menu
@@ -816,6 +815,7 @@ classdef GelBox_exported < matlab.apps.AppBase
         % Code that executes after component creation
         function startupFcn(app)
 
+            addpath(genpath('utilities'));
             movegui(app.GelBoxUIFigure,'center')
             app.gel_data.boxes = [];
 
@@ -1192,8 +1192,8 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             if (path_string~=0)
                 save(fullfile(path_string,file_string),'save_data');
-                % json_file_name = strrep(fullfile(path_string,file_string),'.gbx','.json');
-                % savejson('GelBox Settings',app.gel_data.settings,json_file_name);
+                json_file_name = strrep(fullfile(path_string,file_string),'.gbx','.json');
+                savejson('GelBox Settings',app.gel_data.settings,json_file_name);
             end
         end
 
@@ -1254,7 +1254,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             end
             max_num_bands = max(fit_mode);
             for i=1:n
-                o.box(i) = i;
+                o.Box(i) = i;
                 o.image_file{i} = app.gel_data.image.image_file_string;
                 o.total_area(i) = app.gel_data.box_data(i).total_area;
                 o.background_method{i} = app.gel_data.settings.background.method{i};
@@ -1317,16 +1317,11 @@ classdef GelBox_exported < matlab.apps.AppBase
                 end
 
                 output_table = struct2table(d_out);
-                col_names = app.gel_data.layout.layout_table.Properties.VariableNames;
-                for i = 1 : numel(col_names)
-                    if strcmpi(col_names{i},'box')
-                        app.gel_data.layout.layout_table = renamevars(app.gel_data.layout.layout_table,...
-                            app.gel_data.layout.layout_table.Properties.VariableNames{i},...
-                            'box');
-                    end
-                end
                 if ~isempty(app.gel_data.layout.layout_table)
-                    T = innerjoin(app.gel_data.layout.layout_table,output_table);
+                    T = outerjoin(app.gel_data.layout.layout_table,output_table,...
+                        'MergeKeys',false,...
+                        'LeftKeys','Lane',...
+                        'RightKeys','Box');
                     writetable(T,output_file,'Sheet','Summary')
                 else
                     writetable(output_table,output_file,'Sheet','Summary')
@@ -1546,16 +1541,6 @@ classdef GelBox_exported < matlab.apps.AppBase
         function ShowLaneLayoutButtonPushed(app, event)
             app.LayoutTable = LayoutTableWindow(app);
         end
-
-        % Menu selected function: ExportGelBoxSettingsMenu
-        function ExportGelBoxSettingsMenuSelected(app, event)
-            [file_string,path_string] = uiputfile2( ...
-                {'*.json','JSON'},'Select File Name To Save GelBox Settings');
-            if (path_string~=0)
-                json_file_name = strrep(fullfile(path_string,file_string),'.gbx','.json');
-                savejson('GelBox Settings',app.gel_data.settings,json_file_name);
-            end
-        end
     end
 
     % Component initialization
@@ -1603,12 +1588,6 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.ExportResultsMenu.MenuSelectedFcn = createCallbackFcn(app, @OutputButtonPushed, true);
             app.ExportResultsMenu.Separator = 'on';
             app.ExportResultsMenu.Text = 'Export Results';
-
-            % Create ExportGelBoxSettingsMenu
-            app.ExportGelBoxSettingsMenu = uimenu(app.FileMenu);
-            app.ExportGelBoxSettingsMenu.MenuSelectedFcn = createCallbackFcn(app, @ExportGelBoxSettingsMenuSelected, true);
-            app.ExportGelBoxSettingsMenu.Separator = 'on';
-            app.ExportGelBoxSettingsMenu.Text = 'Export GelBox Settings';
 
             % Create DataAnalysisMenu
             app.DataAnalysisMenu = uimenu(app.GelBoxUIFigure);

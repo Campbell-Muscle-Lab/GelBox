@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="1895550978" file="C:\utku\GitHub\Software\GelBox\code\GelBox.prj" location="C:\utku\GitHub\Software\GelBox\code" name="GelBox" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="542778271" file="C:\utku\GitHub\Software\GelBox\code\GelBox.prj" location="C:\utku\GitHub\Software\GelBox\code" name="GelBox" target="target.mlapps" target-name="Package App">
     <param.appname>GelBox</param.appname>
     <param.authnamewatermark>Utku Gulbulak and Ken Campbell</param.authnamewatermark>
     <param.email />
