@@ -2,66 +2,63 @@ classdef GelBox_exported < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        GelBoxUIFigure                matlab.ui.Figure
-        FileMenu                      matlab.ui.container.Menu
-        LoadImageMenu                 matlab.ui.container.Menu
-        LoadLaneLayoutMenu            matlab.ui.container.Menu
-        LoadAnalysisMenu              matlab.ui.container.Menu
-        SaveAnalysisMenu              matlab.ui.container.Menu
-        ExportResultsMenu             matlab.ui.container.Menu
-        ExportGelBoxSettingsMenu      matlab.ui.container.Menu
-        DataAnalysisMenu              matlab.ui.container.Menu
-        GelImageFileInformationMenu   matlab.ui.container.Menu
-        SelectedBoxInformationMenu    matlab.ui.container.Menu
-        SummaryPlotMenu               matlab.ui.container.Menu
-        FittingPanel                  matlab.ui.container.Panel
-        BandTable                     matlab.ui.control.Table
-        NumberofBandsSpinner          matlab.ui.control.Spinner
-        NumberofBandsSpinnerLabel     matlab.ui.control.Label
-        RsquaredLabel                 matlab.ui.control.Label
-        rsquaredField                 matlab.ui.control.NumericEditField
-        FittingParametersButton       matlab.ui.control.Button
-        DrawFittingCheckBox           matlab.ui.control.CheckBox
+        GelBoxUIFigure               matlab.ui.Figure
+        FileMenu                     matlab.ui.container.Menu
+        LoadImageMenu                matlab.ui.container.Menu
+        LoadLaneLayoutMenu           matlab.ui.container.Menu
+        LoadAnalysisMenu             matlab.ui.container.Menu
+        SaveAnalysisMenu             matlab.ui.container.Menu
+        ExportResultsMenu            matlab.ui.container.Menu
+        ExportGelBoxSettingsMenu     matlab.ui.container.Menu
+        DataAnalysisMenu             matlab.ui.container.Menu
+        GelImageFileInformationMenu  matlab.ui.container.Menu
+        SelectedBoxInformationMenu   matlab.ui.container.Menu
+        SummaryPlotMenu              matlab.ui.container.Menu
+        FittingPanel                 matlab.ui.container.Panel
+        BandTable                    matlab.ui.control.Table
+        NumberofBandsSpinner         matlab.ui.control.Spinner
+        NumberofBandsSpinnerLabel    matlab.ui.control.Label
+        RsquaredLabel                matlab.ui.control.Label
+        rsquaredField                matlab.ui.control.NumericEditField
+        FittingParametersButton      matlab.ui.control.Button
+        DrawFittingCheckBox          matlab.ui.control.CheckBox
         BackgroundCorrectedOpticalDensityLabel  matlab.ui.control.Label
-        RawOpticalDensityLabel        matlab.ui.control.Label
-        raw_density_fit               matlab.ui.control.UIAxes
+        RawOpticalDensityLabel       matlab.ui.control.Label
+        raw_density_fit              matlab.ui.control.UIAxes
         background_corrected_raw_density_fit  matlab.ui.control.UIAxes
-        GelImagePanel                 matlab.ui.container.Panel
-        ShowLaneLayoutButton          matlab.ui.control.Button
-        BoxSelectionDropDown          matlab.ui.control.DropDown
-        BoxSelectionDropDownLabel     matlab.ui.control.Label
-        NewBoxButton                  matlab.ui.control.Button
-        AdjustImageButton             matlab.ui.control.Button
-        gel_image_axis                matlab.ui.control.UIAxes
-        OpticalDensitiesPanel         matlab.ui.container.Panel
-        BackgroundSubtractionLabel    matlab.ui.control.Label
+        GelImagePanel                matlab.ui.container.Panel
+        ShowLaneLayoutButton         matlab.ui.control.Button
+        BoxSelectionDropDown         matlab.ui.control.DropDown
+        BoxSelectionDropDownLabel    matlab.ui.control.Label
+        NewBoxButton                 matlab.ui.control.Button
+        AdjustImageButton            matlab.ui.control.Button
+        gel_image_axis               matlab.ui.control.UIAxes
+        OpticalDensitiesPanel        matlab.ui.container.Panel
+        BackgroundSubtractionLabel   matlab.ui.control.Label
         BackgroundCorrectedOpticalDensityLabel_2  matlab.ui.control.Label
-        RawOpticalDensityLabel_2      matlab.ui.control.Label
-        BackgroundTabGroup            matlab.ui.container.TabGroup
-        CSSTab                        matlab.ui.container.Tab
-        SmoothingEditField            matlab.ui.control.NumericEditField
-        SmoothingEditFieldLabel       matlab.ui.control.Label
-        FractionSpinner               matlab.ui.control.Spinner
-        FractionSpinnerLabel          matlab.ui.control.Label
-        LINTab                        matlab.ui.container.Tab
-        FractionSpinner_Linear        matlab.ui.control.Spinner
-        FractionSpinner_2Label        matlab.ui.control.Label
-        RBTab                         matlab.ui.container.Tab
-        RollingBallSizeSpinner        matlab.ui.control.Spinner
-        RollingBallSizeSpinnerLabel   matlab.ui.control.Label
-        BackgroundAreaField           matlab.ui.control.NumericEditField
-        BackgroundAreaLabel           matlab.ui.control.Label
-        TotalAreaField                matlab.ui.control.NumericEditField
-        TotalAreaEditFieldLabel       matlab.ui.control.Label
-        BackgroundCorrAreaField       matlab.ui.control.NumericEditField
-        BackgroundCorrAreaLabel       matlab.ui.control.Label
-        MedianFilterSizeSpinner       matlab.ui.control.Spinner
-        MedianFilterSizeSpinnerLabel  matlab.ui.control.Label
-        BoxZoomLabel                  matlab.ui.control.Label
-        ApplyFilterCheckBox           matlab.ui.control.CheckBox
+        RawOpticalDensityLabel_2     matlab.ui.control.Label
+        BackgroundTabGroup           matlab.ui.container.TabGroup
+        CSSTab                       matlab.ui.container.Tab
+        SmoothingEditField           matlab.ui.control.NumericEditField
+        SmoothingEditFieldLabel      matlab.ui.control.Label
+        FractionSpinner              matlab.ui.control.Spinner
+        FractionSpinnerLabel         matlab.ui.control.Label
+        LINTab                       matlab.ui.container.Tab
+        FractionSpinner_Linear       matlab.ui.control.Spinner
+        FractionSpinner_2Label       matlab.ui.control.Label
+        RBTab                        matlab.ui.container.Tab
+        RollingBallSizeSpinner       matlab.ui.control.Spinner
+        RollingBallSizeSpinnerLabel  matlab.ui.control.Label
+        BackgroundAreaField          matlab.ui.control.NumericEditField
+        BackgroundAreaLabel          matlab.ui.control.Label
+        TotalAreaField               matlab.ui.control.NumericEditField
+        TotalAreaEditFieldLabel      matlab.ui.control.Label
+        BackgroundCorrAreaField      matlab.ui.control.NumericEditField
+        BackgroundCorrAreaLabel      matlab.ui.control.Label
+        BoxZoomLabel                 matlab.ui.control.Label
         background_corrected_raw_density  matlab.ui.control.UIAxes
-        raw_density                   matlab.ui.control.UIAxes
-        box_inset                     matlab.ui.control.UIAxes
+        raw_density                  matlab.ui.control.UIAxes
+        box_inset                    matlab.ui.control.UIAxes
     end
 
 
@@ -78,11 +75,9 @@ classdef GelBox_exported < matlab.apps.AppBase
         par_fit_na = 0
         moving_box = 0
         background_token = 0
-        filtered_inset = []
         poly_pars = []
         c_x = []
         c_y = []
-        load_filters = 0
         load_background = 0 
         estimate_parameters = 0
         l_x = []
@@ -164,29 +159,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                         app.d.box(i).position(4)+20];
                     app.d.box(i).summary_inset = imcrop(app.gel_data.image.im_data, ...
                         summary_position);
-
-                    if app.ApplyFilterCheckBox.Value
-                        app.MedianFilterSizeSpinner.Enable = 'on';
-                        app.MedianFilterSizeSpinnerLabel.Enable = 'on';
-                        sz = app.MedianFilterSizeSpinner.Value;
-                        app.d.box(i).inset = medfilt2(app.d.box(i).inset,[sz sz],'symmetric');
-                        app.gel_data.settings.filtering.median.size(i) = sz;
-                        app.filtered_inset(i) = 1;
-                    elseif app.load_filters
-                        if app.gel_data.settings.filtering.median.size(i)
-                            app.MedianFilterSizeSpinner.Enable = 'on';
-                            app.MedianFilterSizeSpinnerLabel.Enable = 'on';
-                            app.MedianFilterSizeSpinner.Value = app.gel_data.settings.filtering.median.size(i);
-                            sz = app.MedianFilterSizeSpinner.Value;
-                            app.d.box(i).inset = medfilt2(app.d.box(i).inset,[sz sz],'symmetric');
-                            app.filtered_inset(i) = 1;
-                        end
-                    else
-                        app.MedianFilterSizeSpinner.Enable = 'off';
-                        app.MedianFilterSizeSpinnerLabel.Enable = 'off';
-                        app.gel_data.settings.filtering.median.size(i) = 0;
-                        app.filtered_inset(i) = 0;
-                    end
                     
                     if app.load_background
                         back_method = app.gel_data.settings.background.method{i};
@@ -729,9 +701,6 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.BackgroundTabGroup.SelectedTab = app.CSSTab;
             app.SmoothingEditField.Value = 0.0001;
             app.FractionSpinner.Value = 10;
-            app.ApplyFilterCheckBox.Value = 0;
-            app.MedianFilterSizeSpinner.Enable = 'off';
-            app.MedianFilterSizeSpinnerLabel.Enable = 'off';
             % Reset fitting fields
             app.DrawFittingCheckBox.Value = 0;
             app.rsquaredField.Value = 0;
@@ -818,10 +787,6 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             movegui(app.GelBoxUIFigure,'center')
             app.gel_data.boxes = [];
-
-            app.MedianFilterSizeSpinner.Enable = 'off';
-            app.MedianFilterSizeSpinnerLabel.Enable = 'off';
-
             colormap(app.GelBoxUIFigure, 'gray');
             app.fitting_options.shared_shape = true(1,1);
             app.fitting_options.shared_skewness = true(1,1);
@@ -831,10 +796,12 @@ classdef GelBox_exported < matlab.apps.AppBase
 
         % Menu selected function: LoadImageMenu
         function LoadImageButtonPushed(app, event)
+            f = figure('Renderer', 'painters', 'Position', [-100 -100 0 0]);
             [file_string,path_string]=uigetfile2( ...
                 {'*.tif','TIF';'*.png','PNG';'*.bmp','BMP';'*.gif','GIF';'*.jpeg','JPEG';'*.jpeg2000','JPEG2000';'*.pbm','PBM';'*.pgm','PGM'}, ...
                 'Select Image File');
             if (path_string~=0)
+                delete(f)
                 app.loaded_analysis = 0;
                 ResetDisplay(app)
                 app.DataAnalysisMenu.Enable = 1;
@@ -843,7 +810,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                 app.gel_data.fitting.par_update = 0;
                 app.gel_data.boxes = [];
                 app.d = [];
-                app.filtered_inset = [];
                 app.background_token = [];
 
                 app.gel_data.invert_status = 0;
@@ -865,11 +831,13 @@ classdef GelBox_exported < matlab.apps.AppBase
 
         % Menu selected function: LoadAnalysisMenu
         function LoadAnalysisButtonPushed(app, event)
+            f = figure('Renderer', 'painters', 'Position', [-100 -100 0 0]);
 
             [file_string,path_string] = uigetfile2( ...
                 {'*.gbx','GelBox file';'*.gdf','Gel data file'},'Select GBX File To Load Analysis');
 
             if (path_string~=0)
+                delete(f);
                 % Delete any old boxes
                 if (isfield(app.gel_data.boxes,'box_handle'))
                     n = numel(app.gel_data.boxes.box_handle);
@@ -895,7 +863,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                 app.gel_data = [];
                 app.gel_data.layout.layout_table = [];
                 app.gel_data.boxes = [];
-                app.filtered_inset = [];
                 app.background_token = [];
                 app.d=[];
                 save_fields = {'image','fitting','settings','layout'};
@@ -908,7 +875,7 @@ classdef GelBox_exported < matlab.apps.AppBase
                     end
                 end
                 
-                if ~isempty(app.gel_data.layout)
+                if ~isempty(app.gel_data.layout.layout_table)
                     app.ShowLaneLayoutButton.Enable = 1;
                 else
                     app.ShowLaneLayoutButton.Enable = 0;
@@ -929,7 +896,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.gel_data.boxes.box_handle(i) = images.roi.Rectangle(app.gel_image_axis, ...
                         'Position',save_data.boxes.box_position(i,:));
                     control_strings{i} = sprintf('%.0f',i);
-                    app.filtered_inset(i) = 0;
                     app.background_token(i) = 0;
                     if isfield(save_data.fitting,'fitting_mode')
                         app.d.box(i).fitting_mode = save_data.fitting.fitting_mode(i);
@@ -976,20 +942,10 @@ classdef GelBox_exported < matlab.apps.AppBase
                 end                               
                 app.NumberofBandsSpinner.Value = save_data.fitting.fitting_mode(1);
                 drawnow;
-                app.load_filters = 1;
                 app.load_background = 1;
                 app.estimate_parameters = 0;
                 UpdateDisplay(app)
-                if app.gel_data.settings.filtering.median.size(1) ~= 0
-                    app.ApplyFilterCheckBox.Value = 1;
-                    app.MedianFilterSizeSpinner.Enable = ' on';
-                    app.MedianFilterSizeSpinnerLabel.Enable = 'on';
-                    app.MedianFilterSizeSpinner.Value = app.gel_data.settings.filtering.median.size(1);
-                else
-                    app.ApplyFilterCheckBox.Value = 0;
-                    app.MedianFilterSizeSpinner.Enable = ' off';
-                    app.MedianFilterSizeSpinnerLabel.Enable = 'off';
-                end
+
                 switch back_method{2}
                     case 'CSS'
                         app.FractionSpinner.Value = 100*app.gel_data.settings.background.css_fraction(1);
@@ -999,7 +955,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                     case 'RB'
                         app.RollingBallSizeSpinner.Value = app.gel_data.settings.background.rb_size(1);
                 end
-                app.load_filters = 0;
                 app.load_background = 0;
                 app.loaded_analysis = 1;
             end
@@ -1019,10 +974,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                         if isequal(old_size,current_size)
                             app.single_box_callback = 1;
                             app.background_token(selected_box) = 0;
-                            app.filtered_inset(selected_box) = 0;
                         else
                             app.background_token(1:numel(app.gel_data.boxes.box_handle)) = 0;
-                            app.filtered_inset(1:numel(app.gel_data.boxes.box_handle)) = 0;
                         end
                         app.moving_box = 1;
                         app.estimate_parameters = 1;
@@ -1038,7 +991,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.moving_box = 1;
                     app.estimate_parameters = 1;
                     app.background_token(selected_box) = 0;
-                    app.filtered_inset(selected_box) = 0;
                     UpdateDisplay(app);
                     app.single_box_callback = 0;
                     app.moving_box = 0;
@@ -1095,12 +1047,7 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.estimate_parameters = 1;
             app.single_box_callback = 1;
             app.d.box(n).fitting_mode = app.NumberofBandsSpinner.Value;
-            app.filtered_inset(n) = 0;
             app.background_token(n) = 0;
-            app.ApplyFilterCheckBox.Value = 0;
-            app.MedianFilterSizeSpinner.Value = 3;
-            app.MedianFilterSizeSpinner.Enable = 'off';
-            app.MedianFilterSizeSpinnerLabel.Enable = 'off';
             UpdateDisplay(app)
             app.estimate_parameters = 0;
             app.single_box_callback = 0;
@@ -1118,10 +1065,8 @@ classdef GelBox_exported < matlab.apps.AppBase
                         if isequal(old_size,current_size)
                             app.single_box_callback = 1;
                             app.background_token(selected_box) = 0;
-                            app.filtered_inset(selected_box) = 0;
                         else
                             app.background_token(1:numel(app.gel_data.boxes.box_handle)) = 0;
-                            app.filtered_inset(1:numel(app.gel_data.boxes.box_handle)) = 0;
                         end
                         app.moving_box = 1;
                         app.estimate_parameters = 1;
@@ -1137,7 +1082,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                     app.moving_box = 1;
                     app.estimate_parameters = 1;
                     app.background_token(selected_box) = 0;
-                    app.filtered_inset(selected_box) = 0;
                     UpdateDisplay(app);
                     app.single_box_callback = 0;
                     app.moving_box = 0;
@@ -1186,7 +1130,8 @@ classdef GelBox_exported < matlab.apps.AppBase
             for i = 1:number_of_boxes
                 save_data.fitting.fitting_mode(i) = app.d.box(i).fitting_mode;
             end
-
+            
+            
             [file_string,path_string] = uiputfile2( ...
                 {'*.gbx','GelBox file';'*.gdf','Gel data file'},'Select File Name To Save Analysis');
 
@@ -1215,17 +1160,6 @@ classdef GelBox_exported < matlab.apps.AppBase
 
             value = app.d.box(selected_box).fitting_mode;
             app.NumberofBandsSpinner.Value = value;
-            if app.gel_data.settings.filtering.median.size(selected_box)
-                app.ApplyFilterCheckBox.Value = 1;
-                app.MedianFilterSizeSpinner.Enable = 'on';
-                app.MedianFilterSizeSpinnerLabel.Enable = 'on';
-                app.MedianFilterSizeSpinner.Value = app.gel_data.settings.filtering.median.size(selected_box);
-            else
-                app.ApplyFilterCheckBox.Value = 0;
-                app.MedianFilterSizeSpinner.Enable = 'off';
-                app.MedianFilterSizeSpinnerLabel.Enable = 'off';
-                app.gel_data.settings.filtering.median.size(selected_box) = 0;
-            end
 
             back_method = app.gel_data.settings.background.method{selected_box};
             back_method = regexp(back_method,'[^()]*','match');
@@ -1262,7 +1196,6 @@ classdef GelBox_exported < matlab.apps.AppBase
                 o.background_css_smoothing(i) = app.gel_data.settings.background.css_smoothing(i);
                 o.background_lin_fraction(i) = app.gel_data.settings.background.lin_fraction(i);
                 o.background_rb_size(i) = app.gel_data.settings.background.rb_size(i);
-                o.median_filter_size(i) = app.gel_data.settings.filtering.median.size(i);
                 o.background_area(i) = app.gel_data.box_data(i).background_area;
                 num_of_bands = numel(app.gel_data.box_data(i).band_area);
 
@@ -1433,32 +1366,6 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.single_box_callback = 0;
         end
 
-        % Value changed function: MedianFilterSizeSpinner
-        function MedianFilterSizeSpinnerValueChanged(app, event)
-            value = app.MedianFilterSizeSpinner.Value;
-            box = str2num(app.BoxSelectionDropDown.Value);
-            app.filtered_inset(box) = 0;
-            app.background_token(box) = 0;
-            app.single_box_callback = 1;
-            UpdateDisplay(app)
-            app.single_box_callback = 0;
-        end
-
-        % Value changed function: ApplyFilterCheckBox
-        function ApplyFilterCheckBoxValueChanged(app, event)
-            value = app.ApplyFilterCheckBox.Value;
-            if value
-                app.MedianFilterSizeSpinner.Enable = 'on';
-                app.MedianFilterSizeSpinnerLabel.Enable = 'on';
-            else
-                app.MedianFilterSizeSpinner.Enable = 'off';
-                app.MedianFilterSizeSpinnerLabel.Enable = 'off';
-            end
-            app.single_box_callback = 1;
-            UpdateDisplay(app)
-            app.single_box_callback = 0;
-        end
-
         % Value changed function: FractionSpinner
         function FractionSpinnerValueChanged(app, event)
             value = app.FractionSpinner.Value;
@@ -1513,10 +1420,12 @@ classdef GelBox_exported < matlab.apps.AppBase
 
         % Menu selected function: LoadLaneLayoutMenu
         function LoadLaneLayoutMenuSelected(app, event)
+            f = figure('Renderer', 'painters', 'Position', [-100 -100 0 0]);
             [file_string_layout,path_string_layout] = uigetfile2( ...
                 {'*.xlsx','Excel file'},'Select The Layout File');
 
             if (path_string_layout~=0)
+                delete(f);
                 app.gel_data.layout.layout_table = [];
                 app.gel_data.layout.layout_file = fullfile(path_string_layout,file_string_layout);
                 app.gel_data.layout.layout_table = readtable(app.gel_data.layout.layout_file);
@@ -1657,31 +1566,12 @@ classdef GelBox_exported < matlab.apps.AppBase
             app.background_corrected_raw_density.YColor = [0.9412 0.9412 0.9412];
             app.background_corrected_raw_density.Position = [396 46 234 209];
 
-            % Create ApplyFilterCheckBox
-            app.ApplyFilterCheckBox = uicheckbox(app.OpticalDensitiesPanel);
-            app.ApplyFilterCheckBox.ValueChangedFcn = createCallbackFcn(app, @ApplyFilterCheckBoxValueChanged, true);
-            app.ApplyFilterCheckBox.Text = 'Apply Filter';
-            app.ApplyFilterCheckBox.Position = [63 48 82 22];
-
             % Create BoxZoomLabel
             app.BoxZoomLabel = uilabel(app.OpticalDensitiesPanel);
             app.BoxZoomLabel.HorizontalAlignment = 'center';
             app.BoxZoomLabel.WordWrap = 'on';
             app.BoxZoomLabel.Position = [41 260 126 22];
             app.BoxZoomLabel.Text = 'Box Zoom';
-
-            % Create MedianFilterSizeSpinnerLabel
-            app.MedianFilterSizeSpinnerLabel = uilabel(app.OpticalDensitiesPanel);
-            app.MedianFilterSizeSpinnerLabel.HorizontalAlignment = 'right';
-            app.MedianFilterSizeSpinnerLabel.Position = [22 17 102 22];
-            app.MedianFilterSizeSpinnerLabel.Text = 'Median Filter Size';
-
-            % Create MedianFilterSizeSpinner
-            app.MedianFilterSizeSpinner = uispinner(app.OpticalDensitiesPanel);
-            app.MedianFilterSizeSpinner.Limits = [3 Inf];
-            app.MedianFilterSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @MedianFilterSizeSpinnerValueChanged, true);
-            app.MedianFilterSizeSpinner.Position = [131 17 55 22];
-            app.MedianFilterSizeSpinner.Value = 3;
 
             % Create BackgroundCorrAreaLabel
             app.BackgroundCorrAreaLabel = uilabel(app.OpticalDensitiesPanel);

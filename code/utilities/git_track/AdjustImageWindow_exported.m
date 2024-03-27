@@ -4,24 +4,29 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
     properties (Access = public)
         AdjustImageUIFigure             matlab.ui.Figure
         BrightnessandContrastPanel      matlab.ui.container.Panel
-        MaximizeContrastCheckBox        matlab.ui.control.CheckBox
         MaximumInPixelIntensitySlider   matlab.ui.control.Slider
         MaximumInPixelIntensitySliderLabel  matlab.ui.control.Label
-        BrightnessSlider                matlab.ui.control.Slider
-        BrightnessSliderLabel           matlab.ui.control.Label
         MinimumInPixelIntensitySlider   matlab.ui.control.Slider
         MinimumInPixelIntensitySliderLabel  matlab.ui.control.Label
-        adjusted_image_hist_working     matlab.ui.control.UIAxes
+        BrightnessSlider                matlab.ui.control.Slider
+        BrightnessSliderLabel           matlab.ui.control.Label
+        MaximizeContrastCheckBox        matlab.ui.control.CheckBox
         in_out_axis                     matlab.ui.control.UIAxes
+        BasicAdjustmentsPanel           matlab.ui.container.Panel
+        MedianFilterSizeSpinner         matlab.ui.control.Spinner
+        MedianFilterSizeSpinnerLabel    matlab.ui.control.Label
+        ApplyMedianFilterCheckBox       matlab.ui.control.CheckBox
+        RotateImageDegreesSpinner       matlab.ui.control.Spinner
+        RotateImageDegreesSpinnerLabel  matlab.ui.control.Label
+        InvertImageCheckBox             matlab.ui.control.CheckBox
+        CropImageButton                 matlab.ui.control.Button
+        PixelCountsPanel                matlab.ui.container.Panel
+        adjusted_image_hist_working     matlab.ui.control.UIAxes
         AdjustedImagePanel              matlab.ui.container.Panel
         RevertChangesButton             matlab.ui.control.Button
         AcceptChangesButton             matlab.ui.control.Button
         adjusted_image_axis             matlab.ui.control.UIAxes
         OriginalImagePanel              matlab.ui.container.Panel
-        RotateImageDegreesSpinner       matlab.ui.control.Spinner
-        RotateImageDegreesSpinnerLabel  matlab.ui.control.Label
-        InvertImageCheckBox             matlab.ui.control.CheckBox
-        CropImageButton                 matlab.ui.control.Button
         original_image_axis             matlab.ui.control.UIAxes
     end
 
@@ -46,12 +51,15 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
         col = {'r','b'} % Description
         overlay_original_image % Description
         im_rotation_angle = [] % Description
+        pre_filter_image
+        post_filter_image
+        filtered_image = 0
     end
 
     methods (Access = public)
 
         function UpdateAdjustedImageDisplay(app,image)
-
+            
             cla(app.adjusted_image_axis);
             cla(app.adjusted_image_hist_working);
 
@@ -61,7 +69,7 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             else
                 sat_mask = image == 1;
             end
-
+            
             im_b = imoverlay(image,sat_mask,'red');
             center_image_with_preserved_aspect_ratio( ...
                 im_b, ...
@@ -76,6 +84,7 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
                 edges(1:(end-1)), counts,'EdgeColor',app.col{2},'FaceAlpha',0);
             xlim(app.adjusted_image_hist_working,[-0.01 1.01])
             OverlayOriginalHistogram(app)
+
         end
 
         function LoadImageAdjustments(app)
@@ -108,12 +117,19 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
 
             app.bit_d_val = double(intmax(bit_d))+1;
             app.adjusted_image = double(app.adjusted_image)./(app.bit_d_val);
-
-
-            app.BrightnessSlider.Value = app.GelBoxApp.gel_data.settings.image_adjustments.brightness;
-            app.MinimumInPixelIntensitySlider.Value = app.GelBoxApp.gel_data.settings.image_adjustments.contrast_lower;
-            app.MaximumInPixelIntensitySlider.Value = app.GelBoxApp.gel_data.settings.image_adjustments.contrast_upper;
             
+
+
+            output_values = {'BrightnessSlider','MinimumInPixelIntensitySlider',...
+                             'MaximumInPixelIntensitySlider'};
+            gbx_values_vars = {'brightness','contrast_lower','contrast_upper'};
+            
+            for i = 1 : numel(output_values)
+
+                app.(output_values{i}).Value = ...
+                    app.GelBoxApp.gel_data.settings.image_adjustments.(gbx_values_vars{i});
+            end
+
             app.cropped_image = [];
             if ~isempty(app.GelBoxApp.gel_data.settings.image_adjustments.crop_pos)
                 app.im_crop_box = images.roi.Rectangle(app.original_image_axis, ...
@@ -145,41 +161,54 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
                     InvertImageCheckBoxValueChanged(app)
                 end
             end
-            
+
             try
                 app.RotateImageDegreesSpinner.Value = ...
                     app.GelBoxApp.gel_data.settings.image_adjustments.im_rotation;
             catch
                 app.RotateImageDegreesSpinner.Value = 0;
             end
-           
-            
+
+            try
+                if app.GelBoxApp.gel_data.settings.image_adjustments.filter_status
+                    app.ApplyMedianFilterCheckBox.Value = 1;
+                    app.MedianFilterSizeSpinner.Enable = "on";
+                    app.MedianFilterSizeSpinnerLabel.Enable = "on";
+                    app.MedianFilterSizeSpinner.Value = app.GelBoxApp.gel_data.settings.image_adjustments.filter_size;
+                    app.filtered_image = 1;
+                end
+            catch
+                app.filtered_image = 0;
+            end
+
             UpdateAdjustedImageDisplay(app,app.adjusted_image)
-            
-%             if app.GelBoxApp.loaded_analysis
-%                 comp_names = {'CropImageButton','AcceptChangesButton',...
-%                     'BrightnessSlider',...
-%                     'MaximumInPixelIntensitySlider',...
-%                     'MinimumInPixelIntensitySlider',...
-%                     'MaximizeContrastButton',...
-%                     'InvertImageCheckBox'};
-%                 
-%                 for i = 1 : numel(comp_names)
-%                     app.(comp_names{i}).Enable = 'off';
-%                 end
-%                 app.im_crop_box.InteractionsAllowed = 'none';
-%             end
+
+            %             if app.GelBoxApp.loaded_analysis
+            %                 comp_names = {'CropImageButton','AcceptChangesButton',...
+            %                     'BrightnessSlider',...
+            %                     'MaximumInPixelIntensitySlider',...
+            %                     'MinimumInPixelIntensitySlider',...
+            %                     'MaximizeContrastButton',...
+            %                     'InvertImageCheckBox'};
+            %
+            %                 for i = 1 : numel(comp_names)
+            %                     app.(comp_names{i}).Enable = 'off';
+            %                 end
+            %                 app.im_crop_box.InteractionsAllowed = 'none';
+            %             end
 
             function crop_box_position_2(evt);
                 app.cropped_image = [];
                 app.crop_pos = app.im_crop_box.Position;
                 app.cropped_image = imcrop(app.original_image,app.crop_pos);
-%                 if app.inverted_image
-%                     app.cropped_image = imcomplement(app.cropped_image);
-%                 end
+                %                 if app.inverted_image
+                %                     app.cropped_image = imcomplement(app.cropped_image);
+                %                 end
                 app.BrightnessSlider.Value = 0;
                 app.MinimumInPixelIntensitySlider.Value = 0;
                 app.MaximumInPixelIntensitySlider.Value = 1;
+                app.MedianFilterSizeSpinner.Enable = 'off';
+                app.MedianFilterSizeSpinnerLabel.Enable = 'off';
                 app.in_out = linspace(0,1);
                 app.adjusted_image = [];
                 app.adjusted_image_2 = [];
@@ -264,7 +293,7 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             app.cropped_image = imcrop(app.original_image,app.crop_pos);
             addlistener(app.im_crop_box,"MovingROI", ...
                 @(src,evt) crop_box_position(evt));
-            
+
 
             UpdateAdjustedImageDisplay(app,app.cropped_image)
 
@@ -278,6 +307,9 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
                 app.BrightnessSlider.Value = 0;
                 app.MinimumInPixelIntensitySlider.Value = 0;
                 app.MaximumInPixelIntensitySlider.Value = 1;
+                app.ApplyMedianFilterCheckBox.Value = 0;
+                app.MedianFilterSizeSpinner.Enable = 'off';
+                app.MedianFilterSizeSpinnerLabel.Enable = 'off';
                 app.in_out = linspace(0,1);
                 app.adjusted_image = [];
                 app.adjusted_image_2 = [];
@@ -432,13 +464,24 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
         % Button pushed function: AcceptChangesButton
         function AcceptChangesButtonPushed(app, event)
 
-            app.GelBoxApp.gel_data.settings.image_adjustments.crop_pos = app.crop_pos;
-            app.GelBoxApp.gel_data.settings.image_adjustments.brightness = app.BrightnessSlider.Value;
-            app.GelBoxApp.gel_data.settings.image_adjustments.contrast_lower = app.MinimumInPixelIntensitySlider.Value;
-            app.GelBoxApp.gel_data.settings.image_adjustments.contrast_upper = app.MaximumInPixelIntensitySlider.Value;
-            app.GelBoxApp.gel_data.settings.image_adjustments.max_contrast = app.max_contrast;
-            app.GelBoxApp.gel_data.settings.image_adjustments.im_rotation = app.RotateImageDegreesSpinner.Value;
-            app.GelBoxApp.gel_data.settings.invert_status = app.inverted_image;
+            output_status = {'crop_pos','max_contrast','inverted_image','filtered_image'};
+            gbx_status_vars = {'crop_pos','max_contrast','invert_status','filter_status'};
+            
+            for i = 1 : numel(output_status)
+                app.GelBoxApp.gel_data.settings.image_adjustments.(gbx_status_vars{i})=...
+                    app.(output_status{i});
+            end
+            
+            output_values = {'BrightnessSlider','MinimumInPixelIntensitySlider',...
+                             'MaximumInPixelIntensitySlider','RotateImageDegreesSpinner',...
+                             'MedianFilterSizeSpinner'};
+            gbx_values_vars = {'brightness','contrast_lower','contrast_upper','im_rotation','filter_size'};
+            
+            for i = 1 : numel(output_values)
+                app.GelBoxApp.gel_data.settings.image_adjustments.(gbx_values_vars{i}) = ...
+                    app.(output_values{i}).Value;
+            end
+
             if isempty(app.cropped_image) && isempty(app.im_rotation_angle)
                 if app.inverted_image
                     app.GelBoxApp.gel_data.image.adjusted_image = imcomplement(app.GelBoxApp.gel_data.image.original_image);
@@ -452,7 +495,7 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             else
                 app.GelBoxApp.gel_data.image.adjusted_image = app.adjusted_image_2.*app.bit_d_val;
             end
-            
+
             app.GelBoxApp.gel_data.image.adjusted_image = cast(app.GelBoxApp.gel_data.image.adjusted_image,...
                 class(app.GelBoxApp.gel_data.image.im_data));
 
@@ -563,13 +606,56 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
                 rot_mask = ~imrotate(app.adjusted_image_2,rot,'crop');
                 app.adjusted_image_2(rot_mask) = pad_val;
                 im = app.adjusted_image_2;
-
-
                 app.im_rotation_angle = changingValue;
             end
             UpdateAdjustedImageDisplay(app,im);
+        end
 
+        % Value changed function: ApplyMedianFilterCheckBox
+        function ApplyMedianFilterCheckBoxValueChanged(app, event)
+            value = app.ApplyMedianFilterCheckBox.Value;
+            if value
+                app.MedianFilterSizeSpinner.Enable = 'on';
+                app.MedianFilterSizeSpinnerLabel.Enable = 'on';
+                sz = app.MedianFilterSizeSpinner.Value;
 
+                if isempty(app.adjusted_image)
+                    if isempty(app.cropped_image)
+                        app.pre_filter_image = 'original_image';
+                        app.post_filter_image = 'adjusted_image';
+                    else
+                        app.pre_filter_image = 'cropped_image';
+                        app.post_filter_image = 'adjusted_image';
+                    end
+                elseif isempty(app.adjusted_image_2)
+                    app.pre_filter_image = 'adjusted_image';
+                    app.post_filter_image = 'adjusted_image_2';
+                else
+                    app.pre_filter_image = 'adjusted_image';
+                    app.post_filter_image = 'adjusted_image_2';
+                end
+                app.(app.post_filter_image) = medfilt2(app.(app.pre_filter_image),[sz sz],"symmetric");
+                im = app.(app.post_filter_image);
+                app.filtered_image = 1;
+            else
+                app.MedianFilterSizeSpinner.Enable = 'off';
+                app.MedianFilterSizeSpinnerLabel.Enable = 'off';
+                im_pre = app.pre_filter_image;
+                im_post = app.post_filter_image;
+                app.(im_post) = [];
+                im = app.(im_pre);
+                app.filtered_image = 0;
+
+            end
+            UpdateAdjustedImageDisplay(app,im);
+        end
+
+        % Value changed function: MedianFilterSizeSpinner
+        function MedianFilterSizeSpinnerValueChanged(app, event)
+            value = app.MedianFilterSizeSpinner.Value;
+            app.(app.post_filter_image) = medfilt2(app.(app.pre_filter_image),[value value],"symmetric");
+            im = app.(app.post_filter_image);
+            UpdateAdjustedImageDisplay(app,im);
         end
     end
 
@@ -581,72 +667,112 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
 
             % Create AdjustImageUIFigure and hide until all components are created
             app.AdjustImageUIFigure = uifigure('Visible', 'off');
-            app.AdjustImageUIFigure.Position = [100 100 1690 582];
+            app.AdjustImageUIFigure.Position = [100 100 1702 611];
             app.AdjustImageUIFigure.Name = 'Adjust Image';
 
             % Create OriginalImagePanel
             app.OriginalImagePanel = uipanel(app.AdjustImageUIFigure);
             app.OriginalImagePanel.Title = 'Original Image';
-            app.OriginalImagePanel.Position = [8 18 558 553];
+            app.OriginalImagePanel.Position = [10 7 560 592];
 
             % Create original_image_axis
             app.original_image_axis = uiaxes(app.OriginalImagePanel);
             app.original_image_axis.XTick = [];
             app.original_image_axis.YTick = [];
             app.original_image_axis.Box = 'on';
-            app.original_image_axis.Position = [8 0 540 484];
-
-            % Create CropImageButton
-            app.CropImageButton = uibutton(app.OriginalImagePanel, 'push');
-            app.CropImageButton.ButtonPushedFcn = createCallbackFcn(app, @CropImageButtonPushed, true);
-            app.CropImageButton.Position = [12 495 100 22];
-            app.CropImageButton.Text = 'Crop Image';
-
-            % Create InvertImageCheckBox
-            app.InvertImageCheckBox = uicheckbox(app.OriginalImagePanel);
-            app.InvertImageCheckBox.ValueChangedFcn = createCallbackFcn(app, @InvertImageCheckBoxValueChanged, true);
-            app.InvertImageCheckBox.Text = 'Invert Image';
-            app.InvertImageCheckBox.Position = [126 495 89 22];
-
-            % Create RotateImageDegreesSpinnerLabel
-            app.RotateImageDegreesSpinnerLabel = uilabel(app.OriginalImagePanel);
-            app.RotateImageDegreesSpinnerLabel.HorizontalAlignment = 'right';
-            app.RotateImageDegreesSpinnerLabel.Position = [222 495 134 22];
-            app.RotateImageDegreesSpinnerLabel.Text = 'Rotate Image (Degrees)';
-
-            % Create RotateImageDegreesSpinner
-            app.RotateImageDegreesSpinner = uispinner(app.OriginalImagePanel);
-            app.RotateImageDegreesSpinner.ValueChangingFcn = createCallbackFcn(app, @RotateImageDegreesSpinnerValueChanging, true);
-            app.RotateImageDegreesSpinner.Position = [363 495 50 22];
+            app.original_image_axis.Position = [10 1 540 557];
 
             % Create AdjustedImagePanel
             app.AdjustedImagePanel = uipanel(app.AdjustImageUIFigure);
             app.AdjustedImagePanel.Title = 'Adjusted Image';
-            app.AdjustedImagePanel.Position = [1105 18 558 553];
+            app.AdjustedImagePanel.Position = [1140 7 558 593];
 
             % Create adjusted_image_axis
             app.adjusted_image_axis = uiaxes(app.AdjustedImagePanel);
             app.adjusted_image_axis.XTick = [];
             app.adjusted_image_axis.YTick = [];
             app.adjusted_image_axis.Box = 'on';
-            app.adjusted_image_axis.Position = [10 7 540 478];
+            app.adjusted_image_axis.Position = [10 0 540 525];
 
             % Create AcceptChangesButton
             app.AcceptChangesButton = uibutton(app.AdjustedImagePanel, 'push');
             app.AcceptChangesButton.ButtonPushedFcn = createCallbackFcn(app, @AcceptChangesButtonPushed, true);
-            app.AcceptChangesButton.Position = [10 495 104 22];
+            app.AcceptChangesButton.Position = [10 535 104 22];
             app.AcceptChangesButton.Text = 'Accept Changes';
 
             % Create RevertChangesButton
             app.RevertChangesButton = uibutton(app.AdjustedImagePanel, 'push');
             app.RevertChangesButton.ButtonPushedFcn = createCallbackFcn(app, @RevertChangesButtonPushed, true);
-            app.RevertChangesButton.Position = [130 495 102 22];
+            app.RevertChangesButton.Position = [130 535 102 22];
             app.RevertChangesButton.Text = 'Revert Changes';
+
+            % Create PixelCountsPanel
+            app.PixelCountsPanel = uipanel(app.AdjustImageUIFigure);
+            app.PixelCountsPanel.Title = 'Pixel Counts';
+            app.PixelCountsPanel.Position = [584 317 546 282];
+
+            % Create adjusted_image_hist_working
+            app.adjusted_image_hist_working = uiaxes(app.PixelCountsPanel);
+            title(app.adjusted_image_hist_working, 'Intensity Histogram')
+            xlabel(app.adjusted_image_hist_working, 'Pixel Intensity')
+            app.adjusted_image_hist_working.Box = 'on';
+            app.adjusted_image_hist_working.Position = [36 5 475 248];
+
+            % Create BasicAdjustmentsPanel
+            app.BasicAdjustmentsPanel = uipanel(app.AdjustImageUIFigure);
+            app.BasicAdjustmentsPanel.Title = 'Basic Adjustments';
+            app.BasicAdjustmentsPanel.Position = [585 7 115 303];
+
+            % Create CropImageButton
+            app.CropImageButton = uibutton(app.BasicAdjustmentsPanel, 'push');
+            app.CropImageButton.ButtonPushedFcn = createCallbackFcn(app, @CropImageButtonPushed, true);
+            app.CropImageButton.Position = [13 249 88 22];
+            app.CropImageButton.Text = 'Crop Image';
+
+            % Create InvertImageCheckBox
+            app.InvertImageCheckBox = uicheckbox(app.BasicAdjustmentsPanel);
+            app.InvertImageCheckBox.ValueChangedFcn = createCallbackFcn(app, @InvertImageCheckBoxValueChanged, true);
+            app.InvertImageCheckBox.Text = 'Invert Image';
+            app.InvertImageCheckBox.Position = [14 212 89 22];
+
+            % Create RotateImageDegreesSpinnerLabel
+            app.RotateImageDegreesSpinnerLabel = uilabel(app.BasicAdjustmentsPanel);
+            app.RotateImageDegreesSpinnerLabel.HorizontalAlignment = 'center';
+            app.RotateImageDegreesSpinnerLabel.WordWrap = 'on';
+            app.RotateImageDegreesSpinnerLabel.Position = [14 165 87 30];
+            app.RotateImageDegreesSpinnerLabel.Text = 'Rotate Image (Degrees)';
+
+            % Create RotateImageDegreesSpinner
+            app.RotateImageDegreesSpinner = uispinner(app.BasicAdjustmentsPanel);
+            app.RotateImageDegreesSpinner.ValueChangingFcn = createCallbackFcn(app, @RotateImageDegreesSpinnerValueChanging, true);
+            app.RotateImageDegreesSpinner.Position = [14 133 87 22];
+
+            % Create ApplyMedianFilterCheckBox
+            app.ApplyMedianFilterCheckBox = uicheckbox(app.BasicAdjustmentsPanel);
+            app.ApplyMedianFilterCheckBox.ValueChangedFcn = createCallbackFcn(app, @ApplyMedianFilterCheckBoxValueChanged, true);
+            app.ApplyMedianFilterCheckBox.Text = 'Apply Median Filter';
+            app.ApplyMedianFilterCheckBox.WordWrap = 'on';
+            app.ApplyMedianFilterCheckBox.Position = [14 81 89 42];
+
+            % Create MedianFilterSizeSpinnerLabel
+            app.MedianFilterSizeSpinnerLabel = uilabel(app.BasicAdjustmentsPanel);
+            app.MedianFilterSizeSpinnerLabel.HorizontalAlignment = 'center';
+            app.MedianFilterSizeSpinnerLabel.Enable = 'off';
+            app.MedianFilterSizeSpinnerLabel.Position = [7 49 101 22];
+            app.MedianFilterSizeSpinnerLabel.Text = 'Median Filter Size';
+
+            % Create MedianFilterSizeSpinner
+            app.MedianFilterSizeSpinner = uispinner(app.BasicAdjustmentsPanel);
+            app.MedianFilterSizeSpinner.Limits = [3 Inf];
+            app.MedianFilterSizeSpinner.ValueChangedFcn = createCallbackFcn(app, @MedianFilterSizeSpinnerValueChanged, true);
+            app.MedianFilterSizeSpinner.Enable = 'off';
+            app.MedianFilterSizeSpinner.Position = [14 16 87 22];
+            app.MedianFilterSizeSpinner.Value = 3;
 
             % Create BrightnessandContrastPanel
             app.BrightnessandContrastPanel = uipanel(app.AdjustImageUIFigure);
             app.BrightnessandContrastPanel.Title = 'Brightness and Contrast';
-            app.BrightnessandContrastPanel.Position = [577 18 519 552];
+            app.BrightnessandContrastPanel.Position = [709 7 422 304];
 
             % Create in_out_axis
             app.in_out_axis = uiaxes(app.BrightnessandContrastPanel);
@@ -654,33 +780,19 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             ylabel(app.in_out_axis, 'Out (Pixel Intensity)')
             zlabel(app.in_out_axis, 'Z')
             app.in_out_axis.Box = 'on';
-            app.in_out_axis.Position = [222 27 235 235];
+            app.in_out_axis.Position = [209 50 200 200];
 
-            % Create adjusted_image_hist_working
-            app.adjusted_image_hist_working = uiaxes(app.BrightnessandContrastPanel);
-            title(app.adjusted_image_hist_working, 'Intensity Histogram')
-            xlabel(app.adjusted_image_hist_working, 'Pixel Intensity')
-            app.adjusted_image_hist_working.Box = 'on';
-            app.adjusted_image_hist_working.Position = [32 269 458 256];
-
-            % Create MinimumInPixelIntensitySliderLabel
-            app.MinimumInPixelIntensitySliderLabel = uilabel(app.BrightnessandContrastPanel);
-            app.MinimumInPixelIntensitySliderLabel.HorizontalAlignment = 'center';
-            app.MinimumInPixelIntensitySliderLabel.WordWrap = 'on';
-            app.MinimumInPixelIntensitySliderLabel.Position = [30 163 156 29];
-            app.MinimumInPixelIntensitySliderLabel.Text = 'Minimum In (Pixel Intensity)';
-
-            % Create MinimumInPixelIntensitySlider
-            app.MinimumInPixelIntensitySlider = uislider(app.BrightnessandContrastPanel);
-            app.MinimumInPixelIntensitySlider.Limits = [0 1];
-            app.MinimumInPixelIntensitySlider.ValueChangingFcn = createCallbackFcn(app, @MinimumInPixelIntensitySliderValueChanging, true);
-            app.MinimumInPixelIntensitySlider.Position = [32 151 150 3];
+            % Create MaximizeContrastCheckBox
+            app.MaximizeContrastCheckBox = uicheckbox(app.BrightnessandContrastPanel);
+            app.MaximizeContrastCheckBox.ValueChangedFcn = createCallbackFcn(app, @MaximizeContrastCheckBoxValueChanged, true);
+            app.MaximizeContrastCheckBox.Text = 'Maximize Contrast';
+            app.MaximizeContrastCheckBox.Position = [45 13 121 22];
 
             % Create BrightnessSliderLabel
             app.BrightnessSliderLabel = uilabel(app.BrightnessandContrastPanel);
             app.BrightnessSliderLabel.HorizontalAlignment = 'center';
             app.BrightnessSliderLabel.WordWrap = 'on';
-            app.BrightnessSliderLabel.Position = [77 235 57 30];
+            app.BrightnessSliderLabel.Position = [75 245 57 30];
             app.BrightnessSliderLabel.Text = 'Brightness';
 
             % Create BrightnessSlider
@@ -689,27 +801,34 @@ classdef AdjustImageWindow_exported < matlab.apps.AppBase
             app.BrightnessSlider.MajorTicks = [-1 -0.6 -0.2 0 0.2 0.6 1];
             app.BrightnessSlider.MajorTickLabels = {'Darken', '', '', '', '', '', 'Brighten'};
             app.BrightnessSlider.ValueChangingFcn = createCallbackFcn(app, @BrightnessSliderValueChanging, true);
-            app.BrightnessSlider.Position = [29 226 153 3];
+            app.BrightnessSlider.Position = [27 236 153 3];
+
+            % Create MinimumInPixelIntensitySliderLabel
+            app.MinimumInPixelIntensitySliderLabel = uilabel(app.BrightnessandContrastPanel);
+            app.MinimumInPixelIntensitySliderLabel.HorizontalAlignment = 'center';
+            app.MinimumInPixelIntensitySliderLabel.WordWrap = 'on';
+            app.MinimumInPixelIntensitySliderLabel.Position = [26 173 156 29];
+            app.MinimumInPixelIntensitySliderLabel.Text = 'Minimum In (Pixel Intensity)';
+
+            % Create MinimumInPixelIntensitySlider
+            app.MinimumInPixelIntensitySlider = uislider(app.BrightnessandContrastPanel);
+            app.MinimumInPixelIntensitySlider.Limits = [0 1];
+            app.MinimumInPixelIntensitySlider.ValueChangingFcn = createCallbackFcn(app, @MinimumInPixelIntensitySliderValueChanging, true);
+            app.MinimumInPixelIntensitySlider.Position = [28 161 150 3];
 
             % Create MaximumInPixelIntensitySliderLabel
             app.MaximumInPixelIntensitySliderLabel = uilabel(app.BrightnessandContrastPanel);
             app.MaximumInPixelIntensitySliderLabel.HorizontalAlignment = 'center';
             app.MaximumInPixelIntensitySliderLabel.WordWrap = 'on';
-            app.MaximumInPixelIntensitySliderLabel.Position = [29 80 161 29];
+            app.MaximumInPixelIntensitySliderLabel.Position = [25 85 161 29];
             app.MaximumInPixelIntensitySliderLabel.Text = 'Maximum In (Pixel Intensity)';
 
             % Create MaximumInPixelIntensitySlider
             app.MaximumInPixelIntensitySlider = uislider(app.BrightnessandContrastPanel);
             app.MaximumInPixelIntensitySlider.Limits = [0 1];
             app.MaximumInPixelIntensitySlider.ValueChangingFcn = createCallbackFcn(app, @MaximumInPixelIntensitySliderValueChanging, true);
-            app.MaximumInPixelIntensitySlider.Position = [28 73 156 3];
+            app.MaximumInPixelIntensitySlider.Position = [24 78 156 3];
             app.MaximumInPixelIntensitySlider.Value = 1;
-
-            % Create MaximizeContrastCheckBox
-            app.MaximizeContrastCheckBox = uicheckbox(app.BrightnessandContrastPanel);
-            app.MaximizeContrastCheckBox.ValueChangedFcn = createCallbackFcn(app, @MaximizeContrastCheckBoxValueChanged, true);
-            app.MaximizeContrastCheckBox.Text = 'Maximize Contrast';
-            app.MaximizeContrastCheckBox.Position = [51 7 121 22];
 
             % Show the figure after all components are created
             app.AdjustImageUIFigure.Visible = 'on';
