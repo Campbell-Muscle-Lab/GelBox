@@ -1,6 +1,4 @@
 *.mat
 *.asv
-app/utilities/work_folder
-app/GelBox/for_redistribution
-app/GelBox/for_redistribution_files_only
-app/GelBox/for_testing
+
+
