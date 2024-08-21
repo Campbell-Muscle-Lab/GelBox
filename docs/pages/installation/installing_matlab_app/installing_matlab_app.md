@@ -11,7 +11,7 @@ nav_order: 2
 
 This page instructs you on how to install GelBox as a MATLAB App.
 
-+ The MATLAB App installer file can be downloaded from the [GitHub page](https://github.com/Campbell-Muscle-Lab/GelBox/tree/master/app/GelBox.mlappinstall). In this case, the installer file is located under your designated Downloads folder.
++ The MATLAB App installer file can be downloaded from the [GitHub page](https://github.com/Campbell-Muscle-Lab/GelBox/tree/master/app/median_filtering_27Mar24). 27Mar24 installer is the current GelBox build. In this case, the installer file is located under your designated Downloads folder.
 + Users can also clone the GelBox repository and access the MATLAB App installer file. The installer file is located under `<repo>app`.  The instructions on how to clone a repository can be found [here](../cloning_gelbox/cloning_gel_box.html).
 
 Locate `GelBox.mlappinstall` file on your computer.
