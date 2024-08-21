@@ -11,7 +11,7 @@ nav_order: 3
 
 This page instructs you on how to install GelBox as a stand-alone application.
 
-+ The installer file can be downloaded from the [GitHub page](https://github.com/Campbell-Muscle-Lab/GelBox/tree/master/bin/GelBoxInstaller.zip). In this case, the installer file is located under your designated Downloads folder.
++ The installer file can be downloaded from the [GitHub page](https://github.com/Campbell-Muscle-Lab/GelBox/tree/master/bin/median_filtering_27Mar24). 7Mar24 installer is the current GelBox build. In this case, the installer file is located under your designated Downloads folder.
 + Users can also clone the GelBox repository and access the zipped installer file. The installer file is located under `<repo>bin`. The instructions on how to clone a repository can be found [here](../cloning_gelbox/cloning_gel_box.html).
 
 Locate the installer file on your computer and unzip it. Once the installer is unzipped, double-click the `GelBoxInstaller.exe` file.
