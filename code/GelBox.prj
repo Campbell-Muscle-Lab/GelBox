@@ -1,5 +1,5 @@
 <deployment-project plugin="plugin.apptool" plugin-version="1.0">
-  <configuration build-checksum="542778271" file="C:\utku\GitHub\Software\GelBox\code\GelBox.prj" location="C:\utku\GitHub\Software\GelBox\code" name="GelBox" target="target.mlapps" target-name="Package App">
+  <configuration build-checksum="3610462107" file="C:\utku\GitHub\Software\GelBox\code\GelBox.prj" location="C:\utku\GitHub\Software\GelBox\code" name="GelBox" target="target.mlapps" target-name="Package App">
     <param.appname>GelBox</param.appname>
     <param.authnamewatermark>Utku Gulbulak and Ken Campbell</param.authnamewatermark>
     <param.email />
@@ -29,7 +29,7 @@
       <item>23.2</item>
     </param.products.version>
     <param.platforms />
-    <param.output>C:\utku\GitHub\Software\GelBox\app</param.output>
+    <param.output>C:\utku\GitHub\Software\GelBox\app\median_filtering_27Mar24</param.output>
     <param.guid>3a0b4c0a-d0b8-4eaf-ae49-d4731db6c984</param.guid>
     <unset>
       <param.email />
@@ -69,7 +69,7 @@
     </fileset.resources>
     <fileset.package />
     <build-deliverables>
-      <file location="C:\utku\GitHub\Software\GelBox" name="app" optional="false">C:\utku\GitHub\Software\GelBox\app</file>
+      <file location="C:\utku\GitHub\Software\GelBox\app" name="median_filtering_27Mar24" optional="false">C:\utku\GitHub\Software\GelBox\app\median_filtering_27Mar24</file>
     </build-deliverables>
     <workflow />
     <matlab>
